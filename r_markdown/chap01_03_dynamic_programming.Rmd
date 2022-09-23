@@ -1,8 +1,14 @@
-#######################################
-### Plotting some graphs in our Dynamic Programming Chapter
-#######################################
+---
+title: "Dynamic Programming"
+output:
+  html_document:
+    df_print: paged
+---
 
-# Clear the workspace and load libraries
+### Loading packages etc.
+We first clear the workspace using `rm(list = ls())`and then include all packages we need. All packages used here are for plotting. If a package is missing in your R distribution (which is quite likely initially), just use `install.packages("package_name")` with the respective package name to install it on your system. If the variable `export_graphs` us set to `TRUE`, then the graphs will be exported as pdf-files.
+
+```{r message = FALSE}
 rm(list = ls())
 library(reshape2)
 library(base)
@@ -13,12 +19,14 @@ library(tidyverse)
 
 # should graphs be exported to pdf
 export_pdf = FALSE
+```
 
 
-########### 
-# Parameterize the problem
-########### 
+### Plot a time path of consumption
 
+Before plotting a time path of consumption, we have to parameterize the problem, i.e. we have to choose $\gamma$, $\beta$ and $a_0$. We set some choices here that can easily be changed.
+
+```{r}
 # curvature of utility function
 gamma = 0.5
 
@@ -27,13 +35,12 @@ beta = 0.95
 
 # initial quantity of the resource
 a0 = 100
+```
 
+<br />
+Now we can calculate a time path using the explicit solution we obtained. We therefore choose to simulate `200` periods. In the data frame, we store the different period dates as well as the corresponding consumption level $\beta^{t\gamma}\cdot(1-\beta^\gamma)\cdot a_0$. We then plot the consumption path using `ggplot`.
 
-
-########### 
-# Time path for the all-in-one solution
-########### 
-
+```{r}
 # simulate path for 200 periods
 t = c(0:200)
 
@@ -53,19 +60,14 @@ myplot <- ggplot(data=dat) +
 
 # print plot
 print(myplot)
+```
 
-# save plot to pdf file (if needed)
-if(export_pdf) {
-  aspect_ratio <- 4/3;
-  height <- 3.5;
-  ggsave("fig7.pdf", width = height*aspect_ratio, height = height)
-}
-  
 
-########### 
-# Now plot the policy and function
-########### 
+### Value and policy function
 
+Next, we would like to draw the policy and the value function of the cake eating problem. We therefore define a discrete set of points $a \in [0, a_0]$ for which we calculate the policy and value function values. We can do this using the explicit solutions provided in class. Finally, we can plot the policy function by means of `ggplot`.
+
+```{r}
 # generate discrete set for potential resources
 a = seq(0, a0, 0.01)
 
@@ -86,15 +88,12 @@ myplot <- ggplot(data=dat) +
 
 # print plot
 print(myplot)
+```
 
-# save plot to pdf file (if needed)
-if(export_pdf) {
-  aspect_ratio <- 4/3;
-  height <- 3.5;
-  ggsave("fig9.pdf", width = height*aspect_ratio, height = height)
-}
+<br />
+And we can do the same for the value function.
 
-
+```{r}
 # plot for the value function
 myplot <- ggplot(data=dat) + 
   geom_line(aes(x=a, y=V), color= "darkred", size=1) +
@@ -106,23 +105,14 @@ myplot <- ggplot(data=dat) +
 
 # print plot
 print(myplot)
-
-# save plot to pdf file (if needed)
-if(export_pdf) {
-  aspect_ratio <- 4/3;
-  height <- 3.5;
-  ggsave("fig10.pdf", width = height*aspect_ratio, height = height)
-}
+```
 
 
+### Simulating the system forward
 
+Now we want to use the policy function $c(a_t)$ as well as the low of motion for the resource $a_{t+1} = a_t - c_t$ to simulate the solution of the dynamic program forward. To do so, we first define a function `policy` that returns the value of the policy function for any given state `a`. Next to the current level of the resource, this function receives the parameters of the problem `gamma` and `beta`.
 
-########### 
-# Calculates the optimal policy at state a
-#     a     : the point in the state space where we are at
-#     gamma : curvature of utility function
-#     beta  : time discount factor
-###########
+```{r}
 policy <- function(a, gamma, beta) {
   
   # calculate the optimal policy
@@ -131,11 +121,12 @@ policy <- function(a, gamma, beta) {
   # return the value
   return(c)
 }
+```
 
-########### 
-# Use the policy function to simulate the system forward
-###########
+<br />
+Now we can sequentially simulate the system forward. We start by defining a final period `T` until which we want to simulate the system. We set the inital state of the resource to `a_t = a0` and calculate the optimal policy at this point. We then successively use the budget constraint and the optimal policy function to calculate next period's resource level and next period's optimal consumption until we reach the final simulation period `T`. Finally, we can plot the optimal consumption path as well as the optimal path as well as the optimal path for the evolution of the resource over time.
 
+```{r}
 # number of periods to simulate
 T = 200
 
@@ -171,14 +162,6 @@ myplot <- ggplot(data=dat) +
 
 print(myplot)
 
-# save plot to pdf file (if needed)
-if(export_pdf) {
-  aspect_ratio <- 4/3;
-  height <- 3.5;
-  ggsave("fig11.pdf", width = height*aspect_ratio, height = height)
-}
-
-
 # now generate time path plot of the resource
 myplot <- ggplot(data=dat) + 
   geom_line(aes(x=t, y=a), color= "darkred", size=1) +
@@ -188,10 +171,4 @@ myplot <- ggplot(data=dat) +
   theme_bw()
 
 print(myplot)
-
-# save plot to pdf file (if needed)
-if(export_pdf) {
-  aspect_ratio <- 4/3;
-  height <- 3.5;
-  ggsave("fig12.pdf", width = height*aspect_ratio, height = height)
-}
+```

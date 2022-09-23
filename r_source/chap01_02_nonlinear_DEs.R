@@ -107,7 +107,7 @@ plot_diff <- function(y_0, alpha, T) {
     coord_cartesian(xlim=c(0, T), ylim=c(0,2)) + 
     scale_x_continuous(breaks=seq(0, T, 2)) +
     labs(x = "Time t",
-         y = "Solution of non-linear DE",
+         y = expression(paste("Solution of non-linear DE ", y[t])),
          title= bquote("Time  diagram: " ~ alpha == .(alpha) ~ " , " ~ y[0] == .(y_0))) +
     theme_bw()
   

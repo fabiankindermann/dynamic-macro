@@ -51,7 +51,7 @@ plot_diff <- function(y_0, a, b, T) {
     coord_cartesian(xlim=c(0, T)) + 
     scale_x_continuous(breaks=seq(0, T, 2)) +
     labs(x = "Time t",
-         y = "Solution of linear DE",
+         y = expression(paste("Solution of linear DE ", y[t])),
          title= bquote("Linear Difference Equation: " ~ a == .(a) ~ " , " ~ b == .(b) ~ " , " ~ y[0] == .(y_0))) +
     theme_bw()
   
@@ -87,7 +87,7 @@ plot_diff_steady <- function(y_0, a, b, T) {
     coord_cartesian(xlim=c(0, T)) + 
     scale_x_continuous(breaks=seq(0, T, 2)) +
     labs(x = "Time t",
-         y = "Solution of linear DE",
+         y = expression(paste("Solution of linear DE ", y[t])),
          title= bquote("Linear Difference Equation: " ~ a == .(a) ~ " , " ~ b == .(b) ~ " , " ~ y[0] == .(y_0))) +
     theme_bw()
   

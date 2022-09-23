@@ -1,5 +1,7 @@
 # Dynamic Macroeconomics
-This is a set of R-files we use for our Dynamic Macro lecture at Uni Regensburg.
+This is a set of R-files we use for our Dynamic Macro lecture at Uni Regensburg. Below you can find links to the html files explaining the content of the `R`-source files.
+
+**When clicking on the `Code` button on the upper right of this page, you can download the entire github directory!**
 
 
 ## Chapter 1

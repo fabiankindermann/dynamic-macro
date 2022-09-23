@@ -1,12 +1,12 @@
 ---
 title: "Non-Linear Difference Equations"
 output:
-  pdf_document: default
   html_document:
     df_print: paged
+  pdf_document: default
 ---
 <br />
-You can download the program code here: [chap1_nonlinear_DEs.R](href="http://www.fabian-kindermann.de/teaching/dynmacro/chap1_nonlinear_DEs.R")
+You can view the program code here: [chap1_nonlinear_DEs.R](href="https://github.com/fabiankindermann/dynamic-macro/blob/main/r_source/chap1_nonlinear_DEs.R")
 
 ### Loading packages etc.
 We first clear the workspace using `rm(list = ls())`and then include all packages we need. All packages used here are for plotting. If a package is missing in your R distribution (which is quite likely initially), just use `install.packages("package_name")` with the respective package name to install it on your system.

@@ -5,7 +5,7 @@ output:
     df_print: paged
 ---
 <br />
-You can download the program code here: [chap1_linear_DEs.R](href="http://www.fabian-kindermann.de/teaching/dynmacro/chap1_linear_DEs.R")
+You can download the program code here: [chap1_linear_DEs.R](href="https://github.com/fabiankindermann/dynamic-macro/blob/1860048191d675bb0bc76c2540690e3e2eec80b0/r_source/chap1_linear_DEs.R")
 
 ### Loading packages etc.
 We first clear the workspace using `rm(list = ls())`and then include all packages we need. All packages used here are for plotting. If a package is missing in your R distribution (which is quite likely initially), just use `install.packages("package_name")` with the respective package name to install it on your system.

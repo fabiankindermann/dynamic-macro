@@ -1,0 +1,225 @@
+---
+title: "The Kaldor Growth Facts"
+output:
+  html_document:
+    df_print: paged
+---
+
+### Loading packages etc.
+We first clear the workspace using `rm(list = ls())`and then include all packages we need. All packages used here are for plotting. If a package is missing in your R distribution (which is quite likely initially), just use `install.packages("package_name")` with the respective package name to install it on your system. If you execute the code in the file `install_packages.R`, then all necessary packages will be installed into your R distribution. If the variable `export_graphs` is set to `TRUE`, then the graphs will be exported as pdf-files.
+
+```{r message = FALSE}
+rm(list = ls())
+library(reshape2)
+library(base)
+library(ggplot2)
+library(grid)
+library(scales)
+library(stringr)
+library(tidyverse)
+library(pwt10)
+
+# should graphs be exported to pdf
+export_pdf = FALSE
+```
+
+
+### Loading the Penn World Tables and extracting US data
+
+We again use the Penn World Tables in `pwt10.0` and extract a sub-dataset that only contains US data.
+
+```{r}
+data("pwt10.0")
+pwt_sub = subset(pwt10.0, isocode=="USA")
+```
+
+<br />
+With these data at hand, we will study the five Kaldor Facts regarding economic growth.
+
+### Fact 1: Output per worker grows at about a constant rate
+
+To establish this fact, we first calculate GDP (or output) per worker in the US economy. In fact, we take the $log$ of GDP, as this allows us to study the growth properties of a variable (see our discussion in the lecture). We then regress output per worker on a constant as well as a linear time trend.
+
+```{r}
+# calculate log-Output-per-Worker
+pwt_sub$output_per_worker = log(pwt_sub$rgdpe/pwt_sub$emp)
+
+# run a linear regression
+reg <- lm(output_per_worker ~ year, pwt_sub)
+summary(reg)
+```
+
+<br />
+The regression results show that a linear model provides quite a good fit to our data. In fact, GDP per worker grows at approximately 1.7 percent per year in the period we are looking at. The model's $R^2$ value is 0.9862, meaning that we can explain most of the variance of GDP over this time span by a linear trend (the rest being the result mostly of cyclical fluctuations). The following graph supports this view.
+
+
+```{r}
+# for graph dimensions and annotation
+xrng <- range(pwt_sub$year)
+yrng <- range(pwt_sub$output_per_worker)
+ymin <- (yrng[1]+yrng[2])/2 - 0.018*(xrng[2]-xrng[1])/2
+ymax <- (yrng[1]+yrng[2])/2 + 0.018*(xrng[2]-xrng[1])/2
+lab  <- paste("growth rate = ", format(round(reg$coefficients[2]*100, 2), nsmall=2), "% / R2 = ", format(round(summary(reg)$r.squared, 2), nsmall=2))
+
+# generate plot
+myplot <- ggplot(data = pwt_sub) + 
+  geom_line(aes(x=year, y=output_per_worker), color= "darkblue", size=1) +
+  geom_smooth(aes(x=year, y=output_per_worker), method="lm", formula="y ~ x", se=FALSE, color= "darkred") +
+  geom_label(aes(x = xrng[1], y = ymax, label = lab), 
+            hjust = 0, vjust = 1, label.r = unit(0, "lines"), label.padding = unit(0.35, "lines")) +
+  coord_cartesian(xlim=c(1950, 2020), ylim=c(ymin, ymax)) + 
+  scale_x_continuous(breaks=seq(1950, 2020, 10)) +
+  labs(x = "Year t",
+       y = "Log(Output/Worker)") +
+  theme_bw()
+
+# print the plot
+print(myplot)
+```
+
+<br />
+Note that the above graph is designed such that the y-axis range covers as span of $0.018 \cdot (2019 - 1950)$ log-points (1.8 percent growth per year) and that the presented series is centered on the y-axis. Our 1.7 percent GDP per worker growth series therefore perfectly fits this graph. 
+
+
+
+### Fact 2: Capital per worker grows at about a constant rate
+
+We can again calculate capital per worker and run a linear regression.
+
+```{r}
+# calculate capital per worker
+pwt_sub$capital_per_worker = log(pwt_sub$rnna/pwt_sub$emp)
+
+# run a linear regression
+reg <- lm(capital_per_worker ~ year, pwt_sub)
+summary(reg)
+```
+
+<br />
+Capital per worker grows less than GDP per worker (only about 1.38 percent per year), but the $R^2$ value is very high as well. The following graph visualizes this.
+
+
+```{r}
+# for graph dimensions and annotation
+xrng <- range(pwt_sub$year)
+yrng <- range(pwt_sub$capital_per_worker)
+ymin <- (yrng[1]+yrng[2])/2 - 0.018*(xrng[2]-xrng[1])/2
+ymax <- (yrng[1]+yrng[2])/2 + 0.018*(xrng[2]-xrng[1])/2
+lab  <- paste("growth rate = ", format(round(reg$coefficients[2]*100, 2), nsmall=2), "% / R2 = ", format(round(summary(reg)$r.squared, 2), nsmall=2))
+
+# generate plot
+myplot <- ggplot(data = pwt_sub) + 
+  geom_line(aes(x=year, y=capital_per_worker), color= "darkblue", size=1) +
+  geom_smooth(aes(x=year, y=capital_per_worker), method="lm", formula="y ~ x", se=FALSE, color= "darkred") +
+  geom_label(aes(x = xrng[1], y = ymax, label = lab), 
+             hjust = 0, vjust = 1, label.r = unit(0, "lines"), label.padding = unit(0.35, "lines")) +
+  coord_cartesian(xlim=c(1950, 2020), ylim=c(ymin, ymax)) + 
+  scale_x_continuous(breaks=seq(1950, 2020, 10)) +
+  labs(x = "Year t",
+       y = "Log(Capital/Worker)") +
+  theme_bw()
+
+# print the plot
+print(myplot)
+```
+
+### Fact 3: The capital-to-output ratio is roughly constant over a long period
+
+We can calculate the capital-to-output ratio (again in logs) and study its properties.
+
+```{r}
+# calculate capital-to-output ratio
+pwt_sub$capital_to_output = log(pwt_sub$rnna/pwt_sub$rgdpna)
+
+# run a linear regression
+reg <- lm(capital_to_output ~ year, pwt_sub)
+summary(reg)
+```
+
+<br />
+The capital to output ratio is not exactly constant over time, but its (negative) growth rate is much, much smaller than any of the growth rates above. Note that the definition of the capital stock we use here plays a role in the capital-to-output-ratio dynamics. If we were to use only corporate capital from the NIPA accounts, we would get a more constant picture. This can be seen for example in [Herrendorf, Rogerson, Valentinyi: Growth and the Kaldor Facts](https://files.stlouisfed.org/files/htdocs/publications/review/2019/10/15/growth-and-the-kaldor-facts.pdf). The graph below also shows that capital doesn't move much over the time span considered.
+
+
+```{r}
+# for graph dimensions
+xrng <- range(pwt_sub$year)
+yrng <- range(pwt_sub$capital_to_output)
+ymin <- (yrng[1]+yrng[2])/2 - 0.018*(xrng[2]-xrng[1])/2
+ymax <- (yrng[1]+yrng[2])/2 + 0.018*(xrng[2]-xrng[1])/2
+lab  <- paste("growth rate = ", format(round(reg$coefficients[2]*100, 2), nsmall=2), "% / R2 = ", format(round(summary(reg)$r.squared, 2), nsmall=2))
+
+# generate plot
+myplot <- ggplot(data = pwt_sub) + 
+  geom_line(aes(x=year, y=capital_to_output), color= "darkblue", size=1) +
+  geom_smooth(aes(x=year, y=capital_to_output), method="lm", formula="y ~ x", se=FALSE, color= "darkred") +
+  geom_label(aes(x = xrng[1], y = ymax, label = lab), 
+             hjust = 0, vjust = 1, label.r = unit(0, "lines"), label.padding = unit(0.35, "lines")) +
+  coord_cartesian(xlim=c(1950, 2020), ylim=c(ymin, ymax)) + 
+  scale_x_continuous(breaks=seq(1950, 2020, 10)) +
+  labs(x = "Year t",
+       y = "Log(Capital/Output)") +
+  theme_bw()
+
+# print the plot
+print(myplot)
+```
+
+
+
+### Fact 4: The gross rate of return on capital is roughly constant over time
+
+The gross return on capital is defined as the amount of capital compensation divided by the capital stock. It hence includes both the net return on capital (in the PWT named `irr`) as well as the capital decpreciation rate `delta`. As we can see in the graph below, the gross return on capital is roughly constant over time and ranges at around 11 to 12 percent.
+
+```{r}
+# calculate gross rate of return on capital
+pwt_sub$gross_return = pwt_sub$irr + pwt_sub$delta
+
+# for annotating
+xrng <- range(pwt_sub$year)
+yrng <- range(pwt_sub$gross_return)
+ymin <- 0.06
+ymax <- 0.17
+lab  <- paste("Long-run Level = ", format(round(mean(pwt_sub$gross_return), 3), nsmall=3))
+
+myplot <- ggplot(data = pwt_sub) + 
+  geom_line(aes(x=year, y=gross_return), color= "darkblue", size=1) +
+  geom_smooth(aes(x=year, y=gross_return), method="lm", formula="y ~ 1", se=FALSE, color= "darkred") +
+  geom_label(aes(x = xrng[2], y = ymax, label = lab),
+             hjust = 1, vjust = 1, label.r = unit(0, "lines"), label.padding = unit(0.35, "lines")) +
+  coord_cartesian(xlim=c(1950, 2020), ylim=c(ymin, ymax)) + 
+  scale_x_continuous(breaks=seq(1950, 2020, 10)) +
+  labs(x = "Year t",
+       y = "Gross Return on Capital") +
+  theme_bw()
+
+# print the plot
+print(myplot)
+```
+
+### Fact 5: The share of labor compensation in GDP is roughly constant over time
+
+Finally, we want to take a look at the share of labor compensation in GDP. Labor compensation includes all wages, salaries and benefits paid by firms and the government. Again, the labor share is roughly constant over time. It declined somewhat starting in the 1980s and also from the beginning 2000s, a phenomenon rightly summarized under **the decline of the labor share** in the literature. But for our purposes, we can safely assume this share to be roughly constant over a longer period of time.
+
+
+```{r}
+# for annotating
+xrng <- range(pwt_sub$year)
+yrng <- range(pwt_sub$labsh)
+ymin <- 0.5
+ymax <- 0.7
+lab  <- paste("Long-run Level = ", format(round(mean(pwt_sub$labsh), 3), nsmall=3))
+
+myplot <- ggplot(data = pwt_sub) + 
+  geom_line(aes(x=year, y=labsh), color= "darkblue", size=1) +
+  geom_smooth(aes(x=year, y=labsh), method="lm", formula="y ~ 1", se=FALSE, color= "darkred") +
+  geom_label(aes(x = xrng[2], y = ymax, label = lab), 
+             hjust = 1, vjust = 1, label.r = unit(0, "lines"), label.padding = unit(0.35, "lines")) +
+  coord_cartesian(xlim=c(1950, 2020), ylim=c(ymin, ymax)) + 
+  scale_x_continuous(breaks=seq(1950, 2020, 10)) +
+  labs(x = "Year t",
+       y = "Share of Labor Compensation in GDP") +
+  theme_bw()
+
+# print the plot
+print(myplot)
+```

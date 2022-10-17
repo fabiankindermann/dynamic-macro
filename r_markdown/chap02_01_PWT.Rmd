@@ -1,0 +1,162 @@
+---
+title: "The Penn World Tables"
+output:
+  html_document:
+    df_print: paged
+---
+
+### Loading packages etc.
+We first clear the workspace using `rm(list = ls())`and then include all packages we need. All packages used here are for plotting. If a package is missing in your R distribution (which is quite likely initially), just use `install.packages("package_name")` with the respective package name to install it on your system. If you execute the code in the file `install_packages.R`, then all necessary packages will be installed into your R distribution. If the variable `export_graphs` is set to `TRUE`, then the graphs will be exported as pdf-files.
+
+```{r message = FALSE}
+rm(list = ls())
+library(reshape2)
+library(base)
+library(ggplot2)
+library(grid)
+library(scales)
+library(stringr)
+library(tidyverse)
+library(pwt10)
+
+# should graphs be exported to pdf
+export_pdf = FALSE
+```
+
+
+## Accessing the Penn World Tables
+
+The most important package used here is `pwt10`. It contains data from the Penn World Tables. The Penn World Tables (PWT) cover important cross country data on macroeconomic performance, like GDP, labor input, the capital stock as well as labor and capital compensation. You can find an overview of the [Penn World Tables here](https://www.rug.nl/ggdc/productivity/pwt/). Downloading the Excel sheet version is the easiest way to inspect the different variables in the PWT dataset. We will use these tables in the following to study some growth facts for the United States. To get a first impression of the Penn World Tables, we can load and inspect them with the following statement:
+
+```{r}
+data("pwt10.0")
+View(pwt10.0)
+```
+
+<br />
+As a next step, we want to study the macroeconomic performance of post-War United States. To this end, we extract a sub-dataset that only contains US data.
+
+```{r}
+pwt_sub = subset(pwt10.0, isocode=="USA")
+```
+
+### Increasing economic performance: growth in GDP
+
+We start with plotting the most important macroeconomic indicator, the gross domestic product. We use the output-side version of GDP, as we will be interested in the driving forces of economic growth. But this doesn't differ much from expenditure side GDP in the long run. Note that we look at **real GDP in constant 2017 US$**. This is important, as it allows us to abstract from price movements over time. Hence, and most importantly, inflation does not play a role in our analysis.
+
+```{r}
+myplot <- ggplot(data = pwt_sub) + 
+  geom_line(aes(x=year, y=rgdpe), color= "darkblue", size=1) +
+  coord_cartesian(xlim=c(1950, 2020)) + 
+  scale_x_continuous(breaks=seq(1950, 2020, 10)) +
+  scale_y_continuous(labels = unit_format(unit = "T", scale = 1e-6)) +
+  labs(x = "Year t",
+       y = "Real GDP (in constant 2017 US$)") +
+  theme_bw()
+
+# print the plot
+print(myplot)
+```
+
+<br />
+GDP grows steadily over time. We can see a bit of up and down movements (especially the consequences of the financial crisis in 2008). Yet, from a long horizon perspective, GDP is growing steadily. 
+
+
+### Potential drivers of GDP growth I: the labor force
+
+But what are the drivers behind GDP growth? A first suspect would be the size of the labor force, i.e. the number of workers that contribute to production. The idea is simple: the more workers there are, the more can be produced.
+
+```{r}
+myplot <- ggplot(data = pwt_sub) + 
+  geom_line(aes(x=year, y=emp), color= "darkblue", size=1) +
+  coord_cartesian(xlim=c(1950, 2020)) + 
+  scale_x_continuous(breaks=seq(1950, 2020, 10)) +
+  scale_y_continuous(labels = unit_format(unit = "M", scale = 1)) +
+  labs(x = "Year t",
+       y = "Number of Employed") +
+  theme_bw()
+
+# print the plot
+print(myplot)
+```
+
+<br />
+In fact, the workforce in the US has grown steadily over time as well, and we find some nice correlations between the growth of the workforce and GDP (see e.g. the financial crises). However, it is not only the number of workers that matters for an economy's output, but also how much they work. In a next step, we therefore look at hours per worker and how these hours evolved over time.
+
+```{r}
+myplot <- ggplot(data = pwt_sub) + 
+  geom_line(aes(x=year, y=avh), color= "darkblue", size=1) +
+  coord_cartesian(xlim=c(1950, 2020)) + 
+  scale_x_continuous(breaks=seq(1950, 2020, 10)) +
+  labs(x = "Year t",
+       y = "Annual average hours worked") +
+  theme_bw()
+
+# print the plot
+print(myplot)
+```
+<br />
+The average worker provided about 2000 hours of labor supply in the 1950s and 1960s. Assuming a 48 week year, this amounts to almost 42 hours a week. Note that this is a remarkable number, as the number of workers also contains part-time employees. Hence, a full-time work-schedule approximately consisted of a 50 hours work week. This has changed somewhat over time, especially in the 1970s where (in several countries) workers and unions bargained a work hours reduction down to about 40 hours. This essentially meant a free Saturday for many employees. Taken together, we can calculate the **total number of work hours provided by workers** in each year simply as the product between the number of workers and average hours. This is shown in the following graph. 
+
+```{r}
+# calculate total hours worked
+pwt_sub$total_hours = pwt_sub$emp*pwt_sub$avh
+
+# generate plot
+myplot <- ggplot(data = pwt_sub) + 
+  geom_line(aes(x=year, y=total_hours), color= "darkblue", size=1) +
+  coord_cartesian(xlim=c(1950, 2020)) + 
+  scale_x_continuous(breaks=seq(1950, 2020, 10)) +
+  scale_y_continuous(labels = unit_format(unit = "B", scale = 1e-3)) +
+  labs(x = "Year t",
+       y = "Total hours worked") +
+  theme_bw()
+
+# print the plot
+print(myplot)
+```
+
+<br />
+Finally, next to the amount of labor provided to the production sector, it also matters how productive labor input is. A more productive worker may produce the same amount of goods or services in less time, hence, create more product on one working day. The following graph shows an index of workers' labor productivity or human capital. The index is scale free, meaning that we can compare it across different periods of time, but it has no direct monetary equivalent.
+
+```{r}
+myplot <- ggplot(data = pwt_sub) + 
+  geom_line(aes(x=year, y=hc), color= "darkblue", size=1) +
+  coord_cartesian(xlim=c(1950, 2020)) + 
+  scale_x_continuous(breaks=seq(1950, 2020, 10)) +
+  labs(x = "Year t",
+       y = "Human Capital per Worker (Index Value)") +
+  theme_bw()
+
+# print the plot
+print(myplot)
+```
+
+
+### Potential drivers of GDP growth II: capital input
+
+The production process usually is organized by two inputs: labor on the one hand and capital (meaning machinery, equipment, structures, etc.) on the other. The following graph plots the US economy's aggregate capital stock over time. 
+
+```{r}
+myplot <- ggplot(data = pwt_sub) + 
+  geom_line(aes(x=year, y=rnna), color= "darkblue", size=1) +
+  coord_cartesian(xlim=c(1950, 2020)) + 
+  scale_x_continuous(breaks=seq(1950, 2020, 10)) +
+  scale_y_continuous(labels = unit_format(unit = "T", scale = 1e-6)) +
+  labs(x = "Year t",
+       y = "Capital Stock (constant 2017 US$)") +
+  theme_bw()
+
+# print the plot
+print(myplot)
+```
+
+<br />
+There are two things to note here. First, the capital stock (like labor input) is growing steadily over time. Second, the capital stock is substatial and it is much larger than GDP (by around a factor of three to four). Note that the above graph contains the entire capital stock of the economy, which consists of 
+
+- residential and non-residential structures
+- machinery and equipment
+- transport equipment
+- and other assets.
+
+We could be a bit more precise by only looking at the corporate capital stock, thereby excluding residential structures. But this would involve studying another dataset (for example the National Income and Product Accounts), which would be too much for this lecture.

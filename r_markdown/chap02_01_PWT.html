@@ -1662,8 +1662,8 @@ library(pwt10)
 # should graphs be exported to pdf
 export_pdf = FALSE</code></pre>
 </div>
-<div id="accessing-the-penn-world-tables" class="section level2">
-<h2>Accessing the Penn World Tables</h2>
+<div id="accessing-the-penn-world-tables" class="section level3">
+<h3>Accessing the Penn World Tables</h3>
 <p>The most important package used here is <code>pwt10</code>. It
 contains data from the Penn World Tables. The Penn World Tables (PWT)
 cover important cross country data on macroeconomic performance, like
@@ -1680,6 +1680,7 @@ View(pwt10.0)</code></pre>
 of post-War United States. To this end, we extract a sub-dataset that
 only contains US data.</p>
 <pre class="r"><code>pwt_sub = subset(pwt10.0, isocode==&quot;USA&quot;)</code></pre>
+</div>
 <div id="increasing-economic-performance-growth-in-gdp" class="section level3">
 <h3>Increasing economic performance: growth in GDP</h3>
 <p>We start with plotting the most important macroeconomic indicator,
@@ -1821,7 +1822,6 @@ stock of the economy, which consists of</p>
 capital stock, thereby excluding residential structures. But this would
 involve studying another dataset (for example the National Income and
 Product Accounts), which would be too much for this lecture.</p>
-</div>
 </div>
 
 

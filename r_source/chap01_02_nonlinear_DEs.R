@@ -64,12 +64,12 @@ plot_phase <- function(y_0, alpha, T) {
       # add the vertical line
       dat <- data.frame(d1 = c(y[t], y[t]),
                         d2 = c(y[t], y[t+1]))
-      myplot <- myplot + geom_line(data=dat, aes(x=d1, y=d2), color = "red", size=0.5, arrow = arrow(length = unit(0.02, "npc")))
+      myplot <- myplot + geom_path(data=dat, aes(x=d1, y=d2), color = "red", size=0.5, arrow = arrow(length = unit(0.02, "npc")))
       
       # add the horizontal line
       dat <- data.frame(d1 = c(y[t], y[t+1]),
                         d2 = c(y[t+1], y[t+1]))
-      myplot <- myplot + geom_line(data=dat, aes(x=d1, y=d2), color = "red", size=0.5, arrow = arrow(length = unit(0.02, "npc")))
+      myplot <- myplot + geom_path(data=dat, aes(x=d1, y=d2), color = "red", size=0.5, arrow = arrow(length = unit(0.02, "npc")))
     }
   }
   

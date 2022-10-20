@@ -46,7 +46,7 @@ We next provide a function `plot_phase` that allows to draw a phase diagram of t
 
 2. Next, we want to plot the functional form of the difference equation as well as a $45°$-line. We therefore construct a data frame that contains an equally spaced set of points on the interval $[0, 2]$ as well as the corresponding function values of $f(y) = y^\alpha$. We plot the function and the $45°$-line by means of `ggplot`.
 
-3. Next we successively add the arrows for each step of the phase diagram. We do this using a `for`-loop that allows us to repeat the same steps over and over again. For each step of the phase diagram, we have to draw a vertical line (the arrow from the $45°$-line to the function $f(y)$) as well as a horizontal line (the arrow from the the function $f(y)$ back to the $45°$-line). For each of the arrows, we construct a separate data frame `dat` and use the `geom_line` plot statement to add the arrow to the plot.
+3. Next we successively add the arrows for each step of the phase diagram. We do this using a `for`-loop that allows us to repeat the same steps over and over again. For each step of the phase diagram, we have to draw a vertical line (the arrow from the $45°$-line to the function $f(y)$) as well as a horizontal line (the arrow from the the function $f(y)$ back to the $45°$-line). For each of the arrows, we construct a separate data frame `dat` and use the `geom_path` plot statement to add the arrow to the plot.
 
 Note that, when all `T` arrow sets are added to the plot, we do not print the plot, but return the plot to the function that will call `plot_phase`, as we want to combine a phase diagram as well as the time diagram of the difference equation into one plot.
 
@@ -79,12 +79,12 @@ plot_phase <- function(y_0, alpha, T) {
       # add the vertical line
       dat <- data.frame(d1 = c(y[t], y[t]),
                         d2 = c(y[t], y[t+1]))
-      myplot <- myplot + geom_line(data=dat, aes(x=d1, y=d2), color = "red", size=0.5, arrow = arrow(length = unit(0.02, "npc")))
+      myplot <- myplot + geom_path(data=dat, aes(x=d1, y=d2), color = "red", size=0.5, arrow = arrow(length = unit(0.02, "npc")))
       
       # add the horizontal line
       dat <- data.frame(d1 = c(y[t], y[t+1]),
                         d2 = c(y[t+1], y[t+1]))
-      myplot <- myplot + geom_line(data=dat, aes(x=d1, y=d2), color = "red", size=0.5, arrow = arrow(length = unit(0.02, "npc")))
+      myplot <- myplot + geom_path(data=dat, aes(x=d1, y=d2), color = "red", size=0.5, arrow = arrow(length = unit(0.02, "npc")))
     }
   }
   

@@ -111,7 +111,43 @@ if(export_pdf) {
 
 
 ########### 
-# Kaldor Fact 3: Capital-to-output ratio is roughly constant
+# Kaldor Fact 3: Gross rate of return on capital
+###########
+
+# calculate gross rate of return on capital
+pwt_sub$gross_return = pwt_sub$irr + pwt_sub$delta
+
+# for annotating
+xrng <- range(pwt_sub$year)
+yrng <- range(pwt_sub$gross_return)
+ymin <- 0.06
+ymax <- 0.17
+lab  <- paste("Long-run Level = ", format(round(mean(pwt_sub$gross_return), 3), nsmall=3))
+
+myplot <- ggplot(data = pwt_sub) + 
+  geom_line(aes(x=year, y=gross_return), color= "darkblue", size=1) +
+  geom_smooth(aes(x=year, y=gross_return), method="lm", formula="y ~ 1", se=FALSE, color= "darkred") +
+  geom_label(aes(x = xrng[2], y = ymax, label = lab),
+             hjust = 1, vjust = 1, label.r = unit(0, "lines"), label.padding = unit(0.35, "lines")) +
+  coord_cartesian(xlim=c(1950, 2020), ylim=c(ymin, ymax)) + 
+  scale_x_continuous(breaks=seq(1950, 2020, 10)) +
+  labs(x = "Year t",
+       y = "Gross Return on Capital") +
+  theme_bw()
+
+# print the plot
+print(myplot)
+
+# save plot to pdf file (if needed)
+if(export_pdf) {
+  aspect_ratio <- 4/3;
+  height <- 3.5;
+  ggsave("fig9.pdf", width = height*aspect_ratio, height = height)
+}
+
+
+########### 
+# Kaldor Fact 4: Capital-to-output ratio is roughly constant
 ###########
 
 # calculate capital-to-output ratio
@@ -138,42 +174,6 @@ myplot <- ggplot(data = pwt_sub) +
   scale_x_continuous(breaks=seq(1950, 2020, 10)) +
   labs(x = "Year t",
        y = "Log(Capital/Output)") +
-  theme_bw()
-
-# print the plot
-print(myplot)
-
-# save plot to pdf file (if needed)
-if(export_pdf) {
-  aspect_ratio <- 4/3;
-  height <- 3.5;
-  ggsave("fig9.pdf", width = height*aspect_ratio, height = height)
-}
-
-
-########### 
-# Kaldor Fact 4: Gross rate of return on capital
-###########
-
-# calculate gross rate of return on capital
-pwt_sub$gross_return = pwt_sub$irr + pwt_sub$delta
-
-# for annotating
-xrng <- range(pwt_sub$year)
-yrng <- range(pwt_sub$gross_return)
-ymin <- 0.06
-ymax <- 0.17
-lab  <- paste("Long-run Level = ", format(round(mean(pwt_sub$gross_return), 3), nsmall=3))
-
-myplot <- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=gross_return), color= "darkblue", size=1) +
-  geom_smooth(aes(x=year, y=gross_return), method="lm", formula="y ~ 1", se=FALSE, color= "darkred") +
-  geom_label(aes(x = xrng[2], y = ymax, label = lab),
-             hjust = 1, vjust = 1, label.r = unit(0, "lines"), label.padding = unit(0.35, "lines")) +
-  coord_cartesian(xlim=c(1950, 2020), ylim=c(ymin, ymax)) + 
-  scale_x_continuous(breaks=seq(1950, 2020, 10)) +
-  labs(x = "Year t",
-       y = "Gross Return on Capital") +
   theme_bw()
 
 # print the plot

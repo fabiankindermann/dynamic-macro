@@ -123,7 +123,38 @@ myplot <- ggplot(data = pwt_sub) +
 print(myplot)
 ```
 
-### Fact 3: The capital-to-output ratio is roughly constant over a long period
+### Fact 3: The gross rate of return on capital is roughly constant over time
+
+The gross return on capital is defined as the amount of capital compensation divided by the capital stock. It hence includes both the net return on capital (in the PWT named `irr`) as well as the capital decpreciation rate `delta`. As we can see in the graph below, the gross return on capital is roughly constant over time and ranges at around 11 to 12 percent.
+
+```{r}
+# calculate gross rate of return on capital
+pwt_sub$gross_return = pwt_sub$irr + pwt_sub$delta
+
+# for annotating
+xrng <- range(pwt_sub$year)
+yrng <- range(pwt_sub$gross_return)
+ymin <- 0.06
+ymax <- 0.17
+lab  <- paste("Long-run Level = ", format(round(mean(pwt_sub$gross_return), 3), nsmall=3))
+
+myplot <- ggplot(data = pwt_sub) + 
+  geom_line(aes(x=year, y=gross_return), color= "darkblue", size=1) +
+  geom_smooth(aes(x=year, y=gross_return), method="lm", formula="y ~ 1", se=FALSE, color= "darkred") +
+  geom_label(aes(x = xrng[2], y = ymax, label = lab),
+             hjust = 1, vjust = 1, label.r = unit(0, "lines"), label.padding = unit(0.35, "lines")) +
+  coord_cartesian(xlim=c(1950, 2020), ylim=c(ymin, ymax)) + 
+  scale_x_continuous(breaks=seq(1950, 2020, 10)) +
+  labs(x = "Year t",
+       y = "Gross Return on Capital") +
+  theme_bw()
+
+# print the plot
+print(myplot)
+```
+
+
+### Fact 4: The capital-to-output ratio is roughly constant over a long period
 
 We can calculate the capital-to-output ratio (again in logs) and study its properties.
 
@@ -158,38 +189,6 @@ myplot <- ggplot(data = pwt_sub) +
   scale_x_continuous(breaks=seq(1950, 2020, 10)) +
   labs(x = "Year t",
        y = "Log(Capital/Output)") +
-  theme_bw()
-
-# print the plot
-print(myplot)
-```
-
-
-
-### Fact 4: The gross rate of return on capital is roughly constant over time
-
-The gross return on capital is defined as the amount of capital compensation divided by the capital stock. It hence includes both the net return on capital (in the PWT named `irr`) as well as the capital decpreciation rate `delta`. As we can see in the graph below, the gross return on capital is roughly constant over time and ranges at around 11 to 12 percent.
-
-```{r}
-# calculate gross rate of return on capital
-pwt_sub$gross_return = pwt_sub$irr + pwt_sub$delta
-
-# for annotating
-xrng <- range(pwt_sub$year)
-yrng <- range(pwt_sub$gross_return)
-ymin <- 0.06
-ymax <- 0.17
-lab  <- paste("Long-run Level = ", format(round(mean(pwt_sub$gross_return), 3), nsmall=3))
-
-myplot <- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=gross_return), color= "darkblue", size=1) +
-  geom_smooth(aes(x=year, y=gross_return), method="lm", formula="y ~ 1", se=FALSE, color= "darkred") +
-  geom_label(aes(x = xrng[2], y = ymax, label = lab),
-             hjust = 1, vjust = 1, label.r = unit(0, "lines"), label.padding = unit(0.35, "lines")) +
-  coord_cartesian(xlim=c(1950, 2020), ylim=c(ymin, ymax)) + 
-  scale_x_continuous(breaks=seq(1950, 2020, 10)) +
-  labs(x = "Year t",
-       y = "Gross Return on Capital") +
   theme_bw()
 
 # print the plot

@@ -14,7 +14,7 @@ library(tidyverse)
 library(pwt10)
 
 # should graphs be exported to pdf
-export_pdf = FALSE
+export_pdf <- FALSE
 
 
 ########### 
@@ -28,7 +28,7 @@ data("pwt10.0")
 View(pwt10.0)
 
 # now extract US data only
-pwt_sub = subset(pwt10.0, isocode=="USA")
+pwt_sub <- subset(pwt10.0, isocode=="USA")
 
 
 ########### 
@@ -37,7 +37,7 @@ pwt_sub = subset(pwt10.0, isocode=="USA")
 
 # generate plot
 myplot <- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=rgdpe), color= "darkblue", size=1) +
+  geom_line(aes(x=year, y=rgdpe), color="darkblue", size=1) +
   coord_cartesian(xlim=c(1950, 2020)) + 
   scale_x_continuous(breaks=seq(1950, 2020, 10)) +
   scale_y_continuous(labels = unit_format(unit = "T", scale = 1e-6)) +
@@ -62,7 +62,7 @@ if(export_pdf) {
 
 # generate plot
 myplot <- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=emp), color= "darkblue", size=1) +
+  geom_line(aes(x=year, y=emp), color="darkblue", size=1) +
   coord_cartesian(xlim=c(1950, 2020)) + 
   scale_x_continuous(breaks=seq(1950, 2020, 10)) +
   scale_y_continuous(labels = unit_format(unit = "M", scale = 1)) +
@@ -87,7 +87,7 @@ if(export_pdf) {
 
 # generate plot
 myplot <- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=avh), color= "darkblue", size=1) +
+  geom_line(aes(x=year, y=avh), color="darkblue", size=1) +
   coord_cartesian(xlim=c(1950, 2020)) + 
   scale_x_continuous(breaks=seq(1950, 2020, 10)) +
   labs(x = "Year t",
@@ -110,11 +110,11 @@ if(export_pdf) {
 ###########
 
 # calculate total hours worked
-pwt_sub$total_hours = pwt_sub$emp*pwt_sub$avh
+pwt_sub$total_hours <- pwt_sub$emp*pwt_sub$avh
 
 # generate plot
 myplot <- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=total_hours), color= "darkblue", size=1) +
+  geom_line(aes(x=year, y=total_hours), color="darkblue", size=1) +
   coord_cartesian(xlim=c(1950, 2020)) + 
   scale_x_continuous(breaks=seq(1950, 2020, 10)) +
   scale_y_continuous(labels = unit_format(unit = "B", scale = 1e-3)) +
@@ -139,7 +139,7 @@ if(export_pdf) {
 
 # generate plot
 myplot <- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=hc), color= "darkblue", size=1) +
+  geom_line(aes(x=year, y=hc), color="darkblue", size=1) +
   coord_cartesian(xlim=c(1950, 2020)) + 
   scale_x_continuous(breaks=seq(1950, 2020, 10)) +
   labs(x = "Year t",
@@ -163,7 +163,7 @@ if(export_pdf) {
 
 # generate plot
 myplot <- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=rnna), color= "darkblue", size=1) +
+  geom_line(aes(x=year, y=rnna), color="darkblue", size=1) +
   coord_cartesian(xlim=c(1950, 2020)) + 
   scale_x_continuous(breaks=seq(1950, 2020, 10)) +
   scale_y_continuous(labels = unit_format(unit = "T", scale = 1e-6)) +

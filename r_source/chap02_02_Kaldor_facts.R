@@ -14,7 +14,12 @@ library(tidyverse)
 library(pwt10)
 
 # should graphs be exported to pdf
-export_pdf = FALSE
+export_pdf <- FALSE
+
+# define some colors
+mygreen <- "#00BA38"
+myblue  <- "#619CFF"
+myred   <- "#F8766D"
 
 
 ########### 
@@ -25,7 +30,7 @@ export_pdf = FALSE
 
 # load data and extract US data
 data("pwt10.0")
-pwt_sub = subset(pwt10.0, isocode=="USA")
+pwt_sub <- subset(pwt10.0, isocode=="USA")
 
 
 ########### 
@@ -33,7 +38,7 @@ pwt_sub = subset(pwt10.0, isocode=="USA")
 ###########
 
 # calculate log-Output-per-Worker
-pwt_sub$output_per_worker = log(pwt_sub$rgdpe/pwt_sub$emp)
+pwt_sub$output_per_worker <- log(pwt_sub$rgdpe/pwt_sub$emp)
 
 # run a linear regression
 reg <- lm(output_per_worker ~ year, pwt_sub)
@@ -48,8 +53,8 @@ lab  <- paste("growth rate = ", format(round(reg$coefficients[2]*100, 2), nsmall
 
 # generate plot
 myplot <- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=output_per_worker), color= "darkblue", size=1) +
-  geom_smooth(aes(x=year, y=output_per_worker), method="lm", formula="y ~ x", se=FALSE, color= "darkred") +
+  geom_line(aes(x=year, y=output_per_worker), color="darkblue", size=1) +
+  geom_smooth(aes(x=year, y=output_per_worker), method="lm", formula="y ~ x", se=FALSE, color=myred) +
   geom_label(aes(x = xrng[1], y = ymax, label = lab), 
             hjust = 0, vjust = 1, label.r = unit(0, "lines"), label.padding = unit(0.35, "lines")) +
   coord_cartesian(xlim=c(1950, 2020), ylim=c(ymin, ymax)) + 
@@ -74,7 +79,7 @@ if(export_pdf) {
 ###########
 
 # calculate capital per worker
-pwt_sub$capital_per_worker = log(pwt_sub$rnna/pwt_sub$emp)
+pwt_sub$capital_per_worker <- log(pwt_sub$rnna/pwt_sub$emp)
 
 # run a linear regression
 reg <- lm(capital_per_worker ~ year, pwt_sub)
@@ -89,8 +94,8 @@ lab  <- paste("growth rate = ", format(round(reg$coefficients[2]*100, 2), nsmall
 
 # generate plot
 myplot <- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=capital_per_worker), color= "darkblue", size=1) +
-  geom_smooth(aes(x=year, y=capital_per_worker), method="lm", formula="y ~ x", se=FALSE, color= "darkred") +
+  geom_line(aes(x=year, y=capital_per_worker), color="darkblue", size=1) +
+  geom_smooth(aes(x=year, y=capital_per_worker), method="lm", formula="y ~ x", se=FALSE, color=myred) +
   geom_label(aes(x = xrng[1], y = ymax, label = lab), 
              hjust = 0, vjust = 1, label.r = unit(0, "lines"), label.padding = unit(0.35, "lines")) +
   coord_cartesian(xlim=c(1950, 2020), ylim=c(ymin, ymax)) + 
@@ -115,7 +120,7 @@ if(export_pdf) {
 ###########
 
 # calculate gross rate of return on capital
-pwt_sub$gross_return = pwt_sub$irr + pwt_sub$delta
+pwt_sub$gross_return <- pwt_sub$irr + pwt_sub$delta
 
 # for annotating
 xrng <- range(pwt_sub$year)
@@ -125,8 +130,8 @@ ymax <- 0.17
 lab  <- paste("Long-run Level = ", format(round(mean(pwt_sub$gross_return), 3), nsmall=3))
 
 myplot <- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=gross_return), color= "darkblue", size=1) +
-  geom_smooth(aes(x=year, y=gross_return), method="lm", formula="y ~ 1", se=FALSE, color= "darkred") +
+  geom_line(aes(x=year, y=gross_return), color="darkblue", size=1) +
+  geom_smooth(aes(x=year, y=gross_return), method="lm", formula="y ~ 1", se=FALSE, color=myred) +
   geom_label(aes(x = xrng[2], y = ymax, label = lab),
              hjust = 1, vjust = 1, label.r = unit(0, "lines"), label.padding = unit(0.35, "lines")) +
   coord_cartesian(xlim=c(1950, 2020), ylim=c(ymin, ymax)) + 
@@ -151,7 +156,7 @@ if(export_pdf) {
 ###########
 
 # calculate capital-to-output ratio
-pwt_sub$capital_to_output = log(pwt_sub$rnna/pwt_sub$rgdpna)
+pwt_sub$capital_to_output <- log(pwt_sub$rnna/pwt_sub$rgdpna)
 
 # run a linear regression
 reg <- lm(capital_to_output ~ year, pwt_sub)
@@ -166,8 +171,8 @@ lab  <- paste("growth rate = ", format(round(reg$coefficients[2]*100, 2), nsmall
 
 # generate plot
 myplot <- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=capital_to_output), color= "darkblue", size=1) +
-  geom_smooth(aes(x=year, y=capital_to_output), method="lm", formula="y ~ x", se=FALSE, color= "darkred") +
+  geom_line(aes(x=year, y=capital_to_output), color="darkblue", size=1) +
+  geom_smooth(aes(x=year, y=capital_to_output), method="lm", formula="y ~ x", se=FALSE, color=myred) +
   geom_label(aes(x = xrng[1], y = ymax, label = lab), 
              hjust = 0, vjust = 1, label.r = unit(0, "lines"), label.padding = unit(0.35, "lines")) +
   coord_cartesian(xlim=c(1950, 2020), ylim=c(ymin, ymax)) + 
@@ -199,8 +204,8 @@ ymax <- 0.7
 lab  <- paste("Long-run Level = ", format(round(mean(pwt_sub$labsh), 3), nsmall=3))
 
 myplot <- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=labsh), color= "darkblue", size=1) +
-  geom_smooth(aes(x=year, y=labsh), method="lm", formula="y ~ 1", se=FALSE, color= "darkred") +
+  geom_line(aes(x=year, y=labsh), color="darkblue", size=1) +
+  geom_smooth(aes(x=year, y=labsh), method="lm", formula="y ~ 1", se=FALSE, color=myred) +
   geom_label(aes(x = xrng[2], y = ymax, label = lab), 
              hjust = 1, vjust = 1, label.r = unit(0, "lines"), label.padding = unit(0.35, "lines")) +
   coord_cartesian(xlim=c(1950, 2020), ylim=c(ymin, ymax)) + 

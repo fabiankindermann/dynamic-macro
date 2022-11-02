@@ -63,8 +63,8 @@ plot_phase <- function(y_0, alpha, T) {
   )
   
   myplot <- ggplot(data=dat) + 
-    geom_line(aes(x=x, y=f), color= "darkblue", size=1) +
-    geom_line(aes(x=x, y=x), color= "darkblue", size=0.5) +
+    geom_line(aes(x=x, y=f), color="darkblue", size=1) +
+    geom_line(aes(x=x, y=x), color="darkblue", size=0.5) +
     coord_cartesian(xlim=c(0, 2), ylim=c(0, 2)) + 
     scale_x_continuous(breaks=seq(0, 2, 0.2)) +
     labs(x = expression('y'['t']),

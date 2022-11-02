@@ -1660,7 +1660,7 @@ library(tidyverse)
 library(pwt10)
 
 # should graphs be exported to pdf
-export_pdf = FALSE</code></pre>
+export_pdf &lt;- FALSE</code></pre>
 </div>
 <div id="accessing-the-penn-world-tables" class="section level3">
 <h3>Accessing the Penn World Tables</h3>
@@ -1679,7 +1679,7 @@ View(pwt10.0)</code></pre>
 <p><br /> As a next step, we want to study the macroeconomic performance
 of post-War United States. To this end, we extract a sub-dataset that
 only contains US data.</p>
-<pre class="r"><code>pwt_sub = subset(pwt10.0, isocode==&quot;USA&quot;)</code></pre>
+<pre class="r"><code>pwt_sub &lt;- subset(pwt10.0, isocode==&quot;USA&quot;)</code></pre>
 </div>
 <div id="increasing-economic-performance-growth-in-gdp" class="section level3">
 <h3>Increasing economic performance: growth in GDP</h3>
@@ -1692,7 +1692,7 @@ important, as it allows us to abstract from price movements over time.
 Hence, and most importantly, inflation does not play a role in our
 analysis.</p>
 <pre class="r"><code>myplot &lt;- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=rgdpe), color= &quot;darkblue&quot;, size=1) +
+  geom_line(aes(x=year, y=rgdpe), color=&quot;darkblue&quot;, size=1) +
   coord_cartesian(xlim=c(1950, 2020)) + 
   scale_x_continuous(breaks=seq(1950, 2020, 10)) +
   scale_y_continuous(labels = unit_format(unit = &quot;T&quot;, scale = 1e-6)) +
@@ -1714,7 +1714,7 @@ the size of the labor force, i.e. the number of workers that contribute
 to production. The idea is simple: the more workers there are, the more
 can be produced.</p>
 <pre class="r"><code>myplot &lt;- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=emp), color= &quot;darkblue&quot;, size=1) +
+  geom_line(aes(x=year, y=emp), color=&quot;darkblue&quot;, size=1) +
   coord_cartesian(xlim=c(1950, 2020)) + 
   scale_x_continuous(breaks=seq(1950, 2020, 10)) +
   scale_y_continuous(labels = unit_format(unit = &quot;M&quot;, scale = 1)) +
@@ -1732,7 +1732,7 @@ only the number of workers that matters for an economy’s output, but
 also how much they work. In a next step, we therefore look at hours per
 worker and how these hours evolved over time.</p>
 <pre class="r"><code>myplot &lt;- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=avh), color= &quot;darkblue&quot;, size=1) +
+  geom_line(aes(x=year, y=avh), color=&quot;darkblue&quot;, size=1) +
   coord_cartesian(xlim=c(1950, 2020)) + 
   scale_x_continuous(breaks=seq(1950, 2020, 10)) +
   labs(x = &quot;Year t&quot;,
@@ -1755,11 +1755,11 @@ work hours provided by workers</strong> in each year simply as the
 product between the number of workers and average hours. This is shown
 in the following graph.</p>
 <pre class="r"><code># calculate total hours worked
-pwt_sub$total_hours = pwt_sub$emp*pwt_sub$avh
+pwt_sub$total_hours &lt;- pwt_sub$emp*pwt_sub$avh
 
 # generate plot
 myplot &lt;- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=total_hours), color= &quot;darkblue&quot;, size=1) +
+  geom_line(aes(x=year, y=total_hours), color=&quot;darkblue&quot;, size=1) +
   coord_cartesian(xlim=c(1950, 2020)) + 
   scale_x_continuous(breaks=seq(1950, 2020, 10)) +
   scale_y_continuous(labels = unit_format(unit = &quot;B&quot;, scale = 1e-3)) +
@@ -1778,7 +1778,7 @@ graph shows an index of workers’ labor productivity or human capital.
 The index is scale free, meaning that we can compare it across different
 periods of time, but it has no direct monetary equivalent.</p>
 <pre class="r"><code>myplot &lt;- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=hc), color= &quot;darkblue&quot;, size=1) +
+  geom_line(aes(x=year, y=hc), color=&quot;darkblue&quot;, size=1) +
   coord_cartesian(xlim=c(1950, 2020)) + 
   scale_x_continuous(breaks=seq(1950, 2020, 10)) +
   labs(x = &quot;Year t&quot;,
@@ -1796,7 +1796,7 @@ the one hand and capital (meaning machinery, equipment, structures,
 etc.) on the other. The following graph plots the US economy’s aggregate
 capital stock over time.</p>
 <pre class="r"><code>myplot &lt;- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=rnna), color= &quot;darkblue&quot;, size=1) +
+  geom_line(aes(x=year, y=rnna), color=&quot;darkblue&quot;, size=1) +
   coord_cartesian(xlim=c(1950, 2020)) + 
   scale_x_continuous(breaks=seq(1950, 2020, 10)) +
   scale_y_continuous(labels = unit_format(unit = &quot;T&quot;, scale = 1e-6)) +

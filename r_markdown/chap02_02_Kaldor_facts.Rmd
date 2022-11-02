@@ -6,7 +6,7 @@ output:
 ---
 
 ### Loading packages etc.
-We first clear the workspace using `rm(list = ls())`and then include all packages we need. All packages used here are for plotting. If a package is missing in your R distribution (which is quite likely initially), just use `install.packages("package_name")` with the respective package name to install it on your system. If you execute the code in the file `install_packages.R`, then all necessary packages will be installed into your R distribution. If the variable `export_graphs` is set to `TRUE`, then the graphs will be exported as pdf-files.
+We first clear the workspace using `rm(list = ls())`and then include all packages we need. All packages used here are for plotting. If a package is missing in your R distribution (which is quite likely initially), just use `install.packages("package_name")` with the respective package name to install it on your system. If you execute the code in the file `install_packages.R`, then all necessary packages will be installed into your R distribution. If the variable `export_graphs` is set to `TRUE`, then the graphs will be exported as pdf-files. In addition, we define a set of colors here to make graphs look more beautiful.
 
 ```{r message = FALSE}
 rm(list = ls())
@@ -20,7 +20,12 @@ library(tidyverse)
 library(pwt10)
 
 # should graphs be exported to pdf
-export_pdf = FALSE
+export_pdf <- FALSE
+
+# define some colors
+mygreen <- "#00BA38"
+myblue  <- "#619CFF"
+myred   <- "#F8766D"
 ```
 
 
@@ -30,7 +35,7 @@ We again use the Penn World Tables in `pwt10.0` and extract a sub-dataset that o
 
 ```{r}
 data("pwt10.0")
-pwt_sub = subset(pwt10.0, isocode=="USA")
+pwt_sub <- subset(pwt10.0, isocode=="USA")
 ```
 
 <br />
@@ -42,7 +47,7 @@ To establish this fact, we first calculate GDP (or output) per worker in the US 
 
 ```{r}
 # calculate log-Output-per-Worker
-pwt_sub$output_per_worker = log(pwt_sub$rgdpe/pwt_sub$emp)
+pwt_sub$output_per_worker <- log(pwt_sub$rgdpe/pwt_sub$emp)
 
 # run a linear regression
 reg <- lm(output_per_worker ~ year, pwt_sub)
@@ -63,8 +68,8 @@ lab  <- paste("growth rate = ", format(round(reg$coefficients[2]*100, 2), nsmall
 
 # generate plot
 myplot <- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=output_per_worker), color= "darkblue", size=1) +
-  geom_smooth(aes(x=year, y=output_per_worker), method="lm", formula="y ~ x", se=FALSE, color= "darkred") +
+  geom_line(aes(x=year, y=output_per_worker), color="darkblue", size=1) +
+  geom_smooth(aes(x=year, y=output_per_worker), method="lm", formula="y ~ x", se=FALSE, color=myred) +
   geom_label(aes(x = xrng[1], y = ymax, label = lab), 
             hjust = 0, vjust = 1, label.r = unit(0, "lines"), label.padding = unit(0.35, "lines")) +
   coord_cartesian(xlim=c(1950, 2020), ylim=c(ymin, ymax)) + 
@@ -88,7 +93,7 @@ We can again calculate capital per worker and run a linear regression.
 
 ```{r}
 # calculate capital per worker
-pwt_sub$capital_per_worker = log(pwt_sub$rnna/pwt_sub$emp)
+pwt_sub$capital_per_worker <- log(pwt_sub$rnna/pwt_sub$emp)
 
 # run a linear regression
 reg <- lm(capital_per_worker ~ year, pwt_sub)
@@ -109,8 +114,8 @@ lab  <- paste("growth rate = ", format(round(reg$coefficients[2]*100, 2), nsmall
 
 # generate plot
 myplot <- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=capital_per_worker), color= "darkblue", size=1) +
-  geom_smooth(aes(x=year, y=capital_per_worker), method="lm", formula="y ~ x", se=FALSE, color= "darkred") +
+  geom_line(aes(x=year, y=capital_per_worker), color="darkblue", size=1) +
+  geom_smooth(aes(x=year, y=capital_per_worker), method="lm", formula="y ~ x", se=FALSE, color=myred) +
   geom_label(aes(x = xrng[1], y = ymax, label = lab), 
              hjust = 0, vjust = 1, label.r = unit(0, "lines"), label.padding = unit(0.35, "lines")) +
   coord_cartesian(xlim=c(1950, 2020), ylim=c(ymin, ymax)) + 
@@ -129,7 +134,7 @@ The gross return on capital is defined as the amount of capital compensation div
 
 ```{r}
 # calculate gross rate of return on capital
-pwt_sub$gross_return = pwt_sub$irr + pwt_sub$delta
+pwt_sub$gross_return <- pwt_sub$irr + pwt_sub$delta
 
 # for annotating
 xrng <- range(pwt_sub$year)
@@ -139,8 +144,8 @@ ymax <- 0.17
 lab  <- paste("Long-run Level = ", format(round(mean(pwt_sub$gross_return), 3), nsmall=3))
 
 myplot <- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=gross_return), color= "darkblue", size=1) +
-  geom_smooth(aes(x=year, y=gross_return), method="lm", formula="y ~ 1", se=FALSE, color= "darkred") +
+  geom_line(aes(x=year, y=gross_return), color="darkblue", size=1) +
+  geom_smooth(aes(x=year, y=gross_return), method="lm", formula="y ~ 1", se=FALSE, color=myred) +
   geom_label(aes(x = xrng[2], y = ymax, label = lab),
              hjust = 1, vjust = 1, label.r = unit(0, "lines"), label.padding = unit(0.35, "lines")) +
   coord_cartesian(xlim=c(1950, 2020), ylim=c(ymin, ymax)) + 
@@ -160,7 +165,7 @@ We can calculate the capital-to-output ratio (again in logs) and study its prope
 
 ```{r}
 # calculate capital-to-output ratio
-pwt_sub$capital_to_output = log(pwt_sub$rnna/pwt_sub$rgdpna)
+pwt_sub$capital_to_output <- log(pwt_sub$rnna/pwt_sub$rgdpna)
 
 # run a linear regression
 reg <- lm(capital_to_output ~ year, pwt_sub)
@@ -181,8 +186,8 @@ lab  <- paste("growth rate = ", format(round(reg$coefficients[2]*100, 2), nsmall
 
 # generate plot
 myplot <- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=capital_to_output), color= "darkblue", size=1) +
-  geom_smooth(aes(x=year, y=capital_to_output), method="lm", formula="y ~ x", se=FALSE, color= "darkred") +
+  geom_line(aes(x=year, y=capital_to_output), color="darkblue", size=1) +
+  geom_smooth(aes(x=year, y=capital_to_output), method="lm", formula="y ~ x", se=FALSE, color=myred) +
   geom_label(aes(x = xrng[1], y = ymax, label = lab), 
              hjust = 0, vjust = 1, label.r = unit(0, "lines"), label.padding = unit(0.35, "lines")) +
   coord_cartesian(xlim=c(1950, 2020), ylim=c(ymin, ymax)) + 
@@ -209,8 +214,8 @@ ymax <- 0.7
 lab  <- paste("Long-run Level = ", format(round(mean(pwt_sub$labsh), 3), nsmall=3))
 
 myplot <- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=labsh), color= "darkblue", size=1) +
-  geom_smooth(aes(x=year, y=labsh), method="lm", formula="y ~ 1", se=FALSE, color= "darkred") +
+  geom_line(aes(x=year, y=labsh), color="darkblue", size=1) +
+  geom_smooth(aes(x=year, y=labsh), method="lm", formula="y ~ 1", se=FALSE, color=myred) +
   geom_label(aes(x = xrng[2], y = ymax, label = lab), 
              hjust = 1, vjust = 1, label.r = unit(0, "lines"), label.padding = unit(0.35, "lines")) +
   coord_cartesian(xlim=c(1950, 2020), ylim=c(ymin, ymax)) + 

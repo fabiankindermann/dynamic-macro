@@ -20,7 +20,7 @@ library(tidyverse)
 library(pwt10)
 
 # should graphs be exported to pdf
-export_pdf = FALSE
+export_pdf <- FALSE
 ```
 
 
@@ -37,7 +37,7 @@ View(pwt10.0)
 As a next step, we want to study the macroeconomic performance of post-War United States. To this end, we extract a sub-dataset that only contains US data.
 
 ```{r}
-pwt_sub = subset(pwt10.0, isocode=="USA")
+pwt_sub <- subset(pwt10.0, isocode=="USA")
 ```
 
 ### Increasing economic performance: growth in GDP
@@ -46,7 +46,7 @@ We start with plotting the most important macroeconomic indicator, the gross dom
 
 ```{r}
 myplot <- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=rgdpe), color= "darkblue", size=1) +
+  geom_line(aes(x=year, y=rgdpe), color="darkblue", size=1) +
   coord_cartesian(xlim=c(1950, 2020)) + 
   scale_x_continuous(breaks=seq(1950, 2020, 10)) +
   scale_y_continuous(labels = unit_format(unit = "T", scale = 1e-6)) +
@@ -68,7 +68,7 @@ But what are the drivers behind GDP growth? A first suspect would be the size of
 
 ```{r}
 myplot <- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=emp), color= "darkblue", size=1) +
+  geom_line(aes(x=year, y=emp), color="darkblue", size=1) +
   coord_cartesian(xlim=c(1950, 2020)) + 
   scale_x_continuous(breaks=seq(1950, 2020, 10)) +
   scale_y_continuous(labels = unit_format(unit = "M", scale = 1)) +
@@ -85,7 +85,7 @@ In fact, the workforce in the US has grown steadily over time as well, and we fi
 
 ```{r}
 myplot <- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=avh), color= "darkblue", size=1) +
+  geom_line(aes(x=year, y=avh), color="darkblue", size=1) +
   coord_cartesian(xlim=c(1950, 2020)) + 
   scale_x_continuous(breaks=seq(1950, 2020, 10)) +
   labs(x = "Year t",
@@ -100,11 +100,11 @@ The average worker provided about 2000 hours of labor supply in the 1950s and 19
 
 ```{r}
 # calculate total hours worked
-pwt_sub$total_hours = pwt_sub$emp*pwt_sub$avh
+pwt_sub$total_hours <- pwt_sub$emp*pwt_sub$avh
 
 # generate plot
 myplot <- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=total_hours), color= "darkblue", size=1) +
+  geom_line(aes(x=year, y=total_hours), color="darkblue", size=1) +
   coord_cartesian(xlim=c(1950, 2020)) + 
   scale_x_continuous(breaks=seq(1950, 2020, 10)) +
   scale_y_continuous(labels = unit_format(unit = "B", scale = 1e-3)) +
@@ -121,7 +121,7 @@ Finally, next to the amount of labor provided to the production sector, it also 
 
 ```{r}
 myplot <- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=hc), color= "darkblue", size=1) +
+  geom_line(aes(x=year, y=hc), color="darkblue", size=1) +
   coord_cartesian(xlim=c(1950, 2020)) + 
   scale_x_continuous(breaks=seq(1950, 2020, 10)) +
   labs(x = "Year t",
@@ -139,7 +139,7 @@ The production process usually is organized by two inputs: labor on the one hand
 
 ```{r}
 myplot <- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=rnna), color= "darkblue", size=1) +
+  geom_line(aes(x=year, y=rnna), color="darkblue", size=1) +
   coord_cartesian(xlim=c(1950, 2020)) + 
   scale_x_continuous(breaks=seq(1950, 2020, 10)) +
   scale_y_continuous(labels = unit_format(unit = "T", scale = 1e-6)) +

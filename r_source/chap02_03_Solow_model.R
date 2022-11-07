@@ -14,7 +14,7 @@ library(tidyverse)
 library(pwt10)
 
 # should graphs be exported to pdf
-export_pdf <- TRUE
+export_pdf <- FALSE
 
 # define some colors
 mygreen <- "#00BA38"
@@ -314,9 +314,9 @@ myplot <- ggplot(data = transition) +
        y = "GDP and its components per\n effective unit of labor") +
   scale_fill_manual(breaks = c("1c", "2ir", "3di"), name = "", 
                     labels = c("Consumption", "Replacement Investment", "Capital Augmenting Inv."),
-                    values = c("#00BA38", "#619CFF", "#F8766D")) +
+                    values = c(mygreen, myblue, myred)) +
   scale_color_manual(breaks = c("1c", "2ir", "3di"),
-                     values = c("#00BA38", "#619CFF", "#F8766D")) +
+                     values = c(mygreen, myblue, myred)) +
   guides(colour = "none") +
   theme_bw() + 
   theme(legend.position="bottom")
@@ -411,7 +411,7 @@ myplot <- ggplot(data = transition) +
                     labels = c("Consumption", "Replacement Investment", "Capital Augmenting Inv."),
                     values = c(mygreen, myblue, myred)) +
   scale_color_manual(breaks = c("1c", "2ir", "3di"),
-                     values = c("#00BA38", "#619CFF", "#F8766D")) +
+                     values = c(mygreen, myblue, myred)) +
   guides(colour = "none") +
   theme_bw() + 
   theme(legend.position="bottom")

@@ -1893,12 +1893,11 @@ that at a certain date (lets call it <span class="math inline">\(t =
 0\)</span>), the economies savings rate changes from <span class="math inline">\(s = 0.245\)</span> to <span class="math inline">\(s_\text{max} = 0.381\)</span>. Before this change
 happen, we want to run the economy for a couple of periods (50 in
 total), so we assume that the starting date of the economy is <span class="math inline">\(T_0 = -50\)</span>. After the change in the
-savings rate happens, we want to simulte <span class="math inline">\(T_1
-= 200\)</span> periods of economic dynamics. As <code>R</code> only
-allows us to index arrays starting with a value of one, we use a
-function <code>ind</code> that manages the indexing for us. It returns a
-value of 1, when the input date <code>t</code> is equal to -50 and a
-value of 251 when the date is 200.</p>
+savings rate happens, we want to simulate <span class="math inline">\(T_1 = 200\)</span> periods of economic dynamics.
+As <code>R</code> only allows us to index arrays starting with a value
+of one, we use a function <code>ind</code> that manages the indexing for
+us. It returns a value of 1, when the input date <code>t</code> is equal
+to -50 and a value of 251 when the date is 200.</p>
 <pre class="r"><code>T0 &lt;- -50
 T1 &lt;- 200
 
@@ -1911,12 +1910,12 @@ simulating the economy forward. We therefore use the difference equation
 (1+g)k_{t+1} = sk_t^\alpha + (1-\delta)k_t.
 \]</span> Note that for the periods <span class="math inline">\(-50\)</span> to <span class="math inline">\(0\)</span>, the capital intensity will be equal to
 the old capital intensity <span class="math inline">\(k^* =
-7.024\)</span>. Only then, the savings rate changes to <span class="math inline">\(s_\text{max}\)</span>, and the economy will
-starting to evolven differently over time. Having calculated the
-economy’s path for the capital intensity, we can calculate GDP per unit
-of effective labor input <code>y</code> as well as consumption
-<code>c</code>, replacement investment <code>ir</code> and total
-investment <code>i</code>.</p>
+7.024\)</span>. Only then, the savings rate changes to <span class="math inline">\(s_\text{max}\)</span>, and the economy will start
+to evolve differently over time. Having calculated the economy’s path
+for the capital intensity, we can calculate GDP per unit of effective
+labor input <code>y</code> as well as consumption <code>c</code>,
+replacement investment <code>ir</code> and total investment
+<code>i</code>.</p>
 <pre class="r"><code># start at old k_star
 k &lt;- k_star
 k[ind(T0):ind(0)] &lt;- k_star
@@ -1989,14 +1988,13 @@ used to build additional capital. Hence, in the long-run, the economy
 again converges to a situation where all investment is used to keep the
 capital intensity at a constant level. However, as we can see from
 comparing the new long-run consumption level with the old one (dashed
-line), long-run consumption has increased. Yet, this only happend at the
-expense of a drop in short-run consumption.</p>
+line), long-run consumption has increased. Yet, this only happened at
+the expense of a drop in short-run consumption.</p>
 </div>
 <div id="on-the-other-side-of-the-golden-rule" class="section level3">
 <h3>On the other side of the Golden rule</h3>
 <p>We now want to repeat the above exercise, but starting on the other
-side of the Golden rule. We therefore starting with a savings rate of
-<span class="math inline">\(s = 0.5\)</span>, which lies well above the
+side of the Golden rule. We therefore start with a savings rate of <span class="math inline">\(s = 0.5\)</span>, which lies well above the
 consumption-maximizing savings rate of <span class="math inline">\(s_\text{max} = 0.381\)</span>.</p>
 <pre class="r"><code># some other side of the Golden rule savings rate
 s = 0.5
@@ -2072,7 +2070,7 @@ print(myplot)</code></pre>
 <p><br /> In fact, when the savings rate declines, there are more
 resources used for consumption. As a result, investment falls below
 replacement investment and the capital stock has to decline. The red
-area marks the amount of recources that are missing in keeping the
+area marks the amount of resources that are missing in keeping the
 capital intensity constant. With the capital intensity falling, total
 output also declines and, hence, less resources are needed for
 replacement investment. The dynamics of the economy continue until total

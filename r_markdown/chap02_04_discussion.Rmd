@@ -58,7 +58,7 @@ print(myplot)
 ```
 
 <br />
-There are a lot of differnces in output per worker across countries. It seems that all values between 0 and 250000 are present in this graph. But how does this compare to the distribution of capital per worker?
+There are a lot of differences in output per worker across countries. It seems that all values between 0 and 250000 are present in this graph. But how does this compare to the distribution of capital per worker?
 
 ```{r}
 # calculate output per worker
@@ -81,7 +81,7 @@ print(myplot)
 ```
 
 <br />
-The distribution of capital per worker is wider than the distirbution of output per worker. From eyeballing we would get that the corresponding factor is about 4, i.e. the distribution spans from 0 to 1000000. We can be a bit more precise by looking at the quantiles of the two distributions. 
+The distribution of capital per worker is wider than the distribution of output per worker. From eyeballing we would get that the corresponding factor is about 4, i.e. the distribution spans from 0 to 1000000. We can be a bit more precise by looking at the quantiles of the two distributions. 
 
 ```{r results='hold'}
 sprintf("Distribution of GDP per worker:")
@@ -96,7 +96,7 @@ When we compare that 90/10 ratios of the two distributions, i.e. the ratio betwe
 
 ### A growth accounting exercise for the US
 
-We now do a growth accounting exercise for the US. We therefore have to load the US dataset again and calculate the relevant statistics, i.e. GDP per worker, output per worker as well as the labor share.
+We now do a growth accounting exercise for the US. We therefore have to load the US dataset again and calculate the relevant statistics, i.e. GDP per worker, output per worker as well as the capital share.
 
 ```{r}
 # load data and extract US data
@@ -140,7 +140,7 @@ print(myplot)
 ```
 
 <br >
-By an large, we find the Solow residual to me the more important driving factor of economic growth. Movements in the capital stock only add modestly to ecnomic perforamance. In a way, this is the same result we already discussed in the previous section using cross-country data.
+By an large, we find the Solow residual to me the more important driving factor of economic growth. Movements in the capital stock only add modestly to economic performance. In a way, this is the same result we already discussed in the previous section using cross-country data.
 
 ### A test for convergence (1970 to 2015)
 
@@ -200,7 +200,7 @@ print(myplot)
 ```
 
 <br />
-The scatter plot immediately shows that there is nearly no convergence going on the data. What is more, it seems that the shape of the regresion line is majorly determined by three countries (outliers) that started with a very high level of GDP already in 1970. Investigating the data a bit further, we find that these countries are Brunei, the United Arab Emirates and Quatar, all major oil producers who probably follow somewhat different economic rules. Excluding them from the analysis paints an even clearer picture.
+The scatter plot immediately shows that there is nearly no convergence going on the data. What is more, it seems that the shape of the regression line is majorly determined by three countries (outliers) that started with a very high level of GDP already in 1970. Investigating the data a bit further, we find that these countries are Brunei, the United Arab Emirates and Qatar, all major oil producers who probably follow somewhat different economic rules. Excluding them from the analysis paints an even clearer picture.
 
 ```{r}
 # now drop Brunei, United Arab Emirates and Qatar

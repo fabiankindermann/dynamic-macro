@@ -226,7 +226,7 @@ The current US capital intensity is at about a value of 7, generating an (after 
 
 ### A transition path towards Golden rule growth
 
-Next, we want to simulate a transition path of the US economy from its current capital intensity to Golden rule growth. We therefore assume that at a certain date (lets call it $t = 0$), the economies savings rate changes from $s = 0.245$ to $s_\text{max} = 0.381$. Before this change happen, we want to run the economy for a couple of periods (50 in total), so we assume that the starting date of the economy is $T_0 = -50$. After the change in the savings rate happens, we want to simulte $T_1 = 200$ periods of economic dynamics. As `R` only allows us to index arrays starting with a value of one, we use a function `ind` that manages the indexing for us. It returns a value of 1, when the input date `t` is equal to -50 and a value of 251 when the date is 200.
+Next, we want to simulate a transition path of the US economy from its current capital intensity to Golden rule growth. We therefore assume that at a certain date (lets call it $t = 0$), the economies savings rate changes from $s = 0.245$ to $s_\text{max} = 0.381$. Before this change happen, we want to run the economy for a couple of periods (50 in total), so we assume that the starting date of the economy is $T_0 = -50$. After the change in the savings rate happens, we want to simulate $T_1 = 200$ periods of economic dynamics. As `R` only allows us to index arrays starting with a value of one, we use a function `ind` that manages the indexing for us. It returns a value of 1, when the input date `t` is equal to -50 and a value of 251 when the date is 200.
 
 ```{r}
 T0 <- -50
@@ -242,7 +242,7 @@ Once we set the parameters of the model, we can start simulating the economy for
 $$
  (1+g)k_{t+1} = sk_t^\alpha + (1-\delta)k_t.
 $$
-Note that for the periods $-50$ to $0$, the capital intensity will be equal to the old capital intensity $k^* = 7.024$. Only then, the savings rate changes to $s_\text{max}$, and the economy will starting to evolven differently over time. Having calculated the economy's path for the capital intensity, we can calculate GDP per unit of effective labor input `y` as well as consumption `c`, replacement investment `ir` and total investment `i`.
+Note that for the periods $-50$ to $0$, the capital intensity will be equal to the old capital intensity $k^* = 7.024$. Only then, the savings rate changes to $s_\text{max}$, and the economy will start to evolve differently over time. Having calculated the economy's path for the capital intensity, we can calculate GDP per unit of effective labor input `y` as well as consumption `c`, replacement investment `ir` and total investment `i`.
 
 ```{r}
 # start at old k_star
@@ -311,11 +311,11 @@ print(myplot)
 ```
 
 <br />
-Before the savings rate changes to $s_\text{max}$, the capital intensity is in a steady state, meaning that the economy is on a balanced growth path. As the savings rate increases to $s_\text{max}$, there suddenly is less consumption and there are more resources used for investment. When investment increases above replacement investment, as it was before the change in the savings rate, then additional resources are available to augment the capital stock. When the capital intensity increases over time, however, more resources are needed for replacement and less can be used to build additional capital. Hence, in the long-run, the economy again converges to a situation where all investment is used to keep the capital intensity at a constant level. However, as we can see from comparing the new long-run consumption level with the old one (dashed line), long-run consumption has increased. Yet, this only happend at the expense of a drop in short-run consumption.
+Before the savings rate changes to $s_\text{max}$, the capital intensity is in a steady state, meaning that the economy is on a balanced growth path. As the savings rate increases to $s_\text{max}$, there suddenly is less consumption and there are more resources used for investment. When investment increases above replacement investment, as it was before the change in the savings rate, then additional resources are available to augment the capital stock. When the capital intensity increases over time, however, more resources are needed for replacement and less can be used to build additional capital. Hence, in the long-run, the economy again converges to a situation where all investment is used to keep the capital intensity at a constant level. However, as we can see from comparing the new long-run consumption level with the old one (dashed line), long-run consumption has increased. Yet, this only happened at the expense of a drop in short-run consumption.
 
 ### On the other side of the Golden rule
 
-We now want to repeat the above exercise, but starting on the other side of the Golden rule. We therefore starting with a savings rate of $s = 0.5$, which lies well above the consumption-maximizing savings rate of $s_\text{max} = 0.381$.
+We now want to repeat the above exercise, but starting on the other side of the Golden rule. We therefore start with a savings rate of $s = 0.5$, which lies well above the consumption-maximizing savings rate of $s_\text{max} = 0.381$.
 
 ```{r}
 # some other side of the Golden rule savings rate
@@ -398,4 +398,4 @@ print(myplot)
 ```
 
 <br />
-In fact, when the savings rate declines, there are more resources used for consumption. As a result, investment falls below replacement investment and the capital stock has to decline. The red area marks the amount of recources that are missing in keeping the capital intensity constant. With the capital intensity falling, total output also declines and, hence, less resources are needed for replacement investment. The dynamics of the economy continue until total investment again equals replacement investment and the capital intensity can remain constant. Note, however, that the transition path started form a situation where consumption increased initially. It the falls over time, but as we are approaching the Golden rule capital intensity, consumption will not fall below its initial level. This means that we have found a way to increase consumption for all periods, which is why we call the right side of the Golden rule capital level dynamically inefficient.
+In fact, when the savings rate declines, there are more resources used for consumption. As a result, investment falls below replacement investment and the capital stock has to decline. The red area marks the amount of resources that are missing in keeping the capital intensity constant. With the capital intensity falling, total output also declines and, hence, less resources are needed for replacement investment. The dynamics of the economy continue until total investment again equals replacement investment and the capital intensity can remain constant. Note, however, that the transition path started form a situation where consumption increased initially. It the falls over time, but as we are approaching the Golden rule capital intensity, consumption will not fall below its initial level. This means that we have found a way to increase consumption for all periods, which is why we call the right side of the Golden rule capital level dynamically inefficient.

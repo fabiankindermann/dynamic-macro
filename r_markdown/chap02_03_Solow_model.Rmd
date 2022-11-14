@@ -1,0 +1,401 @@
+---
+title: "The Solow Growth Model"
+output:
+  html_document:
+    df_print: paged
+---
+
+
+### Loading packages, defining colors and using data
+We first clear the workspace using `rm(list = ls())`and then include all packages we need. All packages used here are for plotting. If a package is missing in your R distribution (which is quite likely initially), just use `install.packages("package_name")` with the respective package name to install it on your system. If you execute the code in the file `install_packages.R`, then all necessary packages will be installed into your R distribution. If the variable `export_graphs` is set to `TRUE`, then the graphs will be exported as pdf-files. In addition, we define a set of colors here to make graphs look more beautiful. Finally, we load the Penn World Table data an extract the US-specific data from it.
+
+```{r message = FALSE}
+rm(list = ls())
+library(reshape2)
+library(base)
+library(ggplot2)
+library(grid)
+library(scales)
+library(stringr)
+library(tidyverse)
+library(pwt10)
+
+# should graphs be exported to pdf
+export_pdf <- FALSE
+
+# define some colors
+mygreen <- "#00BA38"
+myblue  <- "#619CFF"
+myred   <- "#F8766D"
+
+# load data and extract US data
+data("pwt10.0")
+pwt_sub <- subset(pwt10.0, isocode=="USA")
+```
+
+
+### Additional data to parameterize the model
+
+To parameterize the balanced growth path of the Solow model, we need to calculate some additional important data. This includes the growth rate of total labor input, i.e. the number of employed $N_t$ times average hours worked $\ell_t$.
+
+```{r}
+# calculate log-total-hours
+pwt_sub$total_hours <- log(pwt_sub$emp*pwt_sub$avh)
+
+# run a linear regression
+reg <- lm(total_hours ~ year, pwt_sub)
+summary(reg)
+
+# for graph dimensions and annotation
+xrng <- range(pwt_sub$year)
+yrng <- range(pwt_sub$total_hours)
+ymin <- (yrng[1]+yrng[2])/2 - 0.018*(xrng[2]-xrng[1])/2
+ymax <- (yrng[1]+yrng[2])/2 + 0.018*(xrng[2]-xrng[1])/2
+lab  <- paste("growth rate = ", format(round(reg$coefficients[2]*100, 2), nsmall=2), "% / R2 = ", format(round(summary(reg)$r.squared, 2), nsmall=2))
+
+# generate plot
+myplot <- ggplot(data = pwt_sub) + 
+  geom_line(aes(x=year, y=total_hours), color="darkblue", size=1) +
+  geom_smooth(aes(x=year, y=total_hours), method="lm", formula="y ~ x", se=FALSE, color=myred) +
+  geom_label(aes(x = xrng[1], y = ymax, label = lab), 
+            hjust = 0, vjust = 1, label.r = unit(0, "lines"), label.padding = unit(0.35, "lines")) +
+  coord_cartesian(xlim=c(1950, 2020), ylim=c(ymin, ymax)) + 
+  scale_x_continuous(breaks=seq(1950, 2020, 10)) +
+  labs(x = "Year t",
+       y = "Log(Total Hours)") +
+  theme_bw()
+
+# print the plot
+print(myplot)
+```
+
+
+<br />
+Furthermore, we need to know what the share of investment (gross capital formation) is in the long-run. We therefore also create a plot noting that this share is quite variable over time but roughly constant from a long-run perspective.
+
+```{r}
+# for annotating
+xrng <- range(pwt_sub$year)
+yrng <- range(pwt_sub$csh_i)
+ymin <- 0.15
+ymax <- 0.30
+lab  <- paste("Long-run Level = ", format(round(mean(pwt_sub$csh_i), 3), nsmall=3))
+
+myplot <- ggplot(data = pwt_sub) + 
+  geom_line(aes(x=year, y=csh_i), color="darkblue", size=1) +
+  geom_smooth(aes(x=year, y=csh_i), method="lm", formula="y ~ 1", se=FALSE, color=myred) +
+  geom_label(aes(x = xrng[2], y = ymax, label = lab),
+             hjust = 1, vjust = 1, label.r = unit(0, "lines"), label.padding = unit(0.35, "lines")) +
+  coord_cartesian(xlim=c(1950, 2020), ylim=c(ymin, ymax)) + 
+  scale_x_continuous(breaks=seq(1950, 2020, 10)) +
+  labs(x = "Year t",
+       y = "Gross Capital Formation / GDP") +
+  theme_bw()
+
+# print the plot
+print(myplot)
+```
+
+
+### The Solow model setup
+
+Next, we need to parameterize our Solow model to match the US economy. Our choice of parameters is discussed on the lecture slides.
+
+```{r}
+# Parameter choice
+n     <- 0.0122
+h     <- 0.0169
+delta <- 0.044
+s     <- 0.245
+alpha <- 0.381
+```
+
+<br />
+In addition to setting model parameters, we also have to define a starting point for the model. We choose labor input in 1950 such that it coincides with the value we got from our linear regression. We do the same for GDP. As we assume that the economy is on a balanced growth path, the balanced-growth capital intensity defines, what the capital stock in 1950 has to be. Obviously, there is some discrepancy between the model's capital stock and what we observe in the data. There are two explanations for this. First, we already discussed the definition of the total capital stock in the PWT data. But second, from a modeling perspective, another explanation could be that the US economy was not on a balanced growth path in 1950 (think about this and try to come up with a better approximation of the US economy dynamics).
+
+```{r}
+# initial labor input
+reg <- lm(total_hours ~ year, pwt_sub)
+L_1950 <- exp(reg$coefficients[1] + reg$coefficients[2]*1950)
+
+# initial level of GDP
+pwt_sub$logGDP <- log(pwt_sub$rgdpe)
+reg <- lm(logGDP ~ year, pwt_sub)
+Y_1950 <- exp(reg$coefficients[1] + reg$coefficients[2]*1950)
+
+# steady state capital intensity 
+g <- (1+n)*(1+h)-1
+k_star <- (s/(g+delta))^(1/(1-alpha))
+
+# initial technology level
+A_1950 <- Y_1950/(L_1950*k_star^alpha)
+
+# initial capital level
+K_1950 <- k_star*A_1950*L_1950
+```
+
+<br />
+Finally, after having pinned down all parameters and starting points of the model, we can simulate a balanced growth path of the US economy by simply accounting for the growth rate of aggregate variables.
+
+```{r}
+pwt_sub$solow_Y <- Y_1950*(1+g)^(pwt_sub$year-1950)
+pwt_sub$solow_K <- K_1950*(1+g)^(pwt_sub$year-1950)
+pwt_sub$solow_L <- L_1950*(1+n)^(pwt_sub$year-1950)
+```
+
+### The Solow model: Comparing model and data
+
+We now want to compare the economy dynamics derived from a balanced growth path of the Solow model with the US performance of the time span between 1950 and 2019. Let us start with the evolution of GDP.
+
+
+```{r}
+myplot <- ggplot(data = pwt_sub) + 
+  geom_line(aes(x=year, y=rgdpe), color="darkblue", size=1) +
+  geom_line(aes(x=year, y=solow_Y), color="#00BA38", size=1) +
+  coord_cartesian(xlim=c(1950, 2020)) + 
+  scale_x_continuous(breaks=seq(1950, 2020, 10)) +
+  scale_y_continuous(labels = unit_format(unit = "T", scale = 1e-6)) +
+  labs(x = "Year t",
+       y = "Real GDP (in constant 2017 US$)") +
+  theme_bw()
+
+# print the plot
+print(myplot)
+```
+
+<br />
+We get a quite decent match for the evolution of GDP over time. We miss out a bit throughout the early 2000s though. Next, we plot aggregate labor input from model and data.
+
+```{r}
+pwt_sub$total_hours <- pwt_sub$emp*pwt_sub$avh
+
+# generate plot
+myplot <- ggplot(data = pwt_sub) + 
+  geom_line(aes(x=year, y=total_hours), color="darkblue", size=1) +
+  geom_line(aes(x=year, y=solow_L), color="#00BA38", size=1) +
+  coord_cartesian(xlim=c(1950, 2020)) + 
+  scale_x_continuous(breaks=seq(1950, 2020, 10)) +
+  scale_y_continuous(labels = unit_format(unit = "B", scale = 1e-3)) +
+  labs(x = "Year t",
+       y = "Total hours worked") +
+  theme_bw()
+
+# print the plot
+print(myplot)
+```
+
+<br />
+Here we get a much better match, but remember that we directly targeted the growth rate in total labor input just with specifying its growth rate directly. So the quality of the match is not so surprising. Finally, lets look at the dynamics of the capital stock.
+
+```{r}
+myplot <- ggplot(data = pwt_sub) + 
+  geom_line(aes(x=year, y=rnna), color="darkblue", size=1) +
+  geom_line(aes(x=year, y=solow_K), color="#00BA38", size=1) +
+  coord_cartesian(xlim=c(1950, 2020)) + 
+  scale_x_continuous(breaks=seq(1950, 2020, 10)) +
+  scale_y_continuous(labels = unit_format(unit = "T", scale = 1e-6)) +
+  labs(x = "Year t",
+       y = "Capital Stock (constant 2017 US$)") +
+  theme_bw()
+
+# print the plot
+print(myplot)
+```
+
+<br />
+Here the picture looks worse in terms of the ability of the model to replicate the data. Again, this could be due to the fact that we are looking at the (somewhat) wrong definition of the capital stock or due to the fact that the economy is not on a balanced growth path.
+
+
+### The Golden rule level of capital
+
+In a next step, we want to calculate the Golden rule capital level for the US economy and a couple of important statistics that come with it.
+
+```{r results='hold'}
+k_max <- (alpha/(g+delta))^(1/(1-alpha))
+s_max <- (g+delta)*k_max^(1-alpha)
+
+sprintf("Current capital intensity     : k^*           = %5.3f", k_star)
+sprintf("Current net return to capital : f'(k^*)-delta = %5.3f", alpha*k_star^(alpha-1)-delta)
+sprintf("Growth in labor input         : g             = %5.3f", g)
+sprintf("Golden rule level of capital  : k_max         = %5.3f", k_max)
+sprintf("Consumption-max savings rate  : s_max         = %5.3f", s_max)
+```
+
+<br />
+The current US capital intensity is at about a value of 7, generating an (after depreciation) return to capital of about 7 percent, which is much higher that the economy's growth rate of almost 3 percent. The consumption-maximizing capital intensity equalizes the rate of return on capital and the economy's growth rate. The necessary capital intensity to achieve this is $k_\text{max} = 14.334$. The corresponding savings rate is at 0.381.
+
+### A transition path towards Golden rule growth
+
+Next, we want to simulate a transition path of the US economy from its current capital intensity to Golden rule growth. We therefore assume that at a certain date (lets call it $t = 0$), the economies savings rate changes from $s = 0.245$ to $s_\text{max} = 0.381$. Before this change happen, we want to run the economy for a couple of periods (50 in total), so we assume that the starting date of the economy is $T_0 = -50$. After the change in the savings rate happens, we want to simulte $T_1 = 200$ periods of economic dynamics. As `R` only allows us to index arrays starting with a value of one, we use a function `ind` that manages the indexing for us. It returns a value of 1, when the input date `t` is equal to -50 and a value of 251 when the date is 200.
+
+```{r}
+T0 <- -50
+T1 <- 200
+
+ind <- function(t) {
+  return(t + 1 + abs(T0))
+}
+```
+
+<br />
+Once we set the parameters of the model, we can start simulating the economy forward. We therefore use the difference equation
+$$
+ (1+g)k_{t+1} = sk_t^\alpha + (1-\delta)k_t.
+$$
+Note that for the periods $-50$ to $0$, the capital intensity will be equal to the old capital intensity $k^* = 7.024$. Only then, the savings rate changes to $s_\text{max}$, and the economy will starting to evolven differently over time. Having calculated the economy's path for the capital intensity, we can calculate GDP per unit of effective labor input `y` as well as consumption `c`, replacement investment `ir` and total investment `i`.
+
+```{r}
+# start at old k_star
+k <- k_star
+k[ind(T0):ind(0)] <- k_star
+
+# iterate using new savings rate
+for (t in ind(0):ind(T1-1)) {
+  k[t+1] <- (s_max*k[t]^alpha + (1-delta)*k[t])/(1+g)
+}
+
+# calculate production and consumption along the way
+y <- k^alpha
+c <- 0
+c[ind(T0):ind(0)] <- (1-s)*y[ind(T0):ind(0)]
+c[ind(1):ind(T1)] <- (1-s_max)*y[ind(1):ind(T1)]
+ir <- (g + delta)*k
+i <- y - c
+
+transition <- data.frame(year=c(T0:T1), k, y, c, i, ir)
+```
+
+<br />
+Having simulated the economy's dynamics, we can now plot important statistics. First, we want to look at the evolution of the capital intensity over time.
+
+```{r}
+myplot <- ggplot(data = transition) + 
+  geom_hline(yintercept = k[ind(T0)], color=myred, linetype="dashed", size=1) + 
+  geom_hline(yintercept = k[ind(T1)], color="#00BA38", linetype="dashed", size=1) + 
+  geom_line(aes(x=year, y=k), color="darkblue", size=1) +
+  coord_cartesian(xlim=c(T0, T1), ylim=c(6, 16)) + 
+  scale_x_continuous(breaks=seq(T0, T1, 25), expand=c(0, 0)) +
+  labs(x = "Year t",
+       y = "Capital Intensity") +
+  theme_bw()
+
+# print the plot
+print(myplot)
+```
+
+<br />
+As we expected, the capital intensity will build up slowly over time, starting at its initial value and converging slowly towards the consumption-maximizing capital intensity. Next let us take a look at GDP and its different components.
+
+```{r}
+myplot <- ggplot(data = transition) + 
+  geom_hline(yintercept = c[1], color="#00BA38", linetype="dashed", size=0.5) + 
+  geom_ribbon(aes(x=year, ymin=0, ymax=c,    fill= "1c", color="1c") , alpha=0.4) +
+  geom_ribbon(aes(x=year, ymin=c, ymax=c+ir, fill= "2ir", color="2ir")  , alpha=0.4) +
+  geom_ribbon(aes(x=year, ymin=c+ir, ymax=y, fill= "3di", color="3di"), alpha=0.4) +
+  geom_line(aes(x=year, y=y), color="darkblue", size=1) +
+  coord_cartesian(xlim=c(T0, T1), ylim=c(0, 3)) + 
+  scale_x_continuous(breaks=seq(T0, T1, 25), expand=c(0, 0)) +
+  labs(x = "Year t",
+       y = "GDP and its components per\n effective unit of labor") +
+  scale_fill_manual(breaks = c("1c", "2ir", "3di"), name = "", 
+                    labels = c("Consumption", "Replacement Investment", "Capital Augmenting Inv."),
+                    values = c(mygreen, myblue, myred)) +
+  scale_color_manual(breaks = c("1c", "2ir", "3di"),
+                     values = c(mygreen, myblue, myred)) +
+  guides(colour = "none") +
+  theme_bw() + 
+  theme(legend.position="bottom")
+
+# print the plot
+print(myplot)
+```
+
+<br />
+Before the savings rate changes to $s_\text{max}$, the capital intensity is in a steady state, meaning that the economy is on a balanced growth path. As the savings rate increases to $s_\text{max}$, there suddenly is less consumption and there are more resources used for investment. When investment increases above replacement investment, as it was before the change in the savings rate, then additional resources are available to augment the capital stock. When the capital intensity increases over time, however, more resources are needed for replacement and less can be used to build additional capital. Hence, in the long-run, the economy again converges to a situation where all investment is used to keep the capital intensity at a constant level. However, as we can see from comparing the new long-run consumption level with the old one (dashed line), long-run consumption has increased. Yet, this only happend at the expense of a drop in short-run consumption.
+
+### On the other side of the Golden rule
+
+We now want to repeat the above exercise, but starting on the other side of the Golden rule. We therefore starting with a savings rate of $s = 0.5$, which lies well above the consumption-maximizing savings rate of $s_\text{max} = 0.381$.
+
+```{r}
+# some other side of the Golden rule savings rate
+s = 0.5
+k_star <- (s/(g+delta))^(1/(1-alpha))
+
+# number of transition periods to simulate
+T0 <- -50
+T1 <- 200
+
+ind <- function(t) {
+  return(t + 1 + abs(T0))
+}
+
+# start at old k_star
+k <- 0
+k[ind(T0):ind(0)] <- k_star
+
+# iterate using new savings rate
+for (t in ind(0):ind(T1-1)) {
+  k[t+1] <- (s_max*k[t]^alpha + (1-delta)*k[t])/(1+g)
+}
+
+# calculate production and consumption along the way
+y <- k^alpha
+c <- 0
+c[ind(T0):ind(0)] <- (1-s)*y[ind(T0):ind(0)]
+c[ind(1):ind(T1)] <- (1-s_max)*y[ind(1):ind(T1)]
+ir <- (g + delta)*k
+i <- y - c
+
+transition <- data.frame(year=c(T0:T1), k, y, c, i, ir)
+```
+
+<br />
+Let us again look at the evolution of the capital intensity.
+
+
+```{r}
+myplot <- ggplot(data = transition) + 
+  geom_hline(yintercept = k[ind(T0)], color=myred, linetype="dashed", size=1) + 
+  geom_hline(yintercept = k[ind(T1)], color="#00BA38", linetype="dashed", size=1) + 
+  geom_line(aes(x=year, y=k), color="darkblue", size=1) +
+  coord_cartesian(xlim=c(T0, T1), ylim=c(12, 24)) + 
+  scale_y_continuous(breaks=seq(12, 24, 2)) +
+  scale_x_continuous(breaks=seq(T0, T1, 25), expand=c(0, 0)) +
+  labs(x = "Year t",
+       y = "Capital Intensity") +
+  theme_bw()
+
+# print the plot
+print(myplot)
+```
+
+<br />
+Now, the capital intensity starts at a much higher level of around 22 and, as the savings rate falls to $s_\text{max}$, the capital intensity slowly declines. But what does this mean for GDP and its components?
+
+```{r}
+myplot <- ggplot(data = transition) + 
+  geom_hline(yintercept = c[1], color="#00BA38", linetype="dashed", size=0.5) + 
+  geom_ribbon(aes(x=year, ymin=0, ymax=c,    fill= "1c", color="1c") , alpha=0.4) +
+  geom_ribbon(aes(x=year, ymin=c, ymax=c+ir, fill= "2ir", color="2ir")  , alpha=0.4) +
+  geom_ribbon(aes(x=year, ymin=c+ir, ymax=y, fill= "3di", color="3di"), alpha=0.4) +
+  geom_line(aes(x=year, y=y), color="darkblue", size=1) +
+  coord_cartesian(xlim=c(T0, T1), ylim=c(0, 4)) + 
+  scale_x_continuous(breaks=seq(T0, T1, 25), expand=c(0, 0)) +
+  labs(x = "Year t",
+       y = "GDP and its components per\n effective unit of labor") +
+  scale_fill_manual(breaks = c("1c", "2ir", "3di"), name = "", 
+                    labels = c("Consumption", "Replacement Investment", "Capital Augmenting Inv."),
+                    values = c(mygreen, myblue, myred)) +
+  scale_color_manual(breaks = c("1c", "2ir", "3di"),
+                     values = c(mygreen, myblue, myred)) +
+  guides(colour = "none") +
+  theme_bw() + 
+  theme(legend.position="bottom")
+
+# print the plot
+print(myplot)
+```
+
+<br />
+In fact, when the savings rate declines, there are more resources used for consumption. As a result, investment falls below replacement investment and the capital stock has to decline. The red area marks the amount of recources that are missing in keeping the capital intensity constant. With the capital intensity falling, total output also declines and, hence, less resources are needed for replacement investment. The dynamics of the economy continue until total investment again equals replacement investment and the capital intensity can remain constant. Note, however, that the transition path started form a situation where consumption increased initially. It the falls over time, but as we are approaching the Golden rule capital intensity, consumption will not fall below its initial level. This means that we have found a way to increase consumption for all periods, which is why we call the right side of the Golden rule capital level dynamically inefficient.

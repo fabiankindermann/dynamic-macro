@@ -1,8 +1,15 @@
-#######################################
-### Discussion of Solow growth model
-#######################################
+---
+title: "A Discussion of the Solow Growth Model"
+output:
+  html_document:
+    df_print: paged
+---
 
-# Clear the workspace and load libraries
+### Loading packages, defining colors and using data
+We first clear the workspace using `rm(list = ls())`and then include all packages we need. All packages used here are for plotting. If a package is missing in your R distribution (which is quite likely initially), just use `install.packages("package_name")` with the respective package name to install it on your system. If you execute the code in the file `install_packages.R`, then all necessary packages will be installed into your R distribution. If the variable `export_graphs` is set to `TRUE`, then the graphs will be exported as pdf-files. In addition, we define a set of colors here to make graphs look more beautiful. Finally, we load the Penn World Table data an extract all data for 2019 from it.
+
+
+```{r message = FALSE}
 rm(list = ls())
 library(reshape2)
 library(base)
@@ -21,22 +28,16 @@ mygreen <- "#00BA38"
 myblue  <- "#619CFF"
 myred   <- "#F8766D"
 
-
-########### 
-# Load Penn World Table data and inspect
-#
-# Documentation of Penn World Tables: https://www.rug.nl/ggdc/productivity/pwt/
-########### 
-
 # load data and extract 2019 data
 data("pwt10.0")
 pwt_sub <- subset(pwt10.0, year=="2019")
+```
 
+### Output per worker across countries
 
-########### 
-# Output per worker across countries
-###########
+We first want to look at cross country statistics of important macroeconomic variables. Let us start with output per worker. Note that before creating a histogram plot, we calculate some quantiles of the distribution of output per worker using the `R` function `quantile`. Note further that the data contains a couple of missing values in output per worker (even in 2019). Hence, we restrict our sample to the available subset of values.
 
+```{r}
 # calculate output per worker
 pwt_sub$output_per_worker <- pwt_sub$rgdpe/pwt_sub$emp
 
@@ -54,18 +55,12 @@ myplot <- ggplot(data = pwt_sub[!is.na(pwt_sub$output_per_worker), ]) +
 
 # print the plot
 print(myplot)
+```
 
-# save plot to pdf file (if needed)
-if(export_pdf) {
-  aspect_ratio <- 4/3;
-  height <- 3.5;
-  ggsave("fig25.pdf", width = height*aspect_ratio, height = height)
-}
+<br />
+There are a lot of differnces in output per worker across countries. It seems that all values between 0 and 250000 are present in this graph. But how does this compare to the distribution of capital per worker?
 
-########### 
-# Capital per worker across countries
-###########
-
+```{r}
 # calculate output per worker
 pwt_sub$capital_per_worker <- pwt_sub$rnna/pwt_sub$emp
 
@@ -83,46 +78,44 @@ myplot <- ggplot(data = pwt_sub[!is.na(pwt_sub$capital_per_worker), ]) +
 
 # print the plot
 print(myplot)
+```
 
-# save plot to pdf file (if needed)
-if(export_pdf) {
-  aspect_ratio <- 4/3;
-  height <- 3.5;
-  ggsave("fig26.pdf", width = height*aspect_ratio, height = height)
-}
+<br />
+The distribution of capital per worker is wider than the distirbution of output per worker. From eyeballing we would get that the corresponding factor is about 4, i.e. the distribution spans from 0 to 1000000. We can be a bit more precise by looking at the quantiles of the two distributions. 
 
-
-########### 
-# Quantiles of the distributions
-###########
-
+```{r results='hold'}
 sprintf("Distribution of GDP per worker:")
 print(qo)
 sprintf("Distribution of capital per worker:")
 print(qk)
 sprintf("Percentile ratios : Y/L = %5.3f, K/L = %5.3f", qo["90%"]/qo["10%"], qk["90%"]/qk["10%"])
+```
 
+<br />
+When we compare that 90/10 ratios of the two distributions, i.e. the ratio between the 90th and the 10th percentile, we find them to be substantial. For GDP per worker the 90/10 ratio is around 18, where for capital per worker it is around 36, so twice as large.
 
+### A growth accounting exercise for the US
 
-########### 
-# Growth accounting exercise for the US
-###########
+We now do a growth accounting exercise for the US. We therefore have to load the US dataset again and calculate the relevant statistics, i.e. GDP per worker, output per worker as well as the labor share.
 
+```{r}
 # load data and extract US data
 data("pwt10.0")
 pwt_sub <- subset(pwt10.0, isocode=="USA")
-
 
 # calculate output, capital per worker and capital share
 pwt_sub$output_per_worker  <- pwt_sub$rgdpe/pwt_sub$emp
 pwt_sub$capital_per_worker <- pwt_sub$rnna/pwt_sub$emp
 pwt_sub$capital_share      <- 1 - pwt_sub$labsh
+```
 
-# now calculate growth rates and solow residual
+<br />
+With the above variables at hand, we can calculate the year-by-year growth rate of the economy. Note the the function `lead` allows us to access the next periods level of output per worker, which is essential for calculating growth rates. Furthermore we can decompose the growth rate input growth coming from the increase in the capital stock as well as the Solow residual. Having derived the decomposition, we plot the growth rates as well as the decomposition over time.
+
+```{r}
 pwt_sub$gy <- lead(pwt_sub$output_per_worker)/pwt_sub$output_per_worker - 1
 pwt_sub$gk <- pwt_sub$capital_share*(lead(pwt_sub$capital_per_worker)/pwt_sub$capital_per_worker - 1)
 pwt_sub$rt <- pwt_sub$gy - pwt_sub$gk
-
 
 # now create a plot to show growth and its components
 myplot <- ggplot(data = pwt_sub[!is.na(pwt_sub$gy), ]) + 
@@ -144,19 +137,16 @@ myplot <- ggplot(data = pwt_sub[!is.na(pwt_sub$gy), ]) +
 
 # print the plot
 print(myplot)
+```
 
-# save plot to pdf file (if needed)
-if(export_pdf) {
-  aspect_ratio <- 4/3.5;
-  height <- 4.5;
-  ggsave("fig27.pdf", width = height*aspect_ratio, height = height)
-}
+<br >
+By an large, we find the Solow residual to me the more important driving factor of economic growth. Movements in the capital stock only add modestly to ecnomic perforamance. In a way, this is the same result we already discussed in the previous section using cross-country data.
 
+### A test for convergence (1970 to 2015)
 
-########### 
-# Convergence test 1970 to 2015
-###########
+To test the convergence hypothesis, we use all available data from the PWT for the years 1970 and 2015 and order the dataset by country and time. We then calculate output per capita in log terms. Next, we reshape the dataset such that every country just is one line and the 1970 and 2015 values stand next to each other. This makes it easier to calculate growth rates and create a graph. Once this is done, we exclude all countries that have missing data either for 1970 or for 2015 or both. This gives us a complete sample from which we can calculate the change in log-output per capita over the sample period.
 
+```{r}
 # use 1970 and 2015 data for all available countries
 data("pwt10.0")
 pwt_sub <- subset(pwt10.0, year=="1970" | year=="2015")
@@ -176,12 +166,21 @@ data <- data[!is.na(data$output_per_capita.1970) & !is.na(data$output_per_capita
 
 # calculate growth in output per worker
 data$gy <- data$output_per_capita.2015 - data$output_per_capita.1970
+```
 
+<br />
+To test the extent of convergence, we regress growth in output per worker on the 1970 level of output per worker in each country.
+
+```{r}
 # run regression
 reg <- lm(gy ~ data$output_per_capita.1970, data)
 summary(reg)
+```
 
-# generate scatter plot
+<br />
+The results are quite clear: the point estimate is very small at around a value of $-0.14$. For full convergence, the coefficient should be in the range of $-1.00$. Furthermore, the $R^2$ value is very small, meaning that our linear regression hardly explains the variance we find in the data. We can do a scatter plot to get a more complete picture of the data and analysis. 
+
+```{r}
 lab  <- paste("b = ", format(round(reg$coefficients[2], 2), nsmall=2), " (", format(round(summary(reg)$coefficients[2, 2], 2), nsmall=2), ")",
               " / R2 = ", format(round(summary(reg)$r.squared, 2), nsmall=2))
 
@@ -198,17 +197,14 @@ myplot <- ggplot(data = data) +
 
 # print the plot
 print(myplot)
+```
 
-# save plot to pdf file (if needed)
-if(export_pdf) {
-  aspect_ratio <- 4/3.5;
-  height <- 3.5;
-  ggsave("fig28.pdf", width = height*aspect_ratio, height = height)
-}
+<br />
+The scatter plot immediately shows that there is nearly no convergence going on the data. What is more, it seems that the shape of the regresion line is majorly determined by three countries (outliers) that started with a very high level of GDP already in 1970. Investigating the data a bit further, we find that these countries are Brunei, the United Arab Emirates and Quatar, all major oil producers who probably follow somewhat different economic rules. Excluding them from the analysis paints an even clearer picture.
 
+```{r}
 # now drop Brunei, United Arab Emirates and Qatar
 data <- data[data$output_per_capita.1970 < 11, ]
-
 
 # run regression
 reg <- lm(gy ~ data$output_per_capita.1970, data)
@@ -231,10 +227,6 @@ myplot <- ggplot(data = data) +
 
 # print the plot
 print(myplot)
+```
 
-# save plot to pdf file (if needed)
-if(export_pdf) {
-  aspect_ratio <- 4/3.5;
-  height <- 3.5;
-  ggsave("fig29.pdf", width = height*aspect_ratio, height = height)
-}
+In this subset, the regression coefficient drops to virtually zero and becomes insignificant. The scatter plot now clearly shows that there seems to be no convergence going on in the data.

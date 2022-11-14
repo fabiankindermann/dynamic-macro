@@ -14,3 +14,5 @@ This is a set of R-files we use for our Dynamic Macro lecture at Uni Regensburg.
 
 - [The Penn World Tables](https://raw.githack.com/fabiankindermann/dynamic-macro/main/r_markdown/chap02_01_PWT.html)
 - [The Kaldor Growth Facts](https://raw.githack.com/fabiankindermann/dynamic-macro/main/r_markdown/chap02_02_Kaldor_facts.html)
+- [The Solow Growth Model](https://raw.githack.com/fabiankindermann/dynamic-macro/main/r_markdown/chap02_03_Solow_model.html)
+- [A Discussion of the Solow Growth Model](https://raw.githack.com/fabiankindermann/dynamic-macro/main/r_markdown/chap02_04_discussion.html)

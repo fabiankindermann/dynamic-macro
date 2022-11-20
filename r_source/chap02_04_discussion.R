@@ -23,7 +23,7 @@ myred   <- "#F8766D"
 
 
 ########### 
-# Load Penn World Table data and inspect
+# Load Penn World Table data
 #
 # Documentation of Penn World Tables: https://www.rug.nl/ggdc/productivity/pwt/
 ########### 

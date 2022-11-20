@@ -38,7 +38,7 @@ lab_share = 0.381
 inv_share = 0.245
 gross_ret = 0.114
 
-# Parameter choice
+# parameter choice
 n     <- 0.0122
 h     <- 0.0169
 g     <- (1+n)*(1+h)-1
@@ -137,7 +137,7 @@ solve_ramsey <- function(k0, g, alpha, delta, gamma, beta) {
 }
 ```
 
-### Simulating Ramsey model forward
+### Simulating the Ramsey model forward
 
 Once we have determined the initial consumption level $c_0$ on the saddle path, we can use standard forward simulation to determine the entire path to the steady state. This is done in the function `ramsey`, which follows the same logic as the simulation of [the Solow growth model](https://raw.githack.com/fabiankindermann/dynamic-macro/main/r_markdown/chap02_03_Solow_model.html). We again simulate the economy from some date $T_0 < 0$ to some date $T_1 > 0$. We assume that the economy is in steady state with capital intensity `k0` until date $t = -1$. The change in $\beta$ is assumed to happen at date $t = 0$. The economy then starts on a transition path with initial capital intensity `k0`. We again use a function `ind` that transforms dates into array indices, since array indices start at $1$.
 

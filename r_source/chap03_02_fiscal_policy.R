@@ -25,13 +25,18 @@ myred   <- "#F8766D"
 # Ramsey Model setup
 ###########
 
-# Parameter choice
+# data moments
+lab_share = 0.381
+inv_share = 0.245
+gross_ret = 0.114
+
+# parameter choice
 n     <- 0.0122
 h     <- 0.0169
-g <- (1+n)*(1+h)-1
-alpha <- 0.381
-delta <- 0.245*0.114/alpha - g
-beta  <- (1+g)/(1 + 0.114 - delta)
+g     <- (1+n)*(1+h)-1
+alpha <- lab_share
+delta <- inv_share*gross_ret/alpha - g
+beta  <- (1+g)/(1 + gross_ret - delta)
 gamma <- 0.5
 
 # steady state capital intensity under old beta
@@ -559,6 +564,6 @@ if(export_pdf) {
 # Welfare comparison
 ###########
 
-fprintf('Without capital taxes    : %12.6f %12.6f\n', Welfare_0, 0)
-fprintf('With 2.5p capital tax    : %12.6f %12.6f\n', Welfare_1, ((Welfare_1/Welfare_0)^{1/(1-1/gamma)}-1)*100)
-fprintf('With 2.5p capital subsidy: %12.6f %12.6f\n', Welfare_2, ((Welfare_2/Welfare_0)^{1/(1-1/gamma)}-1)*100)
+sprintf('Without capital taxes    : %12.6f %12.6f\n', Welfare_0, 0)
+sprintf('With 2.5p capital tax    : %12.6f %12.6f\n', Welfare_1, ((Welfare_1/Welfare_0)^{1/(1-1/gamma)}-1)*100)
+sprintf('With 2.5p capital subsidy: %12.6f %12.6f\n', Welfare_2, ((Welfare_2/Welfare_0)^{1/(1-1/gamma)}-1)*100)

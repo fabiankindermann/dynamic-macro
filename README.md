@@ -16,3 +16,8 @@ This is a set of R-files we use for our Dynamic Macro lecture at Uni Regensburg.
 - [The Kaldor Growth Facts](https://raw.githack.com/fabiankindermann/dynamic-macro/main/r_markdown/chap02_02_Kaldor_facts.html)
 - [The Solow Growth Model](https://raw.githack.com/fabiankindermann/dynamic-macro/main/r_markdown/chap02_03_Solow_model.html)
 - [A Discussion of the Solow Growth Model](https://raw.githack.com/fabiankindermann/dynamic-macro/main/r_markdown/chap02_04_discussion.html)
+
+## Chapter 3
+
+- [The Ramsey Growth Model](https://raw.githack.com/fabiankindermann/dynamic-macro/main/r_markdown/chap03_01_Ramsey_model.html)
+- [Fiscal Policy in the Ramsey model](https://raw.githack.com/fabiankindermann/dynamic-macro/main/r_markdown/chap03_02_fiscal_policy.html)

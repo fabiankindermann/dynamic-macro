@@ -1,9 +1,14 @@
 ---
 title: "Fiscal Policy in the Ramsey model"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
-# Clear the workspace and load libraries
+### Loading packages, defining colors and using data
+We first clear the workspace using `rm(list = ls())`and then include all packages we need. All packages used here are for plotting. If a package is missing in your R distribution (which is quite likely initially), just use `install.packages("package_name")` with the respective package name to install it on your system. If you execute the code in the file `install_packages.R`, then all necessary packages will be installed into your R distribution. If the variable `export_graphs` is set to `TRUE`, then the graphs will be exported as pdf-files. In addition, we define a set of colors here to make graphs look more beautiful.
+
+```{r}
 rm(list = ls())
 library(reshape2)
 library(base)
@@ -20,29 +25,41 @@ export_pdf <- FALSE
 mygreen <- "#00BA38"
 myblue  <- "#619CFF"
 myred   <- "#F8766D"
+```
 
+### The Ramsey Model setup
 
-########### 
-# Ramsey Model setup
-###########
+Before being able to simulate the model, we have to set parameters. To do so, we use five data moments. The share of labor compensation in GDP, the share of gross capital formation (investment) in GDP, the gross return to capital and the growth rates of total labor input and labor productivity. From these, we can pin down the parameters of the Ramsey model for the US economy. Having set the parameters, we can determine the balanced growth path, i.e. the steady state of the capital intensity.
 
-# Parameter choice
+```{r}
+# data moments
+lab_share = 0.381
+inv_share = 0.245
+gross_ret = 0.114
+
+# parameter choice
 n     <- 0.0122
 h     <- 0.0169
-g <- (1+n)*(1+h)-1
-alpha <- 0.381
-delta <- 0.245*0.114/alpha - g
-beta  <- (1+g)/(1 + 0.114 - delta)
+g     <- (1+n)*(1+h)-1
+alpha <- lab_share
+delta <- inv_share*gross_ret/alpha - g
+beta  <- (1+g)/(1 + gross_ret - delta)
 gamma <- 0.5
 
 # steady state capital intensity under old beta
 k_old <- (alpha/((1+g)/beta - 1 + delta))^(1/(1-alpha))
 c_old <- k_old^alpha - (g+delta)*k_old
+```
 
+### A guessing algorithm for the Ramsey model
 
-########### 
-# Function to guess initial consumption of the Ramsey model
-###########
+In the lecture, we discussed a guessing algorithm for solving for the saddle path of the Ramsey economy. This algorithm is implemented in function `solve_ramsey'.
+
+This function works in exactly the same way as discussed in [the first part of this chapter](https://raw.githack.com/fabiankindermann/dynamic-macro/main/r_markdown/chap03_01_Ramsey_model.html). However, the function now takes two additional input arguments, `amount` and `policy`, that define the policy setup. `policy` can take the values 1, 2, or 3, with (1) denoting a permanent increase in government spending, (2) being a temporary increase in government spending and (3) implementing a change in the capital income tax. The variable `amount` gives the amount of government spending or the size of the capital income tax.
+
+At the beginning of the function, we now have to set up a path for the extent of fiscal policy. It defines the levels of $g_t$ and $\tau_k$ over time. This path is used in the difference equations for simulating the Ramsey economy, see below. 
+
+```{r}
 solve_ramsey <- function(k0, amount, policy, g, alpha, delta, gamma, beta) {
   
   # set numerical parameters
@@ -115,11 +132,22 @@ solve_ramsey <- function(k0, amount, policy, g, alpha, delta, gamma, beta) {
   # in any case, if you end up here, return c[1] and epsilon
   return(c(c[1], epsilon, i))
 }
+```
 
 
-########### 
-# Function to simulate Ramsey model forward
-###########
+### Simulating the Ramsey model forward
+
+Next, we again provide a function for simulating the economy forward. It works in exactly the same way as in [the first part of this chapter](https://raw.githack.com/fabiankindermann/dynamic-macro/main/r_markdown/chap03_01_Ramsey_model.html). In addition, we have to again specify paths for fiscal policy, i.e. the path of government spending `g_t` and a path for the capital tax rate `tau_k`. We then use the equations
+$$
+  k_{t+1} = \max\left[\frac{k_t^\alpha - c_t - g_t + (1-\delta)k_t}{1+g}, 10^{-4}\right]
+$$
+and 
+$$
+  c_{t+1} = \left[\beta\cdot (1-\tau_k)\cdot\frac{1 + \alpha k_{t+1}^{\alpha-1} - \delta}{1+g}\right]^\gamma\cdot c_t.
+$$
+to simulate the economy forward.
+
+```{r}
 ramsey <- function(T0, T1, c0, k0, g_t, tau_k, g, alpha, delta, gamma, beta) {
   
   # set numerical parameters
@@ -171,12 +199,13 @@ ramsey <- function(T0, T1, c0, k0, g_t, tau_k, g, alpha, delta, gamma, beta) {
 ind <- function(t) {
   return(t + 1 + abs(T0))
 }
+```
 
+### A permanent change in government spending
 
-########### 
-# Simulate permanent change in government spending
-###########
+Lets start with simulating a permanent increase in government spending. To this end, we calculate the capital intensity $k_{old}$ and consumption level $c_{old}$ of an economy without fiscal activity. We then assume that government spending amounts to 20 percent of GDP in this economy, i.e. $g_t = 0.2 k_{old}^\alpha$. We solve for the initial consumption level on the saddle path using function `solve_ramsey`. Next, we specify the corresponding paths for fiscal policy and simulate the model using function `ramsey`. As usual, this function returns a data frame with all the important characteristics of the macroeconomy.
 
+```{r}
 # steady state capital intensity without government spending
 k_old <- (alpha/((1+g)/beta - 1 + delta))^(1/(1-alpha))
 c_old <- k_old^alpha - (g+delta)*k_old
@@ -202,9 +231,12 @@ tau_k[ind(T0):ind(T1)] = 0
 
 # simulate the model for 250 periods
 transition <- ramsey(T0, T1, res[1], k_old, g_t, tau_k, g, alpha, delta, gamma, beta)
+```
 
+<br />
+As discussed in the lecture, a permanent change in government spending does not alter GDP or capital accumulation.
 
-# Plot dynamics of the capital stock
+```{r}
 myplot <- ggplot(data = transition) + 
   geom_hline(yintercept=transition$k[ind(T0)], color=myred, linetype="dashed", size=1) + 
   geom_hline(yintercept=transition$k[ind(T1)], color="#00BA38", linetype="dashed", size=1) + 
@@ -217,16 +249,12 @@ myplot <- ggplot(data = transition) +
 
 # print the plot
 print(myplot)
+```
 
-# save plot to pdf file (if needed)
-if(export_pdf) {
-  aspect_ratio <- 4/3;
-  height <- 3.5;
-  ggsave("fig12.pdf", width = height*aspect_ratio, height = height)
-}
+<br />
+Households just cut their consumption one-to-one and leave investment untouched. As a result, GDP does not move over time. We can see this in the figure below.
 
-
-# Plot GDP and its components
+```{r}
 myplot <- ggplot(data = transition) + 
   geom_hline(yintercept = c_old, color="#00BA38", linetype="dashed", size=0.5) + 
   geom_ribbon(aes(x=year, ymin=0, ymax=c,    fill= "1c", color="1c") , alpha=0.4) +
@@ -248,19 +276,14 @@ myplot <- ggplot(data = transition) +
 
 # print the plot
 print(myplot)
-
-# save plot to pdf file (if needed)
-if(export_pdf) {
-  aspect_ratio <- 4/3.5;
-  height <- 4.8;
-  ggsave("fig13.pdf", width = height*aspect_ratio, height = height)
-}
+```
 
 
-########### 
-# Simulate temporary change in government spending
-###########
+### A temporary change in government spending
 
+We now make the same assumptions regarding government spending with the only difference that government spending happens only in one period.
+
+```{r}
 # steady state capital intensity without government spending
 k_old <- (alpha/((1+g)/beta - 1 + delta))^(1/(1-alpha))
 c_old <- k_old^alpha - (g+delta)*k_old
@@ -286,9 +309,12 @@ tau_k[ind(T0):ind(T1)] = 0
 
 # simulate the model for 250 periods
 transition <- ramsey(T0, T1, res[1], k_old, g_t, tau_k, g, alpha, delta, gamma, beta)
+```
 
+<br />
+A temporary change in government expenditure leads households to smooth the burdens of taxation over time. As a result, they don't only cut into their consumption but also (and majorly) into investment. This drives down the capital intensity in the short run, and capital only comes back after a while. In the long-run the capital intensity has to stay unchanged.
 
-# Plot dynamics of the capital stock
+```{r}
 myplot <- ggplot(data = transition) + 
   geom_hline(yintercept=transition$k[ind(T0)], color=myred, linetype="dashed", size=1) + 
   geom_hline(yintercept=transition$k[ind(T1)], color="#00BA38", linetype="dashed", size=1) + 
@@ -301,16 +327,12 @@ myplot <- ggplot(data = transition) +
 
 # print the plot
 print(myplot)
+```
 
-# save plot to pdf file (if needed)
-if(export_pdf) {
-  aspect_ratio <- 4/3;
-  height <- 3.5;
-  ggsave("fig14.pdf", width = height*aspect_ratio, height = height)
-}
+<br />
+We can see the cut in investment quite well when we plot the evolution of GDP as well as its components.
 
-
-# Plot GDP and its components
+```{r}
 myplot <- ggplot(data = transition) + 
   geom_hline(yintercept = c_old, color="#00BA38", linetype="dashed", size=0.5) + 
   geom_ribbon(aes(x=year, ymin=0, ymax=c,    fill= "1c", color="1c") , alpha=0.4) +
@@ -332,16 +354,14 @@ myplot <- ggplot(data = transition) +
 
 # print the plot
 print(myplot)
+```
 
-# save plot to pdf file (if needed)
-if(export_pdf) {
-  aspect_ratio <- 4/3.5;
-  height <- 4.8;
-  ggsave("fig15.pdf", width = height*aspect_ratio, height = height)
-}
+<br />
+However, since government expenditure only happens in one period, it is worth zooming in on this small episode. We do this on the graph below, where we just adjusted the axis scale in the statement `coord_cartesian`.
 
+While under permanent government expenditure, households cut their consumption level one-to-one, they now majorly adjust investment. Since the government spending shock is only temporary, this behavior allows households to smooth the consumption burden over time. The cut in consumption in every period is quite small, and since $\gamma = 0.5$, households value such consumption smoothing. In the long-run, the economy then returns to its original balanced growth path.
 
-# Plot GDP and its components (zoom in)
+```{r}
 myplot <- ggplot(data = transition) + 
   geom_hline(yintercept = c_old, color="#00BA38", linetype="dashed", size=0.5) + 
   geom_ribbon(aes(x=year, ymin=0, ymax=c,    fill= "1c", color="1c") , alpha=0.4) +
@@ -363,19 +383,15 @@ myplot <- ggplot(data = transition) +
 
 # print the plot
 print(myplot)
-
-# save plot to pdf file (if needed)
-if(export_pdf) {
-  aspect_ratio <- 4/3.5;
-  height <- 4.8;
-  ggsave("fig16.pdf", width = height*aspect_ratio, height = height)
-}
+```
 
 
-########### 
-# Simulate capital tax/subsidy
-###########
 
+### A capital tax
+
+Our next fiscal policy exercise is to impose a tax on capital income of $\tau_k = 0.025$. We do this in quite a similar way as our government spending exercises.
+
+```{r}
 # steady state capital intensity without capital tax
 k_old <- (alpha/((1+g)/beta - 1 + delta))^(1/(1-alpha))
 c_old <- k_old^alpha - (g+delta)*k_old
@@ -401,7 +417,16 @@ tau_k[ind(0):ind(T1)] = tax_rate
 
 # simulate the model for 250 periods
 transition <- ramsey(T0, T1, res[1], k_old, g_t, tau_k, g, alpha, delta, gamma, beta)
+```
 
+<br />
+However, this time it is worth thinking about welfare. We use the discounted utility function of households to calculate welfare under two situation:
+
+1. The case without capital tax, which is just reflected in a constant consumption path at initial levels.
+
+2. The case of a capital tax of 2.5\%.
+
+```{r}
 # calculate welfare number for initial equilibrium
 Welfare_0 <- 0
 for(t in 0:T1) {
@@ -413,9 +438,13 @@ Welfare_1 <- 0
 for(t in 0:T1) {
   Welfare_1 <- Welfare_1 + beta^t*(transition$c[ind(t)]^(1-1/gamma)/(1-1/gamma))
 }
+```
 
 
-# Plot dynamics of the capital stock
+<br />
+The resulting path for the capital intensity is quite clear. The capital tax -- reimbursed directly back to households -- acts like a change in the discount factor. As the long-run capital intensity needs to fall, the economy goes on a transition path to this new balanced growth path.
+
+```{r}
 myplot <- ggplot(data = transition) + 
   geom_hline(yintercept=transition$k[ind(T0)], color=myred, linetype="dashed", size=1) + 
   geom_hline(yintercept=transition$k[ind(T1)], color="#00BA38", linetype="dashed", size=1) + 
@@ -428,16 +457,11 @@ myplot <- ggplot(data = transition) +
 
 # print the plot
 print(myplot)
+```
+<br />
+On the GDP side, the fall in capital intensity is accompanied by a short-run increase in consumption, which is financed by a cut in investment. Since the Ramsey economy is dynamically efficient, however, the fall in capital intensity leads to a drop in long-run consumption.
 
-# save plot to pdf file (if needed)
-if(export_pdf) {
-  aspect_ratio <- 4/3;
-  height <- 3.5;
-  ggsave("fig17.pdf", width = height*aspect_ratio, height = height)
-}
-
-
-# Plot GDP and its components
+```{r}
 myplot <- ggplot(data = transition) + 
   geom_hline(yintercept = c_old, color="#00BA38", linetype="dashed", size=0.5) + 
   geom_ribbon(aes(x=year, ymin=0, ymax=c,    fill= "1c", color="1c") , alpha=0.4) +
@@ -458,19 +482,13 @@ myplot <- ggplot(data = transition) +
 
 # print the plot
 print(myplot)
+```
 
-# save plot to pdf file (if needed)
-if(export_pdf) {
-  aspect_ratio <- 4/3.5;
-  height <- 4.8;
-  ggsave("fig18.pdf", width = height*aspect_ratio, height = height)
-}
+### A capital subsidy
 
+Now lets do the same for a capital subsidy, which is nothing else than a capital tax. Me might think this is a good idea, since the economy is not on the Golden rule path.
 
-########### 
-# Simulate capital subsidy
-###########
-
+```{r}
 # steady state capital intensity without capital tax
 k_old <- (alpha/((1+g)/beta - 1 + delta))^(1/(1-alpha))
 c_old <- k_old^alpha - (g+delta)*k_old
@@ -502,9 +520,12 @@ Welfare_2 <- 0
 for(t in 0:T1) {
   Welfare_2 <- Welfare_2 + beta^t*transition$c[ind(t)]^(1-1/gamma)/(1-1/gamma)
 }
+```
 
+<br />
+As the capital tax is like an increase in the discount factor, the capital intensity slowly increases.
 
-# Plot dynamics of the capital stock
+```{r}
 myplot <- ggplot(data = transition) + 
   geom_hline(yintercept=transition$k[ind(T0)], color=myred, linetype="dashed", size=1) + 
   geom_hline(yintercept=transition$k[ind(T1)], color="#00BA38", linetype="dashed", size=1) + 
@@ -517,16 +538,12 @@ myplot <- ggplot(data = transition) +
 
 # print the plot
 print(myplot)
+```
 
-# save plot to pdf file (if needed)
-if(export_pdf) {
-  aspect_ratio <- 4/3;
-  height <- 3.5;
-  ggsave("fig19.pdf", width = height*aspect_ratio, height = height)
-}
+<br />
+The rise in capital needs to be accompanied by an increase in investment and, hence, by a drop in short-run consumption. Since the economy is dynamically efficient, the increase in long-run capital intensity causes a rise in long-run consumption.
 
-
-# Plot GDP and its components
+```{r}
 myplot <- ggplot(data = transition) + 
   geom_hline(yintercept = c_old, color="#00BA38", linetype="dashed", size=0.5) + 
   geom_ribbon(aes(x=year, ymin=0, ymax=c,    fill= "1c", color="1c") , alpha=0.4) +
@@ -547,19 +564,17 @@ myplot <- ggplot(data = transition) +
 
 # print the plot
 print(myplot)
-
-# save plot to pdf file (if needed)
-if(export_pdf) {
-  aspect_ratio <- 4/3.5;
-  height <- 4.8;
-  ggsave("fig20.pdf", width = height*aspect_ratio, height = height)
-}
+```
 
 
-########### 
-# Welfare comparison
-###########
+### A Welfare comparison
 
-fprintf('Without capital taxes    : %12.6f %12.6f\n', Welfare_0, 0)
-fprintf('With 2.5p capital tax    : %12.6f %12.6f\n', Welfare_1, ((Welfare_1/Welfare_0)^{1/(1-1/gamma)}-1)*100)
-fprintf('With 2.5p capital subsidy: %12.6f %12.6f\n', Welfare_2, ((Welfare_2/Welfare_0)^{1/(1-1/gamma)}-1)*100)
+Is a tax or subsidy on capital income a good idea? To give an answer to this question based on the household optimization problem, we can compare welfare and consumption equivalent variation in the three scenarios. Note that the scenario without capital taxation serves as a benchmark. It is quite clear from these numbers that we should neither have a capital tax nor a subsidy. 
+
+The reason for this is easy to understand: households already optimize their consumption path given their level of discounting. A capital tax or subsidy changes the consumption path of households by altering the intertemporal discount factor for resources. But it does not change the discount factor of households. Hence, under a capital tax/subsidy, households have to enter a consumption path that is suboptimal given their subjective level of discounting. And this causes welfare losses in both directions, even if the long-run consumption level increases under capital subsidies.
+
+```{r  results='hold'}
+sprintf('Without capital taxes    : %12.6f %12.6f\n', Welfare_0, 0)
+sprintf('With 2.5p capital tax    : %12.6f %12.6f\n', Welfare_1, ((Welfare_1/Welfare_0)^{1/(1-1/gamma)}-1)*100)
+sprintf('With 2.5p capital subsidy: %12.6f %12.6f\n', Welfare_2, ((Welfare_2/Welfare_0)^{1/(1-1/gamma)}-1)*100)
+```

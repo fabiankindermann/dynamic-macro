@@ -1675,7 +1675,7 @@ lab_share = 0.381
 inv_share = 0.245
 gross_ret = 0.114
 
-# Parameter choice
+# parameter choice
 n     &lt;- 0.0122
 h     &lt;- 0.0169
 g     &lt;- (1+n)*(1+h)-1
@@ -1797,8 +1797,8 @@ find the initial consumption level.</p>
   return(c(c[1], epsilon, i))
 }</code></pre>
 </div>
-<div id="simulating-ramsey-model-forward" class="section level3">
-<h3>Simulating Ramsey model forward</h3>
+<div id="simulating-the-ramsey-model-forward" class="section level3">
+<h3>Simulating the Ramsey model forward</h3>
 <p>Once we have determined the initial consumption level <span class="math inline">\(c_0\)</span> on the saddle path, we can use
 standard forward simulation to determine the entire path to the steady
 state. This is done in the function <code>ramsey</code>, which follows

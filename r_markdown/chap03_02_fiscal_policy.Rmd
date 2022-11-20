@@ -1,6 +1,7 @@
-#######################################
-### Fiscal Policy in the Ramsey model
-#######################################
+---
+title: "Fiscal Policy in the Ramsey model"
+output: html_notebook
+---
 
 # Clear the workspace and load libraries
 rm(list = ls())

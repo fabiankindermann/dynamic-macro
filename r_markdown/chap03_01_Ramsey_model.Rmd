@@ -1,0 +1,386 @@
+---
+title: "The Ramsey Growth Model"
+output:
+  html_document:
+    df_print: paged
+---
+
+### Loading packages, defining colors and using data
+We first clear the workspace using `rm(list = ls())`and then include all packages we need. All packages used here are for plotting. If a package is missing in your R distribution (which is quite likely initially), just use `install.packages("package_name")` with the respective package name to install it on your system. If you execute the code in the file `install_packages.R`, then all necessary packages will be installed into your R distribution. If the variable `export_graphs` is set to `TRUE`, then the graphs will be exported as pdf-files. In addition, we define a set of colors here to make graphs look more beautiful.
+
+
+```{r message = FALSE}
+rm(list = ls())
+library(reshape2)
+library(base)
+library(ggplot2)
+library(grid)
+library(scales)
+library(stringr)
+library(tidyverse)
+
+# should graphs be exported to pdf
+export_pdf <- FALSE
+
+# define some colors
+mygreen <- "#00BA38"
+myblue  <- "#619CFF"
+myred   <- "#F8766D"
+```
+
+### The Ramsey Model setup
+
+Before being able to simulate the model, we have to set parameters. To do so, we use five data moments. The share of labor compensation in GDP, the share of gross capital formation (investment) in GDP, the gross return to capital and the growth rates of total labor input and labor productivity. From these, we can pin down the parameters of the Ramsey model for the US economy. Having set the parameters, we can determine the balanced growth path, i.e. the steady state of the capital intensity.
+
+```{r}
+# data moments
+lab_share = 0.381
+inv_share = 0.245
+gross_ret = 0.114
+
+# Parameter choice
+n     <- 0.0122
+h     <- 0.0169
+g     <- (1+n)*(1+h)-1
+alpha <- lab_share
+delta <- inv_share*gross_ret/alpha - g
+beta  <- (1+g)/(1 + gross_ret - delta)
+gamma <- 0.5
+
+# steady state capital intensity under old beta
+k_old <- (alpha/((1+g)/beta - 1 + delta))^(1/(1-alpha))
+c_old <- k_old^alpha - (g+delta)*k_old
+```
+
+
+### A guessing algorithm for the Ramsey model
+
+In the lecture, we discussed a guessing algorithm for solving for the saddle path of the Ramsey economy. This algorithm is implemented in function `solve_ramsey'.
+
+The function takes as input the relevant parameters `g, alpha, delta, gamma, beta` of the Ramsey model. In addition, we have to specify the level of the capital intensity `k0` at which we want to start the transition path towards the balanced growth path. 
+
+Within the function, we have to specify a set of numerical parameters. `T` is the maximum number of model periods we will simulate in the algorithm. `itermax` is the maximum number of guesses for $c_0$ we will use to solve for the saddle path. `tol` is the level of tolerance. If the distance of $k_t$ and $c_t$ to its steady state values is smaller than `tol`, we say that the economy has converged.
+
+Next we determine the steady state capital intensity of the Ramsey and the corresponding consumption level. After that, we can determine the relevant bounds for $c_0$ in the guessing algorithm. If $k_0 < k^*$, then $c_0$ must lie in the interval $[0, c^*]$. Otherwise, a good guess for the relevant interval is $[c^*, k_0^{\alpha} + (1-delta)*k_0]$.
+
+With this setup, we can start the guessing algorithm discussed in class. We set the guess for initial consumption $c_0 = \frac{c_{min} + c_{max}}{2}$ and simulate the economy forward until:
+
+1. The capital-consumption path has converged to the steady state of the capital intensity. We define convergence as
+$$
+  \varepsilon = \sqrt{\left(\frac{c_t}{c^*}-1\right)^2 + \left(\frac{k_t}{k^*}-1\right)^2} < tol.
+$$
+2. The capital intensity exceeds $k^*$, which means that initial consumption was too low. We therefore set $c_{min}$ to the last initial guess for consumption.
+
+3. Consumption exceeds $c^*$, which means that initial consumption was too high. We therefore set $c_{max}$ to the last initial guess for consumption.
+
+Note that the above algorithm describes a situation with $k_0 \leq k^*$. In case of $k_0 > k^*$, the economy approaches the balanced growth path from above. Hence, situations 2. and 3. are flipped.
+
+Our function returns three arguments: the best guess for initial consumption $c_0$, the convergence level $\varepsilon$ as well as the number of iteration $i$ needed to find the initial consumption level.
+
+```{r}
+solve_ramsey <- function(k0, g, alpha, delta, gamma, beta) {
+  
+  # set numerical parameters
+  T <- 10000          # number of simulation periods
+  itermax <- 1000     # maximum number of iterations
+  tol <- 1e-6         # tolerance level for difference to steady state
+  
+  # determine steady state capital intensity and consumption
+  kstar <- (alpha/((1+g)/beta - 1 + delta))^(1/(1-alpha))
+  cstar <- kstar**alpha - (g+delta)*kstar
+  
+  # set starting interval depending on k0
+  if(k0 <= kstar) {
+    c_min <- 0
+    c_max <- cstar
+  } else {
+    c_min <- cstar
+    c_max <- k0^alpha + (1-delta)*k0
+  }
+  
+  # start iteration process
+  for (i in 1:itermax) {
+    
+    # start a capital and consumption path
+    k <- k0
+    c <- (c_min+c_max)/2
+    
+    # now simulate the economy forward
+    for (t in 1:T) {
+      
+      # calculate difference to steady state
+      epsilon <- sqrt((c[t]/cstar-1)^2 + (k[t]/kstar-1)^2)
+      
+      # if difference is small enough, that's it, we return
+      if(epsilon < tol) {
+        return(c(c[1], epsilon, i))
+      }
+      
+      # determine next period's capital stock and consumption
+      k[t+1] <- max((k[t]**alpha - c[t] + (1-delta)*k[t])/(1+g), 1e-4)
+      c[t+1] <- (beta*(1 + alpha*k[t+1]^(alpha-1) - delta)/(1+g))^gamma*c[t]
+      
+      #  decision rule for capital
+      if(k0 <= kstar & k[t+1] > kstar | k0 > kstar & c[t+1] < cstar) {
+        c_min <- c[1]; break;
+      }
+      
+      #  if consumption is too large, then initial consumption level was too small
+      if(k0 <= kstar & c[t+1] > cstar | k0 > kstar & k[t+1] < kstar) {
+        c_max <- c[1]; break;
+      }
+    }
+  }
+  
+  # in any case, if you end up here, return c[1] and epsilon
+  return(c(c[1], epsilon, i))
+}
+```
+
+### Simulating Ramsey model forward
+
+Once we have determined the initial consumption level $c_0$ on the saddle path, we can use standard forward simulation to determine the entire path to the steady state. This is done in the function `ramsey`, which follows the same logic as the simulation of [the Solow growth model](https://raw.githack.com/fabiankindermann/dynamic-macro/main/r_markdown/chap02_03_Solow_model.html). We again simulate the economy from some date $T_0 < 0$ to some date $T_1 > 0$. We assume that the economy is in steady state with capital intensity `k0` until date $t = -1$. The change in $\beta$ is assumed to happen at date $t = 0$. The economy then starts on a transition path with initial capital intensity `k0`. We again use a function `ind` that transforms dates into array indices, since array indices start at $1$.
+
+For forward simulation of the economy, we use the two equations
+$$
+  k_{t+1} = \max\left[\frac{k_t^\alpha - c_t + (1-\delta)k_t}{1+g}, 10^{-4}\right]
+$$
+and 
+$$
+  c_{t+1} = \left[\beta\cdot\frac{1 + \alpha k_{t+1}^{\alpha-1} - \delta}{1+g}\right]^\gamma\cdot c_t.
+$$
+Note that we restrict $k_{t+1}$ to not fall below a value of $10^{-4}$, such that we don't run into calculation errors on the marginal product of capital. Furthermore, if the economy is reasonably close to the steady state -- according to the same criterion we used when guessing the initial point of the transition path -- then we map it onto the steady state capital and consumption level. In doing so, we avoid that -- owing to numerical inaccuracies -- the path for capital diverges.
+
+```{r}
+ramsey <- function(T0, T1, c0, k0, g, alpha, delta, gamma, beta) {
+  
+  # set numerical parameters
+  tol <- 1e-6
+  
+  # determine steady state capital intensity and consumption
+  kstar <- (alpha/((1+g)/beta - 1 + delta))^(1/(1-alpha))
+  cstar <- kstar**alpha - (g+delta)*kstar
+    
+  # start a capital and consumption path
+  k <- k0
+  c <- 0
+  
+  # assume economy was in steady state prior to date 0
+  k[ind(T0):ind(0)] <- k0
+  c[ind(T0):ind(0)] <- k0^alpha - (g+delta)*k0
+  
+  # then start to simulate new economy path
+  c[ind(0)] <- c0
+  
+  # now simulate the economy forward
+  for (t in ind(0):ind(T1-1)) {
+    
+    # determine next period's capital stock and consumption
+    k[t+1] <- max((k[t]**alpha - c[t] + (1-delta)*k[t])/(1+g), 1e-4)
+    c[t+1] <- (beta*(1 + alpha*k[t+1]^(alpha-1) - delta)/(1+g))^gamma*c[t]
+    
+    #  move to steady state level when you are almost there
+    epsilon <- sqrt((c[t+1]/cstar-1)^2 + (k[t+1]/kstar-1)^2)
+    if(epsilon < tol) {
+      k[(t+1):ind(T1)] = kstar
+      c[(t+1):ind(T1)] = cstar
+      break
+    }
+  }
+  
+  # calculate other macro statistics
+  y <- k^alpha
+  ir <- (g + delta)*k
+  i <- y - c
+  s <- i/y
+
+  # return a data frame with macro path
+  res <- data.frame(year=c(T0:T1), k, y, c, i, ir, s)
+  return(res)
+}
+
+# indicator management function
+ind <- function(t) {
+  return(t + 1 + abs(T0))
+}
+```
+
+### An increase in the discount factor $\beta$
+
+When we want to simulate an increase in the discount factor $\beta$, we first have to calculate the balanced growth path capital intensity $k_{old}$ under the original discount factor. Then, we can set the parameters for the simulation process. We want to increase the discount factor to $\beta = 0.99$, simulate 50 periods prior to the change in $\beta$ and then let the economy run for 200 periods starting from $t=0$ onward.
+
+With all parameters at hand, we can solve for the initial consumption level $c_0$ that defined the beginning of the transition path to the new balanced growth path with a higher discount factor, i.e. we trace out the beginning of the saddle path. The function `solve_ramsey` returns $c_0$ as a first argument of the vector `res`. The second argument is the accuracy level with which we hit the balanced growth path and the third the number of iterations we needed to calculate $c_0$. 
+
+Once $c_0$ is known, we can simulate the entire transition path with the function `ramsey`. This function takes the parameters for the simulation periods, the initial capital level $k_{old}$ and the initial level of consumption stored in `res[1]`. It returns a data frame that contains the entire path of the economy. We store this data frame in `transition` and can use it to create the relevant plots.
+
+```{r}
+# steady state capital intensity under old beta
+k_old <- (alpha/((1+g)/beta - 1 + delta))^(1/(1-alpha))
+c_old <- k_old^alpha - (g+delta)*k_old
+
+# set new value for beta and simulation periods
+beta <- 0.99
+T0 <- -50
+T1 <- 200
+
+# solve transition path
+res <- solve_ramsey(k_old, g, alpha, delta, gamma, beta)
+
+# simulate the model for 250 periods
+transition <- ramsey(T0, T1, res[1], k_old, g, alpha, delta, gamma, beta)
+```
+
+<br />
+We first plot the dynamics of the capital intensity. When the discount factor increases, so does the long-run capital intensity. Hence, the economy is put on a transition path, where the capital stock increase successively and converges toward the new long-run capital intensity. This looks pretty much like our analysis of [the Solow growth model](https://raw.githack.com/fabiankindermann/dynamic-macro/main/r_markdown/chap02_03_Solow_model.html).
+
+```{r}
+myplot <- ggplot(data = transition) + 
+  geom_hline(yintercept=transition$k[ind(T0)], color=myred, linetype="dashed", size=1) + 
+  geom_hline(yintercept=transition$k[ind(T1)], color="#00BA38", linetype="dashed", size=1) + 
+  geom_line(aes(x=year, y=k), color="darkblue", size=1) +
+  coord_cartesian(xlim=c(T0, T1), ylim=c(6, 14)) + 
+  scale_x_continuous(breaks=seq(T0, T1, 25), expand=c(0, 0)) +
+  labs(x = "Year t",
+       y = "Capital Intensity") +
+  theme_bw()
+
+# print the plot
+print(myplot)
+```
+
+<br />
+What is different compared to the Solow model, however, is the dynamics of the savings rate. Recall that the savings rate is an exogenous object in the Solow model, and in our analysis it just jumped from one date to the other. In the Ramsey model, the savings rate is an endogenous object that is determined by intertemporal optimization. We can plot the dynamics of the savings rate in our model, which we can calculate from relating investment to GDP. We can clearly see that the savings rate is a time varying object. It is initially higher than in the balanced growth path and then converges to the balanced growth savings rate (which is the same as we would see in the Solow model).
+
+```{r}
+myplot <- ggplot(data = transition) + 
+  geom_hline(yintercept=(g+delta)/transition$k[ind(T0)]^(alpha-1), color=myred, linetype="dashed", size=1) + 
+  geom_hline(yintercept=(g+delta)/transition$k[ind(T1)]^(alpha-1), color="#00BA38", linetype="dashed", size=1) +
+  geom_line(aes(x=year, y=s), color="darkblue", size=1) +
+  coord_cartesian(xlim=c(T0, T1), ylim=c(0, 0.5)) + 
+  scale_x_continuous(breaks=seq(T0, T1, 25), expand=c(0, 0)) +
+  labs(x = "Year t",
+       y = "Savings Rate s") +
+  theme_bw()
+
+# print the plot
+print(myplot)
+```
+
+<br />
+Finally, we can again look at the dynamics of GDP and its components. We get a very similar picture as in our analysis of [the Solow growth model](https://raw.githack.com/fabiankindermann/dynamic-macro/main/r_markdown/chap02_03_Solow_model.html). Household initially cut back on their consumption to invest above the replacement investment rate. This slowly increases the capital stock. In the long run, investment again equals replacement investment, but at a higher capital intensity.
+
+```{r}
+myplot <- ggplot(data = transition) + 
+  geom_hline(yintercept = c_old, color="#00BA38", linetype="dashed", size=0.5) + 
+  geom_ribbon(aes(x=year, ymin=0, ymax=c,    fill= "1c", color="1c") , alpha=0.4) +
+  geom_ribbon(aes(x=year, ymin=c, ymax=c+i-ir, fill= "3di", color="3di"), alpha=0.4) +
+  geom_ribbon(aes(x=year, ymin=c+i-ir, ymax=y, fill= "2ir", color="2ir")  , alpha=0.4) +
+  geom_line(aes(x=year, y=y), color="darkblue", size=1) +
+  coord_cartesian(xlim=c(T0, T1), ylim=c(0, 3)) + 
+  scale_x_continuous(breaks=seq(T0, T1, 25), expand=c(0, 0)) +
+  labs(x = "Year t",
+       y = "GDP and its components per\n effective unit of labor") +
+  scale_fill_manual(breaks = c("1c", "2ir", "3di"), name = "", 
+                    labels = c("Consumption", "Replacement Investment", "Capital Augmenting Inv."),
+                    values = c(mygreen, myblue, myred)) +
+  scale_color_manual(breaks = c("1c", "2ir", "3di"),
+                     values = c(mygreen, myblue, myred)) +
+  guides(colour = "none") +
+  theme_bw() + 
+  theme(legend.position="bottom")
+
+# print the plot
+print(myplot)
+```
+
+
+### An increase in $\beta$ with $\gamma = 0.1$
+
+Now we want to perform the same exercise as above, but with a value of $\gamma = 0.1$. We therefore use the same code as above.
+
+```{r}
+# set new gamma and old beta
+gamma <- 0.1
+beta  <- (1+g)/(1 + gross_ret - delta)
+
+# steady state capital intensity under old beta
+k_old <- (alpha/((1+g)/beta - 1 + delta))^(1/(1-alpha))
+c_old <- k_old^alpha - (g+delta)*k_old
+
+# set new value for beta and simulation periods
+beta <- 0.99
+T0 <- -50
+T1 <- 200
+
+# solve transition path
+res <- solve_ramsey(k_old, g, alpha, delta, gamma, beta)
+
+# simulate the model for 250 periods
+transition <- ramsey(T0, T1, res[1], k_old, g, alpha, delta, gamma, beta)
+```
+
+<br />
+Compared to the case of $\gamma = 0.5$, the dynamics of the capital stock is much slower.
+
+```{r}
+# Plot dynamics of the capital stock
+myplot <- ggplot(data = transition) + 
+  geom_hline(yintercept=transition$k[ind(T0)], color=myred, linetype="dashed", size=1) + 
+  geom_hline(yintercept=transition$k[ind(T1)], color="#00BA38", linetype="dashed", size=1) + 
+  geom_line(aes(x=year, y=k), color="darkblue", size=1) +
+  coord_cartesian(xlim=c(T0, T1), ylim=c(6, 14)) + 
+  scale_x_continuous(breaks=seq(T0, T1, 25), expand=c(0, 0)) +
+  labs(x = "Year t",
+       y = "Capital Intensity") +
+  theme_bw()
+
+# print the plot
+print(myplot)
+```
+
+<br />
+The reason for this can be found by looking at the dynamics of the savings rate. While under $\gamma = 0.5$, the savings rate jumped above its long-run level, because households wanted to accumulate savings quickly to match their new discount factor, the savings rate is now much more slow moving over time. It starts at a value below the long-run level and then slowly increases over time. This keeps the consumption path much smoother than under $\gamma = 0.5$.
+
+```{r}
+# Plot dynamics of the savings rate
+myplot <- ggplot(data = transition) + 
+  geom_hline(yintercept=(g+delta)/transition$k[ind(T0)]^(alpha-1), color=myred, linetype="dashed", size=1) + 
+  geom_hline(yintercept=(g+delta)/transition$k[ind(T1)]^(alpha-1), color="#00BA38", linetype="dashed", size=1) +
+  geom_line(aes(x=year, y=s), color="darkblue", size=1) +
+  coord_cartesian(xlim=c(T0, T1), ylim=c(0, 0.5)) + 
+  scale_x_continuous(breaks=seq(T0, T1, 25), expand=c(0, 0)) +
+  labs(x = "Year t",
+       y = "Savings Rate s") +
+  theme_bw()
+
+# print the plot
+print(myplot)
+```
+
+<br />
+We can see the same picture when plotting GDP and its components. The initial drop in consumption is much smaller than under $\gamma = 0.5$. This also means that capital augmenting investment is much smaller initially and therefore GDP rises more slowly over time.
+
+```{r}
+# Plot GDP and its components
+myplot <- ggplot(data = transition) + 
+  geom_hline(yintercept = c_old, color="#00BA38", linetype="dashed", size=0.5) + 
+  geom_ribbon(aes(x=year, ymin=0, ymax=c,    fill= "1c", color="1c") , alpha=0.4) +
+  geom_ribbon(aes(x=year, ymin=c, ymax=c+i-ir, fill= "3di", color="3di"), alpha=0.4) +
+  geom_ribbon(aes(x=year, ymin=c+i-ir, ymax=y, fill= "2ir", color="2ir")  , alpha=0.4) +
+  geom_line(aes(x=year, y=y), color="darkblue", size=1) +
+  coord_cartesian(xlim=c(T0, T1), ylim=c(0, 3)) + 
+  scale_x_continuous(breaks=seq(T0, T1, 25), expand=c(0, 0)) +
+  labs(x = "Year t",
+       y = "GDP and its components per\n effective unit of labor") +
+  scale_fill_manual(breaks = c("1c", "2ir", "3di"), name = "", 
+                    labels = c("Consumption", "Replacement Investment", "Capital Augmenting Inv."),
+                    values = c(mygreen, myblue, myred)) +
+  scale_color_manual(breaks = c("1c", "2ir", "3di"),
+                     values = c(mygreen, myblue, myred)) +
+  guides(colour = "none") +
+  theme_bw() + 
+  theme(legend.position="bottom")
+
+# print the plot
+print(myplot)
+```

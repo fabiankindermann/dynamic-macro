@@ -11,8 +11,6 @@ library(grid)
 library(scales)
 library(stringr)
 library(tidyverse)
-library(pwt10)
-library(pracma)
 
 # should graphs be exported to pdf
 export_pdf <- FALSE
@@ -21,20 +19,6 @@ export_pdf <- FALSE
 mygreen <- "#00BA38"
 myblue  <- "#619CFF"
 myred   <- "#F8766D"
-
-
-########### 
-# Load Penn World Table data
-#
-# Documentation of Penn World Tables: https://www.rug.nl/ggdc/productivity/pwt/
-########### 
-
-# load data and extract US data
-data("pwt10.0")
-pwt_sub <- subset(pwt10.0, isocode=="USA")
-
-# calculate log-total-hours
-pwt_sub$total_hours <- log(pwt_sub$emp*pwt_sub$avh)
 
 
 ########### 
@@ -56,8 +40,8 @@ beta  <- (1+g)/(1 + gross_ret - delta)
 gamma <- 0.5
 
 # steady state capital intensity under old beta
-k_star <- (alpha/((1+g)/beta - 1 + delta))^(1/(1-alpha))
-c_star <- k_star^alpha - (g+delta)*k_star
+k_old <- (alpha/((1+g)/beta - 1 + delta))^(1/(1-alpha))
+c_old <- k_old^alpha - (g+delta)*k_old
 
 
 ########### 
@@ -168,7 +152,7 @@ ramsey <- function(T0, T1, c0, k0, g, alpha, delta, gamma, beta) {
   s <- i/y
 
   # return a data frame with macro path
-  res <- data_frame(year=c(T0:T1), k, y, c, i, ir, s)
+  res <- data.frame(year=c(T0:T1), k, y, c, i, ir, s)
   return(res)
 }
 
@@ -183,8 +167,8 @@ ind <- function(t) {
 ###########
 
 # steady state capital intensity under old beta
-k_star <- (alpha/((1+g)/beta - 1 + delta))^(1/(1-alpha))
-c_star <- k_star^alpha - (g+delta)*k_star
+k_old <- (alpha/((1+g)/beta - 1 + delta))^(1/(1-alpha))
+c_old <- k_old^alpha - (g+delta)*k_old
 
 # set new value for beta and simulation periods
 beta <- 0.99
@@ -192,10 +176,10 @@ T0 <- -50
 T1 <- 200
 
 # solve transition path
-res <- solve_ramsey(k_star, g, alpha, delta, gamma, beta)
+res <- solve_ramsey(k_old, g, alpha, delta, gamma, beta)
 
 # simulate the model for 250 periods
-transition <- ramsey(T0, T1, res[1], k_star, g, alpha, delta, gamma, beta)
+transition <- ramsey(T0, T1, res[1], k_old, g, alpha, delta, gamma, beta)
 
 # Plot dynamics of the capital stock
 myplot <- ggplot(data = transition) + 
@@ -210,6 +194,13 @@ myplot <- ggplot(data = transition) +
 
 # print the plot
 print(myplot)
+
+# save plot to pdf file (if needed)
+if(export_pdf) {
+  aspect_ratio <- 4/3;
+  height <- 3.5;
+  ggsave("fig5.pdf", width = height*aspect_ratio, height = height)
+}
 
 
 # Plot dynamics of the savings rate
@@ -236,7 +227,7 @@ if(export_pdf) {
 
 # Plot GDP and its components
 myplot <- ggplot(data = transition) + 
-  geom_hline(yintercept = c_star, color="#00BA38", linetype="dashed", size=0.5) + 
+  geom_hline(yintercept = c_old, color="#00BA38", linetype="dashed", size=0.5) + 
   geom_ribbon(aes(x=year, ymin=0, ymax=c,    fill= "1c", color="1c") , alpha=0.4) +
   geom_ribbon(aes(x=year, ymin=c, ymax=c+i-ir, fill= "3di", color="3di"), alpha=0.4) +
   geom_ribbon(aes(x=year, ymin=c+i-ir, ymax=y, fill= "2ir", color="2ir")  , alpha=0.4) +
@@ -276,8 +267,8 @@ beta  <- (1+g)/(1 + gross_ret - delta)
 
 
 # steady state capital intensity under old beta
-k_star <- (alpha/((1+g)/beta - 1 + delta))^(1/(1-alpha))
-c_star <- k_star^alpha - (g+delta)*k_star
+k_old <- (alpha/((1+g)/beta - 1 + delta))^(1/(1-alpha))
+c_old <- k_old^alpha - (g+delta)*k_old
 
 # set new value for beta and simulation periods
 beta <- 0.99
@@ -285,10 +276,10 @@ T0 <- -50
 T1 <- 200
 
 # solve transition path
-res <- solve_ramsey(k_star, g, alpha, delta, gamma, beta)
+res <- solve_ramsey(k_old, g, alpha, delta, gamma, beta)
 
 # simulate the model for 250 periods
-transition <- ramsey(T0, T1, res[1], k_star, g, alpha, delta, gamma, beta)
+transition <- ramsey(T0, T1, res[1], k_old, g, alpha, delta, gamma, beta)
 
 
 # Plot dynamics of the capital stock
@@ -337,7 +328,7 @@ if(export_pdf) {
 
 # Plot GDP and its components
 myplot <- ggplot(data = transition) + 
-  geom_hline(yintercept = c_star, color="#00BA38", linetype="dashed", size=0.5) + 
+  geom_hline(yintercept = c_old, color="#00BA38", linetype="dashed", size=0.5) + 
   geom_ribbon(aes(x=year, ymin=0, ymax=c,    fill= "1c", color="1c") , alpha=0.4) +
   geom_ribbon(aes(x=year, ymin=c, ymax=c+i-ir, fill= "3di", color="3di"), alpha=0.4) +
   geom_ribbon(aes(x=year, ymin=c+i-ir, ymax=y, fill= "2ir", color="2ir")  , alpha=0.4) +

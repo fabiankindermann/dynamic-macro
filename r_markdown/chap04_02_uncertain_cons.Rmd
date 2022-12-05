@@ -1,0 +1,299 @@
+---
+title: "Consumption under Uncertainty"
+output:
+  html_document:
+    df_print: paged
+---
+
+### Loading packages, defining colors and using data
+We first clear the workspace using `rm(list = ls())`and then include all packages we need. All packages used here are for plotting. If a package is missing in your R distribution (which is quite likely initially), just use `install.packages("package_name")` with the respective package name to install it on your system. If you execute the code in the file `install_packages.R`, then all necessary packages will be installed into your R distribution. If the variable `export_graphs` is set to `TRUE`, then the graphs will be exported as pdf-files. In addition, we define a set of colors here to make graphs look more beautiful.
+
+```{r message = FALSE}
+rm(list = ls())
+library(xts)
+library(zoo)
+library(dynlm)
+library(reshape2)
+library(base)
+library(ggplot2)
+library(grid)
+library(scales)
+library(stringr)
+library(tidyverse)
+library(pwt10)
+library(fredr)
+
+# should graphs be exported to pdf
+export_pdf <- FALSE
+
+# define some colors
+mygreen <- "#00BA38"
+myblue  <- "#619CFF"
+myred   <- "#F8766D"
+```
+
+### The model setup
+
+In the stochastic permanent income setup, there are not many parameters to choose. In fact, for our analysis, we only have to define the number of periods `T`.
+
+```{r}
+# number of model periods
+T   <- 80
+```
+
+
+### A function for modeling unexpected income shocks
+
+The following function is used to analyze the effect of unexpected income shocks on household consumption expenditure. It silently assumes that, starting from age 1, households believe their current income stream to be $y_t = 1$ and therefore $E_1[y_p] = 1$. From this, we can calculate the baseline consumption path, which will also be characterizes by $c_\text{base} = 1$.
+
+We now assume that in the periods `t_beg` to `t_end`, the household receives and income shock of size `shock`. The shock period can be of arbitrary length and the shock can be positive or negative. The only important thing is that the shock is unanticipated as of date `t_beg - 1`. Following the news to income, the consumer adapts her estimate of expected permanent income `E_y_p[t_beg:T]` and therefore updates her consumption plan `c`. The remainder of the function is the same as under certain income.
+
+```{r}
+income_shock <- function(T, t_beg, t_end, shock) {
+  
+  # generate expected income path in baseline
+  y <- rep(1, T)
+  
+  # expected permanent income as of date t = 1
+  E_y_p <- rep(mean(y), T)
+  
+  # calculate baseline consumption path
+  c_base <- E_y_p
+  
+  # generate income shock
+  y[t_beg:t_end] = y[t_beg:t_end] + shock
+  
+  # update expectations
+  E_y_p[t_beg:T] = mean(y[t_beg:T])
+  
+  # calculate consumption path
+  c <- E_y_p
+  
+  # calculate savings
+  s <- y - c
+  
+  # derive asset path
+  a <- 0
+  for(t in 2:T) {
+    a[t] = a[t-1] + s[t-1]
+  }
+  
+  # create data set to return
+  res <- data.frame(year=c(1:T), c_base, c, E_y_p, y, s, a)
+  
+  return(res)
+}
+```
+
+
+### Unexpected unemployment in period 11-15
+
+Let us first study the consequences of an unexpected and extended period of unemployment in between the years $t=11$ and $t=15$. Income in this periods consequently drops to zero (i.e. we assume that there exists no unemployment benefit or social insurance scheme). While the income consequences of this shock are large, the consumption response is quite modest. In fact, the consumer only lowers their consumption by a little bit and buffers the remainder income loss by (negative) savings. As a consequence, the short-lived shock to labor income causes a permanent drop in consumption for the entire life cycle. Importantly, consumption does not return "back to normal" after a while.
+
+```{r}
+# simulate shock
+consumption <- income_shock(T, 11, 15, -1)
+
+# Plot GDP and its components
+myplot <- ggplot(data = consumption) + 
+  geom_ribbon(aes(x=year, ymin=0, ymax=c,    fill= "1c", color="1c") , alpha=0.4) +
+  geom_ribbon(aes(x=year, ymin=c, ymax=c+s, fill= "2s", color="2s")  , alpha=0.4) +
+  geom_line(aes(x=year, y=y), color="darkblue", size=1) +
+  coord_cartesian(xlim=c(1, T), ylim=c(0, 1.5)) + 
+  scale_x_continuous(breaks=seq(0, T, 10), expand=c(0, 0)) +
+  labs(x = "Year t",
+       y = "Consumption and Savings") +
+  scale_fill_manual(breaks = c("1c", "2s"), name = "", 
+                    labels = c("Consumption", "Savings"),
+                    values = c(mygreen, myblue)) +
+  scale_color_manual(breaks = c("1c", "2s"),
+                     values = c(mygreen, myblue)) +
+  guides(colour = "none") +
+  theme_bw() + 
+  theme(legend.position="bottom")
+
+# print the plot
+print(myplot)
+```
+
+<br />
+The consequences for the wealth accumulation path are clear. The consumer finances the short-run income short-fall by running into debt, which she repays over the rest of her life cycle.
+
+```{r}
+myplot <- ggplot(data = consumption) + 
+  geom_line(aes(x=year, y=a), color="darkblue", size=1) +
+  coord_cartesian(xlim=c(1, T), ylim=c(-5, 1)) + 
+  scale_x_continuous(breaks=seq(0, T, 10), expand=c(0, 0)) +
+  labs(x = "Year t",
+       y = "Individual Wealth") +
+  theme_bw()
+
+# print the plot
+print(myplot)
+```
+
+
+
+### The marginal propensity to consume out of permanent income shock
+
+Now let us think about the marginal propensity to consume out of different shocks. We first consider a permanent shock to income starting at period $t = 11$ and lasting for the entire life cycle. Since the income increase is permanent, the consumer revises his permanent income expectations upward. The entire permanent income increase is then directly mirrored in the consumption path. Consequently, the marginal propensity to consume out of a permanent income increase is $MPC = 1$ or 100\%.
+
+```{r}
+# date at which shock happens
+t_beg = 11
+
+# simulate shock
+consumption <- income_shock(T, t_beg, T, 1)
+
+# calculate MPC
+lab  <- paste("MPC = ", format(round((consumption$c[t_beg]/consumption$c_base[t_beg]-1)*100, 2), nsmall=2), "%")
+
+# Plot GDP and its components
+myplot <- ggplot(data = consumption) + 
+  geom_line(aes(x=year, y=c_base, color="1"), color=myblue, size=1) +
+  geom_line(aes(x=year, y=c, color="2"), color=mygreen, size=1) +
+  coord_cartesian(xlim=c(1, T), ylim=c(0, 2.5)) + 
+  scale_x_continuous(breaks=seq(0, T, 10), expand=c(0, 0)) +
+  geom_label(aes(x = 5, y = 2.5, label = lab), 
+             hjust = 0, vjust = 1, label.r = unit(0, "lines"), label.padding = unit(0.35, "lines")) +
+  labs(x = "Year t",
+       y = "Consumption") +
+  scale_color_manual(breaks = c("1", "2"),
+                     labels = c("Consumption (Baseline)", "Consumption (Permanent Shock)"),
+                     values = c(mygreen, myblue)) +
+  theme_bw() + 
+  theme(legend.position="bottom")
+
+# print the plot
+print(myplot)
+```
+
+
+### The marginal propensity to consume out of transitory income shock
+
+In contrast, let us assume that the positive income shock only lasts for one period. The impact on permanent income expectations is therefore much smaller, and so is the reaction in consumption. In fact, the consumer revises her income expectations upwards by only an amount of $\Delta y_p = \frac{1}{70} = 0.0143$. And hence, the marginal propensity to consume out of this income shock is only $MPC = 0.0143$ or 1.43\%.
+
+```{r}
+# date at which shock happens
+t_beg = 11
+
+# simulate shock
+consumption <- income_shock(T, t_beg, t_beg, 1)
+
+# calculate MPC
+lab  <- paste("MPC = ", format(round((consumption$c[t_beg]/consumption$c_base[t_beg]-1)*100, 2), nsmall=2), "%")
+
+# Plot GDP and its components
+myplot <- ggplot(data = consumption) + 
+  geom_line(aes(x=year, y=c_base, color="1"), color=myblue, size=1) +
+  geom_line(aes(x=year, y=c, color="2"), color=mygreen, size=1) +
+  coord_cartesian(xlim=c(1, T), ylim=c(0, 2.5)) + 
+  scale_x_continuous(breaks=seq(0, T, 10), expand=c(0, 0)) +
+  geom_label(aes(x = 5, y = 2.5, label = lab), 
+             hjust = 0, vjust = 1, label.r = unit(0, "lines"), label.padding = unit(0.35, "lines")) +
+  labs(x = "Year t",
+       y = "Consumption") +
+  scale_color_manual(breaks = c("1", "2"),
+                     labels = c("Consumption (Baseline)", "Consumption (Permanent Shock)"),
+                     values = c(mygreen, myblue)) +
+  theme_bw() + 
+  theme(legend.position="bottom")
+
+# print the plot
+print(myplot)
+```
+
+
+
+
+### Testing random walk hypothesis in macro data
+
+We now want to test the random walk hypothesis in macro data. For this analysis, we have to use more detailed data than the Penn World Tables can provide. Such data can be found in the Federal Reserve Economic Database (FRED). All data series available in FRED can be investigated at 
+<center>
+   https://fred.stlouisfed.org
+</center>
+In order to be able to download data from FRED through `R`, you have to go to
+<center>
+   https://fred.stlouisfed.org/docs/api/api_key.html
+</center>
+and create an API key. To do so, create an account and request an API key for downloading data. Then uncomment the statement `fredr_set_key("type-you-key")` and insert your personal API key. Afterwards, you can run the next statements to download the relevant data from FRED.
+
+We pick three different series:
+
+- a quarterly series of real personal consumption expenditure ([PCECC96](https://fred.stlouisfed.org/series/PCECC96))
+- a quarterly series of real disposable personal income ([DPIC96](https://fred.stlouisfed.org/series/DPIC96))
+- a quarterly series of the growth rate of the price of all US shares ([SPASTT01USQ657N](https://fred.stlouisfed.org/series/SPASTT01USQ657N))
+
+The downloaded data contain more information than we actually need to run regressions. The only information we require is the `date` as well as the corresponding `value`. We turn these `values` into time series using the `xts` function. This function allows us to take a series of values, e.g. `cons_real$value`, and attach date values to this series using the `order.by` statement. Using this time series constructs is required when we want to run regressions that use lag-operators.
+
+```{r}
+#fredr_set_key("type-you-key")
+
+# extract real personal consumption expenditures (quarterly)
+cons_real <- fredr(series_id = "PCECC96",
+                   observation_start = as.Date("1960-01-01"),
+                   observation_end = as.Date("2020-01-01")
+)
+
+# extract real disposable personal income (quarterly)
+inc_real  <- fredr(series_id = "DPIC96",
+                   observation_start = as.Date("1960-01-01"),
+                   observation_end = as.Date("2020-01-01")
+)
+
+# extract total share prices (growth rates, quarterly)
+stock_price <- fredr(series_id = "SPASTT01USQ657N",
+                    observation_start = as.Date("1960-01-01"),
+                    observation_end = as.Date("2020-01-01")
+)
+
+# create time series from consumption data
+cons <- xts(x = cons_real$value, order.by = as.Date(cons_real$date))
+
+# create time series from income data
+inc  <- xts(x = inc_real$value, order.by = as.Date(inc_real$date))
+
+# create time series from share price data
+stock <- xts(x = stock_price$value, order.by = as.Date(stock_price$date))
+```
+
+<br />
+
+We first regress the change in consumption expenditure `cons - stats::lag(cons)` on lagged consumption and income. Note that we have to specify, which `lag` function to use here, as there are multiple packages we use that provide such a function. The correct one that will help us here is `stats::lag`. We find no correlation of the change in consumption expenditure on lagged consumption or income. This may suggest that the random walk hypothesis is probably a valid assumption.
+
+
+```{r}
+# TEST 1: consumption on lags of consumption and income
+res1 <- lm(cons - stats::lag(cons) ~ stats::lag(cons) + stats::lag(inc))
+summary(res1)
+```
+
+<br />
+
+The results however become less clear cut, when we include multiple income lags into the regression. The coefficient on lagged consumption now turns positive and significant.
+
+```{r}
+# TEST 2: consumption on consumption and multiple lags of income
+res2 <- lm(cons - stats::lag(cons) ~ stats::lag(cons, k=1) + stats::lag(inc, k=1) + stats::lag(inc, k=2) + stats::lag(inc, k=3) + stats::lag(inc, k=4))
+summary(res2)
+```
+
+<br />
+
+The same is true when we employ multiple lags of consumption.
+
+```{r}
+# TEST 3: consumption on multiple lags of consumption
+res3 <- lm(cons - stats::lag(cons) ~ stats::lag(cons, k=1) + stats::lag(cons, k=2) + stats::lag(cons, k=3) + stats::lag(cons, k=4) + stats::lag(cons, k=5))
+summary(res3)
+```
+
+<br />
+
+Finally, lagged stock price changes also have the ability to predict future consumption changes. Hence, we conclude that the evidence for the random walk hypothesis in macro data is quite weak.
+
+```{r}
+# TEST 4: consumption on lags of consumption and share price
+res4 <- lm(cons - stats::lag(cons) ~ stats::lag(cons) + stats::lag(stock))
+summary(res4)
+```

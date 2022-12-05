@@ -70,7 +70,7 @@ solve_ramsey <- function(k0, amount, policy, g, alpha, delta, gamma, beta) {
   }
   
   # determine steady state capital intensity and consumption
-  kstar <- (alpha/((1+g)/(beta*(1-tau_k[length(tau_k)])) - 1 + delta))^(1/(1-alpha))
+  kstar <- (alpha/(((1+g)/beta - 1)/(1-tau_k[length(tau_k)]) + delta))^(1/(1-alpha))
   cstar <- kstar**alpha - (g+delta)*kstar - g_t[length(g_t)]
   
   # set starting interval depending on k0
@@ -102,7 +102,7 @@ solve_ramsey <- function(k0, amount, policy, g, alpha, delta, gamma, beta) {
       
       # determine next period's capital stock and consumption
       k[t+1] <- max((k[t]**alpha - c[t] - g_t[t] + (1-delta)*k[t])/(1+g), 1e-4)
-      c[t+1] <- (beta*(1-tau_k[t])*(1 + alpha*k[t+1]^(alpha-1) - delta)/(1+g))^gamma*c[t]
+      c[t+1] <- (beta*(1 + (1-tau_k[t])*(alpha*k[t+1]^(alpha-1) - delta))/(1+g))^gamma*c[t]
       
       #  decision rule for capital
       if(k0 <= kstar & k[t+1] > kstar | k0 > kstar & c[t+1] < cstar) {
@@ -130,7 +130,7 @@ ramsey <- function(T0, T1, c0, k0, g_t, tau_k, g, alpha, delta, gamma, beta) {
   tol <- 1e-6
   
   # determine steady state capital intensity and consumption
-  kstar <- (alpha/((1+g)/(beta*(1-tau_k[length(tau_k)])) - 1 + delta))^(1/(1-alpha))
+  kstar <- (alpha/(((1+g)/beta - 1)/(1-tau_k[length(tau_k)]) + delta))^(1/(1-alpha))
   cstar <- kstar**alpha - (g+delta)*kstar - g_t[length(g_t)]
     
   # start a capital and consumption path
@@ -149,7 +149,7 @@ ramsey <- function(T0, T1, c0, k0, g_t, tau_k, g, alpha, delta, gamma, beta) {
     
     # determine next period's capital stock and consumption
     k[t+1] <- max((k[t]**alpha - c[t] - g_t[t] + (1-delta)*k[t])/(1+g), 1e-4)
-    c[t+1] <- (beta*(1-tau_k[t])*(1 + alpha*k[t+1]^(alpha-1) - delta)/(1+g))^gamma*c[t]
+    c[t+1] <- (beta*(1 + (1-tau_k[t])*(alpha*k[t+1]^(alpha-1) - delta))/(1+g))^gamma*c[t]
     
     #  move to steady state level when you are almost there
     epsilon <- sqrt((c[t+1]/cstar-1)^2 + (k[t+1]/kstar-1)^2)
@@ -385,7 +385,7 @@ k_old <- (alpha/((1+g)/beta - 1 + delta))^(1/(1-alpha))
 c_old <- k_old^alpha - (g+delta)*k_old
 
 # determine size of capital tax rate (2.5%)
-tax_rate <- 0.025
+tax_rate <- 0.25
 
 # set simulation periods
 T0 <- -50
@@ -480,7 +480,7 @@ k_old <- (alpha/((1+g)/beta - 1 + delta))^(1/(1-alpha))
 c_old <- k_old^alpha - (g+delta)*k_old
 
 # determine size of capital tax rate (2.5%)
-tax_rate <- -0.025
+tax_rate <- -0.25
 
 # set simulation periods
 T0 <- -50
@@ -565,5 +565,5 @@ if(export_pdf) {
 ###########
 
 sprintf('Without capital taxes    : %12.6f %12.6f\n', Welfare_0, 0)
-sprintf('With 2.5p capital tax    : %12.6f %12.6f\n', Welfare_1, ((Welfare_1/Welfare_0)^{1/(1-1/gamma)}-1)*100)
-sprintf('With 2.5p capital subsidy: %12.6f %12.6f\n', Welfare_2, ((Welfare_2/Welfare_0)^{1/(1-1/gamma)}-1)*100)
+sprintf('With 25p capital tax     : %12.6f %12.6f\n', Welfare_1, ((Welfare_1/Welfare_0)^{1/(1-1/gamma)}-1)*100)
+sprintf('With 25p capital subsidy : %12.6f %12.6f\n', Welfare_2, ((Welfare_2/Welfare_0)^{1/(1-1/gamma)}-1)*100)

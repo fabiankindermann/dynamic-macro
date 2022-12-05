@@ -1,0 +1,344 @@
+---
+title: "Consumption under Certainty"
+output:
+  html_document:
+    df_print: paged
+---
+
+### Loading packages, defining colors and using data
+We first clear the workspace using `rm(list = ls())`and then include all packages we need. All packages used here are for plotting. If a package is missing in your R distribution (which is quite likely initially), just use `install.packages("package_name")` with the respective package name to install it on your system. If you execute the code in the file `install_packages.R`, then all necessary packages will be installed into your R distribution. If the variable `export_graphs` is set to `TRUE`, then the graphs will be exported as pdf-files. In addition, we define a set of colors here to make graphs look more beautiful.
+
+```{r message = FALSE}
+rm(list = ls())
+library(reshape2)
+library(base)
+library(ggplot2)
+library(grid)
+library(scales)
+library(stringr)
+library(tidyverse)
+library(pwt10)
+
+# should graphs be exported to pdf
+export_pdf <- FALSE
+
+# define some colors
+mygreen <- "#00BA38"
+myblue  <- "#619CFF"
+myred   <- "#F8766D"
+```
+
+### The model setup
+
+In the permanent income setup, there are not many parameters to choose. In fact, in order to pin down consumption, we only have to define the number of periods `T` as well as the size of permanent income `y_p`.
+
+```{r}
+# number of model periods
+T   <- 80
+
+# permanent income
+y_p <- 1
+```
+
+### Solving permanent income consumption model
+
+Next, we provide a function `permanent consumption`, that allows us to solve the permanent income consumption model. This function takes as only input a stream or current incomes `y`. From this, it calculates permanent income `y_p`, which then directly leads to consumption expenditure `c`. Saving `s` then are defined as the difference between current income and permanent income. The stock of wealth `a` is the accumulated amount of savings.
+
+```{r}
+permanent_consumption <- function(y) {
+  
+  # calculate permanent income
+  y_p <- mean(y)
+  
+  # consumption (only depends on permanent income)
+  c <- rep(y_p, T)
+  
+  # calculate savings
+  s <- y - y_p
+  
+  # derive asset path
+  a <- 0
+  for(t in 2:T) {
+    a[t] <- a[t-1] + s[t-1]
+  }
+  
+  # create data set to return
+  res <- data.frame(year=c(1:T), c, y_p, y, s, a)
+  
+  return(res)
+}
+```
+
+
+### Case 1: Identical income in all periods
+
+We start with studying the case in which current income is equal to permanent income in all periods. We define the current income stream `y` accordingly and create a consumption-income-savings dataset, which we can plot into a graph. Obviously, consumption in this case is equal to both permanent and current income. As a result, savings are zero in all periods.
+
+```{r}
+# income profile
+y <- rep(y_p, T)
+
+# create data set
+consumption <- permanent_consumption(y)
+
+# Plot GDP and its components
+myplot <- ggplot(data = consumption) + 
+  geom_ribbon(aes(x=year, ymin=0, ymax=c,    fill= "1c", color="1c") , alpha=0.4) +
+  geom_ribbon(aes(x=year, ymin=c, ymax=c+s, fill= "2s", color="2s")  , alpha=0.4) +
+  geom_line(aes(x=year, y=y), color="darkblue", size=1) +
+  coord_cartesian(xlim=c(1, T), ylim=c(0, 2)) + 
+  scale_x_continuous(breaks=seq(0, T, 10), expand=c(0, 0)) +
+  labs(x = "Year t",
+       y = "Consumption and Savings") +
+  scale_fill_manual(breaks = c("1c", "2s"), name = "", 
+                    labels = c("Consumption", "Savings"),
+                    values = c(mygreen, myblue)) +
+  scale_color_manual(breaks = c("1c", "2s"),
+                     values = c(mygreen, myblue)) +
+  guides(colour = "none") +
+  theme_bw() + 
+  theme(legend.position="bottom")
+
+# print the plot
+print(myplot)
+```
+
+<br />
+
+Because savings are zero in all periods, there is also no wealth accumulation.
+
+
+```{r}
+myplot <- ggplot(data = consumption) + 
+  geom_line(aes(x=year, y=a), color="darkblue", size=1) +
+  coord_cartesian(xlim=c(1, T), ylim=c(0, 2)) + 
+  scale_x_continuous(breaks=seq(0, T, 10), expand=c(0, 0)) +
+  labs(x = "Year t",
+       y = "Individual Wealth") +
+  theme_bw()
+
+# print the plot
+print(myplot)
+```
+
+
+
+### Case 2: All income in period 1
+
+In this second case, we assume that all income is paid out in period one. As the income payout in period one is `y_p*T`, permanent income remains unchanged and so is consumption behavior. However, what changes substantially is savings behavior. In fact, out of the $T$ units of permanent income received in period 1, the consumer will only consume $1$ and save $T-1$ units. In any successive period, the consumer extracts $1$ unit from the accumulated wealth (i.e. $s_t = -1$) to finance additional consumption.
+
+```{r}
+# income profile
+y <- c(y_p*T, rep(0, T-1))
+
+# create data set
+consumption <- permanent_consumption(y)
+
+# Plot GDP and its components
+myplot <- ggplot(data = consumption) + 
+  geom_ribbon(aes(x=year, ymin=0, ymax=c,    fill= "1c", color="1c") , alpha=0.4) +
+  geom_ribbon(aes(x=year, ymin=c, ymax=c+s, fill= "2s", color="2s")  , alpha=0.4) +
+  geom_line(aes(x=year, y=y), color="darkblue", size=1) +
+  coord_cartesian(xlim=c(1, T), ylim=c(0, 80)) + 
+  scale_x_continuous(breaks=seq(0, T, 10), expand=c(0, 0)) +
+  labs(x = "Year t",
+       y = "Consumption and Savings") +
+  scale_fill_manual(breaks = c("1c", "2s"), name = "", 
+                    labels = c("Consumption", "Savings"),
+                    values = c(mygreen, myblue)) +
+  scale_color_manual(breaks = c("1c", "2s"),
+                     values = c(mygreen, myblue)) +
+  guides(colour = "none") +
+  theme_bw() + 
+  theme(legend.position="bottom")
+
+# print the plot
+print(myplot)
+```
+
+<br />
+
+Because of the above savings behavior, the stock of wealth immediately jumps to a value of $T-1$ and then decreases linearly over time until in the last period of life, all wealth has been consumed and $a_{T+1} = 0$.
+
+```{r}
+myplot <- ggplot(data = consumption) + 
+  geom_line(aes(x=year, y=a), color="darkblue", size=1) +
+  coord_cartesian(xlim=c(1, T), ylim=c(0, 80)) + 
+  scale_x_continuous(breaks=seq(0, T, 10), expand=c(0, 0)) +
+  labs(x = "Year t",
+       y = "Individual Wealth") +
+  theme_bw()
+
+# print the plot
+print(myplot)
+```
+
+
+### Case 3: Only income in first half
+
+In our last exemplary case, we assume that the entire income is paid out in the first half of individual life. We can interpret this case as a phase of working for 40 years followed by a 40 years period of retirement (maybe a bit of an exaggeration, but highly instructive). The consumer will now use one unit of income in each period to consume and set aside another unit as savings for retirement. In the retirement phase, the consumer will resort to these savings to finance a constant consumption stream over the life cycle.
+
+```{r}
+# income profile
+y <- c(rep(2*y_p, T/2), rep(0, T/2))
+
+# create data set
+consumption <- permanent_consumption(y)
+
+# Plot GDP and its components
+myplot <- ggplot(data = consumption) + 
+  geom_ribbon(aes(x=year, ymin=0, ymax=c,   fill= "1c", color="1c") , alpha=0.4) +
+  geom_ribbon(aes(x=year, ymin=c, ymax=c+s, fill= "2s", color="2s")  , alpha=0.4) +
+  geom_line(aes(x=year, y=y), color="darkblue", size=1) +
+  coord_cartesian(xlim=c(1, T), ylim=c(0, 2)) + 
+  scale_x_continuous(breaks=seq(0, T, 10), expand=c(0, 0)) +
+  labs(x = "Year t",
+       y = "Consumption and Savings") +
+  scale_fill_manual(breaks = c("1c", "2s"), name = "", 
+                    labels = c("Consumption", "Savings"),
+                    values = c(mygreen, myblue)) +
+  scale_color_manual(breaks = c("1c", "2s"),
+                     values = c(mygreen, myblue)) +
+  guides(colour = "none") +
+  theme_bw() + 
+  theme(legend.position="bottom")
+
+# print the plot
+print(myplot)
+```
+
+<br />
+The above savings behavior leads to a quite typically wealth accumulation pattern. Throughout working years, households accumulate wealth to finance retirement consumption. Starting with retirement, wealth is successively run down until the final period. We call this a life-time wealth accumulation pattern.
+
+```{r}
+myplot <- ggplot(data = consumption) + 
+  geom_line(aes(x=year, y=a), color="darkblue", size=1) +
+  coord_cartesian(xlim=c(1, T), ylim=c(0, 40)) + 
+  scale_x_continuous(breaks=seq(0, T, 10), expand=c(0, 0)) +
+  labs(x = "Year t",
+       y = "Individual Wealth") +
+  theme_bw()
+
+# print the plot
+print(myplot)
+```
+
+
+### Empirical Analysis 1: Consumption over time
+
+Our first empirical approach uses macro data for the US from the Penn World Tables. Once we loaded the dataset, we can calculate per capita consumption and income (GDP). Regressing consumption on income leads to the regression results below. We obtain a quite high regression coefficient and a relatively small constant.
+
+```{r}
+# load Penn World Tables and extract US data
+data("pwt10.0")
+pwt_sub <- subset(pwt10.0, isocode=="USA")
+
+# calculate consumption and income per capita
+pwt_sub$cons <- pwt_sub$csh_c*pwt_sub$cgdpe/pwt_sub$pop
+pwt_sub$inc  <- pwt_sub$cgdpe/pwt_sub$pop
+
+# regress consumption on income per capita
+reg_agg <- lm(cons ~ inc, pwt_sub)
+summary(reg_agg)
+```
+
+
+### Empirical Analysis 2: Consumption in the cross section
+
+An alternative approach is to estimate the consumption function from micro data. The [Consumer Expenditure Survey (CEX)](https://www.bls.gov/cex/) run by the Bureau of Labor Statistics is a good source for micro data on consumption and income. We download and unzip the 2020 wave of this survey, which contains consumption data for the 2nd to 4th quarter of 2020 and the 1st quarter of 2021.
+
+For investigating the consumption function in micro data, we use the 4th quarter expenditure survey. We could be a bit more elaborate here, but for our purposes, it is enough to look at just one quarter. We extrapolate consumption expenditure (variable `TOTEXPCQ`) from this quarter to the entire year. The CEX also contains information on the past 12 months of net income (`FINCBTAX`) as well as the race of the household reference person (`REF_RACE`).
+
+When we regress individual consumption on individual net income, we find that the slope of the regression line is quantitatively small, but the intercept is substantial.
+
+```{r}
+# download 2020 CEX from BLS (ATTENTION: 51Mb)
+zipfile <- paste(getwd(), "/intrvw20.zip", sep="")
+download.file("https://www.bls.gov/cex/pumd/data/comma/intrvw20.zip", destfile=zipfile)
+unzip(zipfile)
+unlink(zipfile)
+
+# extract fourth quarter consumption
+CEX <- read.csv("./intrvw20/fmli204.csv", header=TRUE, sep=",")
+
+# extrapolate quarterly consumption to full year
+CEX$cons <- CEX$TOTEXPCQ*4
+CEX$inc  <- CEX$FINCBTAX
+CEX$race <- CEX$REF_RACE
+
+# regression for all individuals
+reg_cross <- lm(cons ~ inc, CEX[CEX$cons > 0, ])
+summary(reg_cross)
+```
+
+
+### Ploting the two consumption functions
+
+We can now use the regression results from above to plot the two consumption functions. This illustrates what we already found in the regressions. In macro data, the relation between consumption and income is an almost proportional one where in micro data, the relation is much flatter.
+
+```{r}
+# generate consumption functions
+y       <- seq(0, 50000)
+c_agg   <- reg_agg$coefficients[1] + reg_agg$coefficients[2]*y
+c_cross <- reg_cross$coefficients[1] + reg_cross$coefficients[2]*y
+cons_reg <- data.frame(y, c_agg, c_cross)
+
+# plot consumption functions
+myplot <- ggplot(data = cons_reg) + 
+  geom_line(aes(x=y, y=y), color="black", size=0.3) +
+  geom_line(aes(x=y, y=c_agg, color="1"), size=1) +
+  geom_line(aes(x=y, y=c_cross, color="2"), size=1) +
+  coord_cartesian(xlim=c(0, 50000), ylim=c(0, 50000)) + 
+  scale_color_manual(breaks = c("1", "2"), name = "", 
+                    labels = c("Macro Data", "Micro Data"),
+                    values = c(mygreen, myblue)) +
+  scale_x_continuous(breaks=seq(0, 50000, 5000)) +
+  scale_y_continuous(breaks=seq(0, 50000, 10000)) +
+  labs(x = "Income Y",
+       y = "Consumption C") +
+  theme_bw() + 
+  theme(legend.position="bottom")
+
+# print the plot
+print(myplot)
+```
+
+
+### Empirical Analysis 3: Consumption by Race
+
+In an additional analysis, we can study the relation between the race of the household reference period and the relation between consumption and income. Running the above regressions separately for households with a White and a Black reference person, respectively, yields differences in both the sensitivity of consumption to income as well as the intercept. Plotting the two consumption functions, we find that the major difference in consumption is determined by the intercept, i.e. the consumption functions move (somewhat) parallel. Of course, owing to the different coefficients, the difference between the two lines increases somewhat with income. This leads us to the conclusion that the difference in consumption between Black and White reference person households is mainly governed by different permanent incomes in the two groups.
+
+```{r}
+# regression only for white reference persons
+reg_White <- lm(cons ~ inc, CEX[CEX$cons > 0 & CEX$race == 1, ])
+summary(reg_White)
+
+# regression only for Black reference persons
+reg_Black <- lm(cons ~ inc, CEX[CEX$cons > 0 & CEX$race == 2, ])
+summary(reg_Black)
+
+# generate consumption functions
+y         <- seq(0, 50000)
+c_White   <- reg_White$coefficients[1] + reg_White$coefficients[2]*y
+c_Black   <- reg_Black$coefficients[1] + reg_Black$coefficients[2]*y
+cons_race <- data.frame(y, c_White, c_Black)
+
+# plot consumption functions
+myplot <- ggplot(data = cons_race) + 
+  geom_line(aes(x=y, y=y), color="black", size=0.3) +
+  geom_line(aes(x=y, y=c_White, color="1"), size=1) +
+  geom_line(aes(x=y, y=c_Black, color="2"), size=1) +
+  coord_cartesian(xlim=c(0, 50000), ylim=c(0, 50000)) + 
+  scale_color_manual(breaks = c("1", "2"), name = "", 
+                     labels = c("Whites", "Blacks"),
+                     values = c(mygreen, myblue)) +
+  scale_x_continuous(breaks=seq(0, 50000, 5000)) +
+  scale_y_continuous(breaks=seq(0, 50000, 10000)) +
+  labs(x = "Income Y",
+       y = "Consumption C") +
+  theme_bw() + 
+  theme(legend.position="bottom")
+
+# print the plot
+print(myplot)
+```

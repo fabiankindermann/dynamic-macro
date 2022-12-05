@@ -21,3 +21,8 @@ This is a set of R-files we use for our Dynamic Macro lecture at Uni Regensburg.
 
 - [The Ramsey Growth Model](https://raw.githack.com/fabiankindermann/dynamic-macro/main/r_markdown/chap03_01_Ramsey_model.html)
 - [Fiscal Policy in the Ramsey model](https://raw.githack.com/fabiankindermann/dynamic-macro/main/r_markdown/chap03_02_fiscal_policy.html)
+
+## Chapter 4
+
+- [Consumption under Certainty](https://raw.githack.com/fabiankindermann/dynamic-macro/main/r_markdown/chap04_01_certain_cons.html)
+- [Consumption under Uncertainty](https://raw.githack.com/fabiankindermann/dynamic-macro/main/r_markdown/chap04_02_uncertain_cons.html)

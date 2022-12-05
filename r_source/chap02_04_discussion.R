@@ -14,7 +14,7 @@ library(tidyverse)
 library(pwt10)
 
 # should graphs be exported to pdf
-export_pdf <- TRUE
+export_pdf <- FALSE
 
 # define some colors
 mygreen <- "#00BA38"
@@ -178,7 +178,7 @@ data <- data[!is.na(data$output_per_capita.1970) & !is.na(data$output_per_capita
 data$gy <- data$output_per_capita.2015 - data$output_per_capita.1970
 
 # run regression
-reg <- lm(gy ~ data$output_per_capita.1970, data)
+reg <- lm(gy ~ output_per_capita.1970, data)
 summary(reg)
 
 # generate scatter plot
@@ -211,7 +211,7 @@ data <- data[data$output_per_capita.1970 < 11, ]
 
 
 # run regression
-reg <- lm(gy ~ data$output_per_capita.1970, data)
+reg <- lm(gy ~ output_per_capita.1970, data)
 summary(reg)
 
 # generate scatter plot

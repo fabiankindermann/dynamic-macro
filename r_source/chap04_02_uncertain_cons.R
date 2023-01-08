@@ -145,17 +145,17 @@ lab  <- paste("MPC = ", format(round((consumption$c[t_beg]/consumption$c_base[t_
 
 # Plot GDP and its components
 myplot <- ggplot(data = consumption) + 
-  geom_line(aes(x=year, y=c_base, color="1"), color=myblue, size=1) +
-  geom_line(aes(x=year, y=c, color="2"), color=mygreen, size=1) +
+  geom_line(aes(x=year, y=c_base, color="1"), size=1) +
+  geom_line(aes(x=year, y=c, color="2"), size=1) +
   coord_cartesian(xlim=c(1, T), ylim=c(0, 2.5)) + 
   scale_x_continuous(breaks=seq(0, T, 10), expand=c(0, 0)) +
   geom_label(aes(x = 5, y = 2.5, label = lab), 
              hjust = 0, vjust = 1, label.r = unit(0, "lines"), label.padding = unit(0.35, "lines")) +
   labs(x = "Year t",
        y = "Consumption") +
-  scale_color_manual(breaks = c("1", "2"),
+  scale_color_manual(breaks = c("1", "2"), name = "", 
                      labels = c("Consumption (Baseline)", "Consumption (Permanent Shock)"),
-                     values = c(mygreen, myblue)) +
+                     values = c(myblue, mygreen)) +
   theme_bw() + 
   theme(legend.position="bottom")
 
@@ -185,17 +185,17 @@ lab  <- paste("MPC = ", format(round((consumption$c[t_beg]/consumption$c_base[t_
 
 # Plot GDP and its components
 myplot <- ggplot(data = consumption) + 
-  geom_line(aes(x=year, y=c_base, color="1"), color=myblue, size=1) +
-  geom_line(aes(x=year, y=c, color="2"), color=mygreen, size=1) +
+  geom_line(aes(x=year, y=c_base, color="1"), size=1) +
+  geom_line(aes(x=year, y=c, color="2"), size=1) +
   coord_cartesian(xlim=c(1, T), ylim=c(0, 2.5)) + 
   scale_x_continuous(breaks=seq(0, T, 10), expand=c(0, 0)) +
   geom_label(aes(x = 5, y = 2.5, label = lab), 
              hjust = 0, vjust = 1, label.r = unit(0, "lines"), label.padding = unit(0.35, "lines")) +
   labs(x = "Year t",
        y = "Consumption") +
-  scale_color_manual(breaks = c("1", "2"),
-                     labels = c("Consumption (Baseline)", "Consumption (Permanent Shock)"),
-                     values = c(mygreen, myblue)) +
+  scale_color_manual(breaks = c("1", "2"), name = "", 
+                     labels = c("Consumption (Baseline)", "Consumption (Transitory Shock)"),
+                     values = c(myblue, mygreen)) +
   theme_bw() + 
   theme(legend.position="bottom")
 

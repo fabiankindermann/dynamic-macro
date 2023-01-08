@@ -1,0 +1,3 @@
+load("/Users/kif60840/git/dynamic-macro/r_source/chap06_calibrated_parameters.RData")
+alpha
+beta

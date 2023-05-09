@@ -1,9 +1,0 @@
-load("/Users/kif60840/git/dynamic-macro/r_source/chap06_calibrated_parameters.RData")
-alpha
-beta
-load("/Users/kif60840/git/dynamic-macro/r_source/chap07_coefficients.RData")
-load("/Users/kif60840/git/dynamic-macro/r_source/chap07_empirics.RData")
-load("/Users/kif60840/git/dynamic-macro/r_source/chap07_parameters.RData")
-load("/Users/kif60840/git/dynamic-macro/r_source/chap07_coefficients.RData")
-load("/Users/kif60840/git/dynamic-macro/r_source/chap07_empirics.RData")
-load("/Users/kif60840/git/dynamic-macro/r_source/chap07_parameters.RData")

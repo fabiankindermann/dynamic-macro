@@ -60,7 +60,7 @@ gdp_real$log_gdp = log(gdp_real$value)
 
 # Plot GDP and estimated trends
 myplot <- ggplot(data = gdp_real) + 
-  geom_line(aes(x=date, y=log_gdp), color="darkblue", size=1) +
+  geom_line(aes(x=date, y=log_gdp), color="darkblue", linewidth=1) +
   labs(x = "Year t",
        y = "Log of real GDP") +
   scale_x_date(breaks = xbreaks, date_labels = "%Y", expand=c(0, 0)) +
@@ -125,10 +125,10 @@ gdp_real$c_hpf <- res_hpf$cycle
 
 # Plot GDP and estimated trends
 myplot <- ggplot(data = gdp_real) + 
-  geom_line(aes(x=date, y=log_gdp), color="darkblue", size=1) +
-  geom_line(aes(x=date, y=g_lin, color="linear"), size=0.5) +
-  geom_line(aes(x=date, y=g_ham, color="hamilton"), size=0.5) +
-  geom_line(aes(x=date, y=g_hpf, color="hpfilter"), size=0.5) +
+  geom_line(aes(x=date, y=log_gdp), color="darkblue", linewidth=1) +
+  geom_line(aes(x=date, y=g_lin, color="linear"), linewidth=0.5) +
+  geom_line(aes(x=date, y=g_ham, color="hamilton"), linewidth=0.5) +
+  geom_line(aes(x=date, y=g_hpf, color="hpfilter"), linewidth=0.5) +
   labs(x = "Year t",
        y = "Log of real GDP") +
   scale_color_manual(breaks = c("linear", "hamilton", "hpfilter"),
@@ -186,10 +186,10 @@ dy   <- (abs(ymin)+abs(ymax))/2
 # plot cycle
 myplot <- ggplot(data = gdp_real) + 
   geom_rect(data=rec_df, aes(xmin=rstart, xmax=rend, ymin=ymin-0.05*dy, ymax=ymax+0.05*dy), fill='gray', alpha=0.5) + 
-  geom_hline(yintercept=0, color="gray", size=0.5) +
-  geom_line(aes(x=date, y=c_lin, color="linear"), size=0.5) +
-  geom_line(aes(x=date, y=c_ham, color="hamilton"), size=0.5) +
-  geom_line(aes(x=date, y=c_hpf, color="hpfilter"), size=0.5) +
+  geom_hline(yintercept=0, color="gray", linewidth=0.5) +
+  geom_line(aes(x=date, y=c_lin, color="linear"), linewidth=0.5) +
+  geom_line(aes(x=date, y=c_ham, color="hamilton"), linewidth=0.5) +
+  geom_line(aes(x=date, y=c_hpf, color="hpfilter"), linewidth=0.5) +
   scale_x_date(breaks = xbreaks, date_labels = "%Y", expand=c(0, 0)) +
   scale_y_continuous(breaks=seq(ymin, ymax, 0.05), expand=c(0, 0)) +  
   labs(x = "Year t",
@@ -225,8 +225,8 @@ dy   <- (abs(ymin)+abs(ymax))/2
 # plot cycle
 myplot <- ggplot(data = gdp_real) + 
   geom_rect(data=rec_df, aes(xmin=rstart, xmax=rend, ymin=ymin-0.05*dy, ymax=ymax+0.05*dy), fill='gray', alpha=0.5) + 
-  geom_hline(yintercept=0, color="gray", size=0.5) +
-  geom_line(aes(x=date, y=c_hpf), color=myred, size=0.5) +
+  geom_hline(yintercept=0, color="gray", linewidth=0.5) +
+  geom_line(aes(x=date, y=c_hpf), color=myred, linewidth=0.5) +
   scale_x_date(breaks = xbreaks, date_labels = "%Y", expand=c(0, 0)) +
   scale_y_continuous(breaks=seq(ymin, ymax, 0.025), expand=c(0, 0)) +  
   labs(x = "Year t",

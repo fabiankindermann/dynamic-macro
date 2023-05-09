@@ -15,6 +15,7 @@ library(scales)
 library(stringr)
 library(tidyverse)
 library(fredr)
+library(mFilter)
 library(formattable)
 
 # should graphs be exported to pdf
@@ -103,9 +104,9 @@ dy   <- (abs(ymin)+abs(ymax))/2
 # plot cycle
 myplot <- ggplot(data = fred) + 
   geom_rect(data=rec_df, aes(xmin=rstart, xmax=rend, ymin=ymin-0.05*dy, ymax=ymax+0.05*dy), fill='gray', alpha=0.5) + 
-  geom_hline(yintercept=0, color="gray", size=0.5) +
-  geom_line(aes(x=date, y=c_hpf_US, color="US"), size=0.5) +
-  geom_line(aes(x=date, y=c_hpf_DE, color="DE"), size=0.5) +
+  geom_hline(yintercept=0, color="gray", linewidth=0.5) +
+  geom_line(aes(x=date, y=c_hpf_US, color="US"), linewidth=0.5) +
+  geom_line(aes(x=date, y=c_hpf_DE, color="DE"), linewidth=0.5) +
   scale_x_date(breaks = xbreaks, date_labels = "%Y", expand=c(0, 0)) +
   scale_y_continuous(breaks=seq(ymin, ymax, 0.025), expand=c(0, 0)) +  
   labs(x = "Year t",
@@ -148,9 +149,9 @@ dy   <- (abs(ymin)+abs(ymax))/2
 # plot cycle
 myplot <- ggplot(data = fred) + 
   geom_rect(data=rec_df, aes(xmin=rstart, xmax=rend, ymin=ymin-0.05*dy, ymax=ymax+0.05*dy), fill='gray', alpha=0.5) + 
-  geom_hline(yintercept=0, color="gray", size=0.5) +
-  geom_line(aes(x=date, y=D_EMPL_US, color="US"), size=0.5) +
-  geom_line(aes(x=date, y=D_EMPL_DE, color="DE"), size=0.5) +
+  geom_hline(yintercept=0, color="gray", linewidth=0.5) +
+  geom_line(aes(x=date, y=D_EMPL_US, color="US"), linewidth=0.5) +
+  geom_line(aes(x=date, y=D_EMPL_DE, color="DE"), linewidth=0.5) +
   scale_x_date(breaks = xbreaks, date_labels = "%Y", expand=c(0, 0)) +
   scale_y_continuous(breaks=seq(ymin, ymax, 2), expand=c(0, 0)) +  
   labs(x = "Year t",
@@ -184,9 +185,9 @@ dy   <- (abs(ymin)+abs(ymax))/2
 # plot cycle
 myplot <- ggplot(data = fred) + 
   geom_rect(data=rec_df, aes(xmin=rstart, xmax=rend, ymin=ymin-0.05*dy, ymax=ymax+0.05*dy), fill='gray', alpha=0.5) + 
-  geom_hline(yintercept=0, color="gray", size=0.5) +
-  geom_line(aes(x=date, y=UNEMP_US, color="US"), size=0.5) +
-  geom_line(aes(x=date, y=UNEMP_DE, color="DE"), size=0.5) +
+  geom_hline(yintercept=0, color="gray", linewidth=0.5) +
+  geom_line(aes(x=date, y=UNEMP_US, color="US"), linewidth=0.5) +
+  geom_line(aes(x=date, y=UNEMP_DE, color="DE"), linewidth=0.5) +
   scale_x_date(breaks = xbreaks, date_labels = "%Y", expand=c(0, 0)) +
   scale_y_continuous(breaks=seq(ymin, ymax, 2.5), expand=c(0, 0)) +  
   labs(x = "Year t",
@@ -220,9 +221,9 @@ dy   <- (abs(ymin)+abs(ymax))/2
 # plot cycle
 myplot <- ggplot(data = fred) + 
   geom_rect(data=rec_df, aes(xmin=rstart, xmax=rend, ymin=ymin-0.05*dy, ymax=ymax+0.05*dy), fill='gray', alpha=0.5) + 
-  geom_hline(yintercept=0, color="gray", size=0.5) +
-  geom_line(aes(x=date, y=INFL_US, color="US"), size=0.5) +
-  geom_line(aes(x=date, y=INFL_DE, color="DE"), size=0.5) +
+  geom_hline(yintercept=0, color="gray", linewidth=0.5) +
+  geom_line(aes(x=date, y=INFL_US, color="US"), linewidth=0.5) +
+  geom_line(aes(x=date, y=INFL_DE, color="DE"), linewidth=0.5) +
   scale_x_date(breaks = xbreaks, date_labels = "%Y", expand=c(0, 0)) +
   scale_y_continuous(breaks=seq(ymin, ymax, 2), expand=c(0, 0)) +  
   labs(x = "Year t",
@@ -256,9 +257,9 @@ dy   <- (abs(ymin)+abs(ymax))/2
 # plot cycle
 myplot <- ggplot(data = fred) + 
   geom_rect(data=rec_df, aes(xmin=rstart, xmax=rend, ymin=ymin-0.05*dy, ymax=ymax+0.05*dy), fill='gray', alpha=0.5) + 
-  geom_hline(yintercept=0, color="gray", size=0.5) +
-  geom_line(aes(x=date, y=NOMRATE_US, color="US"), size=0.5) +
-  geom_line(aes(x=date, y=NOMRATE_DE, color="DE"), size=0.5) +
+  geom_hline(yintercept=0, color="gray", linewidth=0.5) +
+  geom_line(aes(x=date, y=NOMRATE_US, color="US"), linewidth=0.5) +
+  geom_line(aes(x=date, y=NOMRATE_DE, color="DE"), linewidth=0.5) +
   scale_x_date(breaks = xbreaks, date_labels = "%Y", expand=c(0, 0)) +
   scale_y_continuous(breaks=seq(ymin, ymax, 2), expand=c(0, 0)) +  
   labs(x = "Year t",

@@ -53,7 +53,7 @@ lab  <- paste("growth rate = ", format(round(reg$coefficients[2]*100, 2), nsmall
 
 # generate plot
 myplot <- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=output_per_worker), color="darkblue", size=1) +
+  geom_line(aes(x=year, y=output_per_worker), color="darkblue", linewidth=1) +
   geom_smooth(aes(x=year, y=output_per_worker), method="lm", formula="y ~ x", se=FALSE, color=myred) +
   geom_label(aes(x = xrng[1], y = ymax, label = lab), 
             hjust = 0, vjust = 1, label.r = unit(0, "lines"), label.padding = unit(0.35, "lines")) +
@@ -94,7 +94,7 @@ lab  <- paste("growth rate = ", format(round(reg$coefficients[2]*100, 2), nsmall
 
 # generate plot
 myplot <- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=capital_per_worker), color="darkblue", size=1) +
+  geom_line(aes(x=year, y=capital_per_worker), color="darkblue", linewidth=1) +
   geom_smooth(aes(x=year, y=capital_per_worker), method="lm", formula="y ~ x", se=FALSE, color=myred) +
   geom_label(aes(x = xrng[1], y = ymax, label = lab), 
              hjust = 0, vjust = 1, label.r = unit(0, "lines"), label.padding = unit(0.35, "lines")) +
@@ -130,7 +130,7 @@ ymax <- 0.17
 lab  <- paste("Long-run Level = ", format(round(mean(pwt_sub$gross_return), 3), nsmall=3))
 
 myplot <- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=gross_return), color="darkblue", size=1) +
+  geom_line(aes(x=year, y=gross_return), color="darkblue", linewidth=1) +
   geom_smooth(aes(x=year, y=gross_return), method="lm", formula="y ~ 1", se=FALSE, color=myred) +
   geom_label(aes(x = xrng[2], y = ymax, label = lab),
              hjust = 1, vjust = 1, label.r = unit(0, "lines"), label.padding = unit(0.35, "lines")) +
@@ -171,7 +171,7 @@ lab  <- paste("growth rate = ", format(round(reg$coefficients[2]*100, 2), nsmall
 
 # generate plot
 myplot <- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=capital_to_output), color="darkblue", size=1) +
+  geom_line(aes(x=year, y=capital_to_output), color="darkblue", linewidth=1) +
   geom_smooth(aes(x=year, y=capital_to_output), method="lm", formula="y ~ x", se=FALSE, color=myred) +
   geom_label(aes(x = xrng[1], y = ymax, label = lab), 
              hjust = 0, vjust = 1, label.r = unit(0, "lines"), label.padding = unit(0.35, "lines")) +
@@ -204,7 +204,7 @@ ymax <- 0.7
 lab  <- paste("Long-run Level = ", format(round(mean(pwt_sub$labsh), 3), nsmall=3))
 
 myplot <- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=labsh), color="darkblue", size=1) +
+  geom_line(aes(x=year, y=labsh), color="darkblue", linewidth=1) +
   geom_smooth(aes(x=year, y=labsh), method="lm", formula="y ~ 1", se=FALSE, color=myred) +
   geom_label(aes(x = xrng[2], y = ymax, label = lab), 
              hjust = 1, vjust = 1, label.r = unit(0, "lines"), label.padding = unit(0.35, "lines")) +

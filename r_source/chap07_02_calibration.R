@@ -20,7 +20,7 @@ library(formattable)
 library(nortsTest)
 
 # should graphs be exported to pdf
-export_pdf <- TRUE
+export_pdf <- FALSE
 
 # define some colors
 mygreen <- "#00BA38"
@@ -115,9 +115,9 @@ gov_exp <- hpf$cycle[40:length(hpf$cycle)]
 
 # Plot cycle of government expenditure
 myplot <- ggplot(data = fred_q) + 
-  geom_vline(xintercept=40, color="gray", size=0.5) +
-  geom_hline(yintercept=0, color="gray", size=0.5) +
-  geom_line(aes(x=quarter, y=gov_cycle), color="darkblue", size=1) +
+  geom_vline(xintercept=40, color="gray", linewidth=0.5) +
+  geom_hline(yintercept=0, color="gray", linewidth=0.5) +
+  geom_line(aes(x=quarter, y=gov_cycle), color="darkblue", linewidth=1) +
   labs(x = "Quarter t",
        y = "Cycle of log(G_t)") +
   coord_cartesian(ylim=c(-0.15, 0.15)) +
@@ -177,7 +177,7 @@ table_data <- data.frame("Data" =
                              "Government purchases G/Y", "Hours worked (share of endowment)",
                              "Labor share corporate sector wL/Y", "Capital K/Y (quarterly)",
                              "Government purchases: autocorrelation rho_G", "Government purchases: sd sigma_G"))
-table_data <- cbind(table_data, "Average (1948-2021, in %)" = dat)
+table_data <- cbind(table_data, "Average (1948-2021)" = dat)
 
 
 # output table
@@ -225,12 +225,12 @@ table_data <- data.frame("Parameter" =
                            c("Production parameter (alpha)", "Depreciation rate (delta)", 
                              "Time discount factor (beta)", "Disutility of labor (chi)",
                              "Government share (g_y)", "Mean gov. expend. process (G_bar)",
-                             "Autocorrelation gov. expend. rho_G", "Standard deviation gov. expend. rho_G"))
+                             "Autocorrelation gov. expend. rho_G", "Standard deviation gov. expend. sigma_G"))
 table_data <- cbind(table_data, "Value" = c(alpha, delta, beta, chi, g_y, G_bar, rho_G, sigma_G))
 
 
 # output table
-formattable(table_data,
+formattable(table_data, digits=2,
             align= c("l", "r"))
 
 
@@ -272,11 +272,11 @@ table_data <- data.frame("Data" =
                              "Government purchases G/Y", "Hours worked (share of endowment)",
                              "Labor share corporate sector wL/Y", "Capital K/Y (quarterly)",
                              "Interest rate (quarterly)"))
-table_data <- cbind(table_data, "Model Value" = percent(c(CY, IY, GY, L, wL, KY, r)))
+table_data <- cbind(table_data, "Model Value" = c(CY, IY, GY, L, wL, KY, r))
 
 # output table
 formattable(table_data,
-            align= c("l", "r"))
+            align= c("l", "r"), digits = 3)
 
 
 ########### 
@@ -356,6 +356,5 @@ formattable(table_data, digits = 2,
 
 
 # save empirical data
-
 save(file="chap07_empirics.RData", 
      list=c("emp_data"))

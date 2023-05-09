@@ -76,7 +76,7 @@ selection <- rbind(selection, c("PRS85006151", "REALCOMP"))
 selection <- rbind(selection, c("TB3MS", "NOMRATE"))
 
 # pull all data series from FRED
-fred <- get_fred_data(selection$series, selection$names, "1948-01-01", "2021-12-31", "q")
+fred <- get_fred_data(selection$series, selection$names, "1948-01-01", "1995-12-31", "q")
 
 
 # calculate real variables by deflating nominal ones
@@ -197,8 +197,8 @@ dy   <- (abs(ymin)+abs(ymax))/2
 # create plot
 myplot <- ggplot(data = fred) + 
   geom_rect(data=rec_df, aes(xmin=rstart, xmax=rend, ymin=ymin-0.05*dy, ymax=ymax+0.05*dy), fill='gray', alpha=0.5) + 
-  geom_hline(yintercept=0, color="gray", size=0.5) +
-  geom_line(aes(x=date, y=D_EMPL), color="darkblue", size=0.5) +
+  geom_hline(yintercept=0, color="gray", linewidth=0.5) +
+  geom_line(aes(x=date, y=D_EMPL), color="darkblue", linewidth=0.5) +
   scale_x_date(breaks = xbreaks, date_labels = "%Y", expand=c(0, 0)) +
   scale_y_continuous(breaks=seq(ymin, ymax, 2), expand=c(0, 0)) +  
   labs(x = "Year t",
@@ -228,7 +228,7 @@ dy   <- (abs(ymin)+abs(ymax))/2
 # create plot
 myplot <- ggplot(data = fred) + 
   geom_rect(data=rec_df, aes(xmin=rstart, xmax=rend, ymin=ymin-0.05*dy, ymax=ymax+0.05*dy), fill='gray', alpha=0.5) + 
-  geom_line(aes(x=date, y=UNEMP), color="darkblue", size=0.5) +
+  geom_line(aes(x=date, y=UNEMP), color="darkblue", linewidth=0.5) +
   scale_x_date(breaks = xbreaks, date_labels = "%Y", expand=c(0, 0)) +
   scale_y_continuous(breaks=seq(ymin, ymax, 2.5), expand=c(0, 0)) +  
   labs(x = "Year t",
@@ -258,7 +258,7 @@ dy   <- (abs(ymin)+abs(ymax))/2
 # create plot
 myplot <- ggplot(data = fred) + 
   geom_rect(data=rec_df, aes(xmin=rstart, xmax=rend, ymin=ymin-0.05*dy, ymax=ymax+0.05*dy), fill='gray', alpha=0.5) + 
-  geom_line(aes(x=date, y=HOURS), color="darkblue", size=0.5) +
+  geom_line(aes(x=date, y=HOURS), color="darkblue", linewidth=0.5) +
   scale_x_date(breaks = xbreaks, date_labels = "%Y", expand=c(0, 0)) +
   scale_y_continuous(breaks=seq(ymin, ymax, 2), expand=c(0, 0)) +  
   labs(x = "Year t",
@@ -288,8 +288,8 @@ dy   <- (abs(ymin)+abs(ymax))/2
 # create plot
 myplot <- ggplot(data = fred) + 
   geom_rect(data=rec_df, aes(xmin=rstart, xmax=rend, ymin=ymin-0.05*dy, ymax=ymax+0.05*dy), fill='gray', alpha=0.5) + 
-  geom_hline(yintercept=0, color="gray", size=0.5) +
-  geom_line(aes(x=date, y=LPROD), color="darkblue", size=0.5) +
+  geom_hline(yintercept=0, color="gray", linewidth=0.5) +
+  geom_line(aes(x=date, y=LPROD), color="darkblue", linewidth=0.5) +
   scale_x_date(breaks = xbreaks, date_labels = "%Y", expand=c(0, 0)) +
   scale_y_continuous(breaks=seq(ymin, ymax, 4), expand=c(0, 0)) +  
   labs(x = "Year t",
@@ -319,8 +319,8 @@ dy   <- (abs(ymin)+abs(ymax))/2
 # create plot
 myplot <- ggplot(data = fred) + 
   geom_rect(data=rec_df, aes(xmin=rstart, xmax=rend, ymin=ymin-0.05*dy, ymax=ymax+0.05*dy), fill='gray', alpha=0.5) + 
-  geom_hline(yintercept=0, color="gray", size=0.5) +
-  geom_line(aes(x=date, y=REALCOMP), color="darkblue", size=0.5) +
+  geom_hline(yintercept=0, color="gray", linewidth=0.5) +
+  geom_line(aes(x=date, y=REALCOMP), color="darkblue", linewidth=0.5) +
   scale_x_date(breaks = xbreaks, date_labels = "%Y", expand=c(0, 0)) +
   scale_y_continuous(breaks=seq(ymin, ymax, 4), expand=c(0, 0)) +  
   labs(x = "Year t",
@@ -354,8 +354,8 @@ dy   <- (abs(ymin)+abs(ymax))/2
 # create plot
 myplot <- ggplot(data = fred) + 
   geom_rect(data=rec_df, aes(xmin=rstart, xmax=rend, ymin=ymin-0.05*dy, ymax=ymax+0.05*dy), fill='gray', alpha=0.5) + 
-  geom_hline(yintercept=0, color="gray", size=0.5) +
-  geom_line(aes(x=date, y=INFL), color="darkblue", size=0.5) +
+  geom_hline(yintercept=0, color="gray", linewidth=0.5) +
+  geom_line(aes(x=date, y=INFL), color="darkblue", linewidth=0.5) +
   scale_x_date(breaks = xbreaks, date_labels = "%Y", expand=c(0, 0)) +
   scale_y_continuous(breaks=seq(ymin, ymax, 2), expand=c(0, 0)) +  
   labs(x = "Year t",
@@ -385,7 +385,7 @@ dy   <- (abs(ymin)+abs(ymax))/2
 # create plot
 myplot <- ggplot(data = fred) + 
   geom_rect(data=rec_df, aes(xmin=rstart, xmax=rend, ymin=ymin-0.05*dy, ymax=ymax+0.05*dy), fill='gray', alpha=0.5) + 
-  geom_line(aes(x=date, y=NOMRATE), color="darkblue", size=0.5) +
+  geom_line(aes(x=date, y=NOMRATE), color="darkblue", linewidth=0.5) +
   scale_x_date(breaks = xbreaks, date_labels = "%Y", expand=c(0, 0)) +
   scale_y_continuous(breaks=seq(ymin, ymax, 2), expand=c(0, 0)) +  
   labs(x = "Year t",
@@ -415,8 +415,8 @@ dy   <- (abs(ymin)+abs(ymax))/2
 # create plot
 myplot <- ggplot(data = fred) + 
   geom_rect(data=rec_df, aes(xmin=rstart, xmax=rend, ymin=ymin-0.05*dy, ymax=ymax+0.05*dy), fill='gray', alpha=0.5) + 
-  geom_hline(yintercept=0, color="gray", size=0.5) +
-  geom_line(aes(x=date, y=NOMRATE-INFL), color="darkblue", size=0.5) +
+  geom_hline(yintercept=0, color="gray", linewidth=0.5) +
+  geom_line(aes(x=date, y=NOMRATE-INFL), color="darkblue", linewidth=0.5) +
   scale_x_date(breaks = xbreaks, date_labels = "%Y", expand=c(0, 0)) +
   scale_y_continuous(breaks=seq(ymin, ymax, 2), expand=c(0, 0)) +  
   labs(x = "Year t",

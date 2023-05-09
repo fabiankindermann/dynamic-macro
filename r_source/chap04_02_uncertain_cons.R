@@ -4,8 +4,8 @@
 
 # Clear the workspace and load libraries
 rm(list = ls())
-library(xts)
 library(zoo)
+library(xts)
 library(dynlm)
 library(reshape2)
 library(base)
@@ -85,7 +85,7 @@ consumption <- income_shock(T, 11, 15, -1)
 myplot <- ggplot(data = consumption) + 
   geom_ribbon(aes(x=year, ymin=0, ymax=c,    fill= "1c", color="1c") , alpha=0.4) +
   geom_ribbon(aes(x=year, ymin=c, ymax=c+s, fill= "2s", color="2s")  , alpha=0.4) +
-  geom_line(aes(x=year, y=y), color="darkblue", size=1) +
+  geom_line(aes(x=year, y=y), color="darkblue", linewidth=1) +
   coord_cartesian(xlim=c(1, T), ylim=c(0, 1.5)) + 
   scale_x_continuous(breaks=seq(0, T, 10), expand=c(0, 0)) +
   labs(x = "Year t",
@@ -112,7 +112,7 @@ if(export_pdf) {
 
 # Plot dynamics of individual wealth
 myplot <- ggplot(data = consumption) + 
-  geom_line(aes(x=year, y=a), color="darkblue", size=1) +
+  geom_line(aes(x=year, y=a), color="darkblue", linewidth=1) +
   coord_cartesian(xlim=c(1, T), ylim=c(-5, 1)) + 
   scale_x_continuous(breaks=seq(0, T, 10), expand=c(0, 0)) +
   labs(x = "Year t",
@@ -145,8 +145,8 @@ lab  <- paste("MPC = ", format(round((consumption$c[t_beg]/consumption$c_base[t_
 
 # Plot GDP and its components
 myplot <- ggplot(data = consumption) + 
-  geom_line(aes(x=year, y=c_base, color="1"), size=1) +
-  geom_line(aes(x=year, y=c, color="2"), size=1) +
+  geom_line(aes(x=year, y=c_base, color="1"), linewidth=1) +
+  geom_line(aes(x=year, y=c, color="2"), linewidth=1) +
   coord_cartesian(xlim=c(1, T), ylim=c(0, 2.5)) + 
   scale_x_continuous(breaks=seq(0, T, 10), expand=c(0, 0)) +
   geom_label(aes(x = 5, y = 2.5, label = lab), 
@@ -185,8 +185,8 @@ lab  <- paste("MPC = ", format(round((consumption$c[t_beg]/consumption$c_base[t_
 
 # Plot GDP and its components
 myplot <- ggplot(data = consumption) + 
-  geom_line(aes(x=year, y=c_base, color="1"), size=1) +
-  geom_line(aes(x=year, y=c, color="2"), size=1) +
+  geom_line(aes(x=year, y=c_base, color="1"), linewidth=1) +
+  geom_line(aes(x=year, y=c, color="2"), linewidth=1) +
   coord_cartesian(xlim=c(1, T), ylim=c(0, 2.5)) + 
   scale_x_continuous(breaks=seq(0, T, 10), expand=c(0, 0)) +
   geom_label(aes(x = 5, y = 2.5, label = lab), 

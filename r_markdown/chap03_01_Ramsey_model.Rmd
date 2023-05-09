@@ -6,7 +6,7 @@ output:
 ---
 
 ### Loading packages, defining colors and using data
-We first clear the workspace using `rm(list = ls())`and then include all packages we need. All packages used here are for plotting. If a package is missing in your R distribution (which is quite likely initially), just use `install.packages("package_name")` with the respective package name to install it on your system. If you execute the code in the file `install_packages.R`, then all necessary packages will be installed into your R distribution. If the variable `export_graphs` is set to `TRUE`, then the graphs will be exported as pdf-files. In addition, we define a set of colors here to make graphs look more beautiful.
+We first clear the workspace using `rm(list = ls())`and then include all packages we need. If a package is missing in your R distribution (which is quite likely initially), just use `install.packages("package_name")` with the respective package name to install it on your system. If you execute the code in the file `install_packages.R`, then all necessary packages will be installed into your R distribution. If the variable `export_graphs` is set to `TRUE`, then the graphs will be exported as pdf-files. In addition, we define a set of colors here to make graphs look more beautiful.
 
 
 ```{r message = FALSE}
@@ -235,9 +235,9 @@ We first plot the dynamics of the capital intensity. When the discount factor in
 
 ```{r}
 myplot <- ggplot(data = transition) + 
-  geom_hline(yintercept=transition$k[ind(T0)], color=myred, linetype="dashed", size=1) + 
-  geom_hline(yintercept=transition$k[ind(T1)], color="#00BA38", linetype="dashed", size=1) + 
-  geom_line(aes(x=year, y=k), color="darkblue", size=1) +
+  geom_hline(yintercept=transition$k[ind(T0)], color=myred, linetype="dashed", linewidth=1) + 
+  geom_hline(yintercept=transition$k[ind(T1)], color="#00BA38", linetype="dashed", linewidth=1) + 
+  geom_line(aes(x=year, y=k), color="darkblue", linewidth=1) +
   coord_cartesian(xlim=c(T0, T1), ylim=c(6, 14)) + 
   scale_x_continuous(breaks=seq(T0, T1, 25), expand=c(0, 0)) +
   labs(x = "Year t",
@@ -253,9 +253,9 @@ What is different compared to the Solow model, however, is the dynamics of the s
 
 ```{r}
 myplot <- ggplot(data = transition) + 
-  geom_hline(yintercept=(g+delta)/transition$k[ind(T0)]^(alpha-1), color=myred, linetype="dashed", size=1) + 
-  geom_hline(yintercept=(g+delta)/transition$k[ind(T1)]^(alpha-1), color="#00BA38", linetype="dashed", size=1) +
-  geom_line(aes(x=year, y=s), color="darkblue", size=1) +
+  geom_hline(yintercept=(g+delta)/transition$k[ind(T0)]^(alpha-1), color=myred, linetype="dashed", linewidth=1) + 
+  geom_hline(yintercept=(g+delta)/transition$k[ind(T1)]^(alpha-1), color="#00BA38", linetype="dashed", linewidth=1) +
+  geom_line(aes(x=year, y=s), color="darkblue", linewidth=1) +
   coord_cartesian(xlim=c(T0, T1), ylim=c(0, 0.5)) + 
   scale_x_continuous(breaks=seq(T0, T1, 25), expand=c(0, 0)) +
   labs(x = "Year t",
@@ -271,11 +271,11 @@ Finally, we can again look at the dynamics of GDP and its components. We get a v
 
 ```{r}
 myplot <- ggplot(data = transition) + 
-  geom_hline(yintercept = c_old, color="#00BA38", linetype="dashed", size=0.5) + 
+  geom_hline(yintercept = c_old, color="#00BA38", linetype="dashed", linewidth=0.5) + 
   geom_ribbon(aes(x=year, ymin=0, ymax=c,    fill= "1c", color="1c") , alpha=0.4) +
   geom_ribbon(aes(x=year, ymin=c, ymax=c+i-ir, fill= "3di", color="3di"), alpha=0.4) +
   geom_ribbon(aes(x=year, ymin=c+i-ir, ymax=y, fill= "2ir", color="2ir")  , alpha=0.4) +
-  geom_line(aes(x=year, y=y), color="darkblue", size=1) +
+  geom_line(aes(x=year, y=y), color="darkblue", linewidth=1) +
   coord_cartesian(xlim=c(T0, T1), ylim=c(0, 3)) + 
   scale_x_continuous(breaks=seq(T0, T1, 25), expand=c(0, 0)) +
   labs(x = "Year t",
@@ -325,9 +325,9 @@ Compared to the case of $\gamma = 0.5$, the dynamics of the capital stock is muc
 ```{r}
 # Plot dynamics of the capital stock
 myplot <- ggplot(data = transition) + 
-  geom_hline(yintercept=transition$k[ind(T0)], color=myred, linetype="dashed", size=1) + 
-  geom_hline(yintercept=transition$k[ind(T1)], color="#00BA38", linetype="dashed", size=1) + 
-  geom_line(aes(x=year, y=k), color="darkblue", size=1) +
+  geom_hline(yintercept=transition$k[ind(T0)], color=myred, linetype="dashed", linewidth=1) + 
+  geom_hline(yintercept=transition$k[ind(T1)], color="#00BA38", linetype="dashed", linewidth=1) + 
+  geom_line(aes(x=year, y=k), color="darkblue", linewidth=1) +
   coord_cartesian(xlim=c(T0, T1), ylim=c(6, 14)) + 
   scale_x_continuous(breaks=seq(T0, T1, 25), expand=c(0, 0)) +
   labs(x = "Year t",
@@ -344,9 +344,9 @@ The reason for this can be found by looking at the dynamics of the savings rate.
 ```{r}
 # Plot dynamics of the savings rate
 myplot <- ggplot(data = transition) + 
-  geom_hline(yintercept=(g+delta)/transition$k[ind(T0)]^(alpha-1), color=myred, linetype="dashed", size=1) + 
-  geom_hline(yintercept=(g+delta)/transition$k[ind(T1)]^(alpha-1), color="#00BA38", linetype="dashed", size=1) +
-  geom_line(aes(x=year, y=s), color="darkblue", size=1) +
+  geom_hline(yintercept=(g+delta)/transition$k[ind(T0)]^(alpha-1), color=myred, linetype="dashed", linewidth=1) + 
+  geom_hline(yintercept=(g+delta)/transition$k[ind(T1)]^(alpha-1), color="#00BA38", linetype="dashed", linewidth=1) +
+  geom_line(aes(x=year, y=s), color="darkblue", linewidth=1) +
   coord_cartesian(xlim=c(T0, T1), ylim=c(0, 0.5)) + 
   scale_x_continuous(breaks=seq(T0, T1, 25), expand=c(0, 0)) +
   labs(x = "Year t",
@@ -363,11 +363,11 @@ We can see the same picture when plotting GDP and its components. The initial dr
 ```{r}
 # Plot GDP and its components
 myplot <- ggplot(data = transition) + 
-  geom_hline(yintercept = c_old, color="#00BA38", linetype="dashed", size=0.5) + 
+  geom_hline(yintercept = c_old, color="#00BA38", linetype="dashed", linewidth=0.5) + 
   geom_ribbon(aes(x=year, ymin=0, ymax=c,    fill= "1c", color="1c") , alpha=0.4) +
   geom_ribbon(aes(x=year, ymin=c, ymax=c+i-ir, fill= "3di", color="3di"), alpha=0.4) +
   geom_ribbon(aes(x=year, ymin=c+i-ir, ymax=y, fill= "2ir", color="2ir")  , alpha=0.4) +
-  geom_line(aes(x=year, y=y), color="darkblue", size=1) +
+  geom_line(aes(x=year, y=y), color="darkblue", linewidth=1) +
   coord_cartesian(xlim=c(T0, T1), ylim=c(0, 3)) + 
   scale_x_continuous(breaks=seq(T0, T1, 25), expand=c(0, 0)) +
   labs(x = "Year t",

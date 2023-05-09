@@ -6,7 +6,7 @@ output:
 ---
 
 ### Loading packages, defining colors and using data
-We first clear the workspace using `rm(list = ls())`and then include all packages we need. All packages used here are for plotting. If a package is missing in your R distribution (which is quite likely initially), just use `install.packages("package_name")` with the respective package name to install it on your system. If you execute the code in the file `install_packages.R`, then all necessary packages will be installed into your R distribution. If the variable `export_graphs` is set to `TRUE`, then the graphs will be exported as pdf-files. In addition, we define a set of colors here to make graphs look more beautiful.
+We first clear the workspace using `rm(list = ls())`and then include all packages we need. If a package is missing in your R distribution (which is quite likely initially), just use `install.packages("package_name")` with the respective package name to install it on your system. If you execute the code in the file `install_packages.R`, then all necessary packages will be installed into your R distribution. If the variable `export_graphs` is set to `TRUE`, then the graphs will be exported as pdf-files. In addition, we define a set of colors here to make graphs look more beautiful.
 
 ```{r message = FALSE}
 rm(list = ls())
@@ -238,9 +238,9 @@ As discussed in the lecture, a permanent change in government spending does not 
 
 ```{r}
 myplot <- ggplot(data = transition) + 
-  geom_hline(yintercept=transition$k[ind(T0)], color=myred, linetype="dashed", size=1) + 
-  geom_hline(yintercept=transition$k[ind(T1)], color="#00BA38", linetype="dashed", size=1) + 
-  geom_line(aes(x=year, y=k), color="darkblue", size=1) +
+  geom_hline(yintercept=transition$k[ind(T0)], color=myred, linetype="dashed", linewidth=1) + 
+  geom_hline(yintercept=transition$k[ind(T1)], color="#00BA38", linetype="dashed", linewidth=1) + 
+  geom_line(aes(x=year, y=k), color="darkblue", linewidth=1) +
   coord_cartesian(xlim=c(T0, T1), ylim=c(6, 8)) + 
   scale_x_continuous(breaks=seq(T0, T1, 25), expand=c(0, 0)) +
   labs(x = "Year t",
@@ -256,11 +256,11 @@ Households just cut their consumption one-to-one and leave investment untouched.
 
 ```{r}
 myplot <- ggplot(data = transition) + 
-  geom_hline(yintercept = c_old, color="#00BA38", linetype="dashed", size=0.5) + 
+  geom_hline(yintercept = c_old, color="#00BA38", linetype="dashed", linewidth=0.5) + 
   geom_ribbon(aes(x=year, ymin=0, ymax=c,    fill= "1c", color="1c") , alpha=0.4) +
   geom_ribbon(aes(x=year, ymin=c, ymax=c+g_t, fill= "3di", color="3di"), alpha=0.4) +
   geom_ribbon(aes(x=year, ymin=c+g_t, ymax=y, fill= "2ir", color="2ir")  , alpha=0.4) +
-  geom_line(aes(x=year, y=y), color="darkblue", size=1) +
+  geom_line(aes(x=year, y=y), color="darkblue", linewidth=1) +
   coord_cartesian(xlim=c(T0, T1), ylim=c(0, 3)) + 
   scale_x_continuous(breaks=seq(T0, T1, 25), expand=c(0, 0)) +
   labs(x = "Year t",
@@ -316,9 +316,9 @@ A temporary change in government expenditure leads households to smooth the burd
 
 ```{r}
 myplot <- ggplot(data = transition) + 
-  geom_hline(yintercept=transition$k[ind(T0)], color=myred, linetype="dashed", size=1) + 
-  geom_hline(yintercept=transition$k[ind(T1)], color="#00BA38", linetype="dashed", size=1) + 
-  geom_line(aes(x=year, y=k), color="darkblue", size=1) +
+  geom_hline(yintercept=transition$k[ind(T0)], color=myred, linetype="dashed", linewidth=1) + 
+  geom_hline(yintercept=transition$k[ind(T1)], color="#00BA38", linetype="dashed", linewidth=1) + 
+  geom_line(aes(x=year, y=k), color="darkblue", linewidth=1) +
   coord_cartesian(xlim=c(T0, T1), ylim=c(6, 8)) + 
   scale_x_continuous(breaks=seq(T0, T1, 25), expand=c(0, 0)) +
   labs(x = "Year t",
@@ -334,11 +334,11 @@ We can see the cut in investment quite well when we plot the evolution of GDP as
 
 ```{r}
 myplot <- ggplot(data = transition) + 
-  geom_hline(yintercept = c_old, color="#00BA38", linetype="dashed", size=0.5) + 
+  geom_hline(yintercept = c_old, color="#00BA38", linetype="dashed", linewidth=0.5) + 
   geom_ribbon(aes(x=year, ymin=0, ymax=c,    fill= "1c", color="1c") , alpha=0.4) +
   geom_ribbon(aes(x=year, ymin=c, ymax=c+g_t, fill= "3di", color="3di"), alpha=0.4) +
   geom_ribbon(aes(x=year, ymin=c+g_t, ymax=y, fill= "2ir", color="2ir")  , alpha=0.4) +
-  geom_line(aes(x=year, y=y), color="darkblue", size=1) +
+  geom_line(aes(x=year, y=y), color="darkblue", linewidth=1) +
   coord_cartesian(xlim=c(T0, T1), ylim=c(0, 3)) + 
   scale_x_continuous(breaks=seq(T0, T1, 25), expand=c(0, 0)) +
   labs(x = "Year t",
@@ -363,11 +363,11 @@ While under permanent government expenditure, households cut their consumption l
 
 ```{r}
 myplot <- ggplot(data = transition) + 
-  geom_hline(yintercept = c_old, color="#00BA38", linetype="dashed", size=0.5) + 
+  geom_hline(yintercept = c_old, color="#00BA38", linetype="dashed", linewidth=0.5) + 
   geom_ribbon(aes(x=year, ymin=0, ymax=c,    fill= "1c", color="1c") , alpha=0.4) +
   geom_ribbon(aes(x=year, ymin=c, ymax=c+g_t, fill= "3di", color="3di"), alpha=0.4) +
   geom_ribbon(aes(x=year, ymin=c+g_t, ymax=y, fill= "2ir", color="2ir")  , alpha=0.4) +
-  geom_line(aes(x=year, y=y), color="darkblue", size=1) +
+  geom_line(aes(x=year, y=y), color="darkblue", linewidth=1) +
   coord_cartesian(xlim=c(-10, 50), ylim=c(1.5, 2.25)) + 
   scale_x_continuous(breaks=seq(T0, T1, 25), expand=c(0, 0)) +
   labs(x = "Year t",
@@ -446,9 +446,9 @@ The resulting path for the capital intensity is quite clear. The capital tax -- 
 
 ```{r}
 myplot <- ggplot(data = transition) + 
-  geom_hline(yintercept=transition$k[ind(T0)], color=myred, linetype="dashed", size=1) + 
-  geom_hline(yintercept=transition$k[ind(T1)], color="#00BA38", linetype="dashed", size=1) + 
-  geom_line(aes(x=year, y=k), color="darkblue", size=1) +
+  geom_hline(yintercept=transition$k[ind(T0)], color=myred, linetype="dashed", linewidth=1) + 
+  geom_hline(yintercept=transition$k[ind(T1)], color="#00BA38", linetype="dashed", linewidth=1) + 
+  geom_line(aes(x=year, y=k), color="darkblue", linewidth=1) +
   coord_cartesian(xlim=c(T0, T1), ylim=c(4, 8)) + 
   scale_x_continuous(breaks=seq(T0, T1, 25), expand=c(0, 0)) +
   labs(x = "Year t",
@@ -463,10 +463,10 @@ On the GDP side, the fall in capital intensity is accompanied by a short-run inc
 
 ```{r}
 myplot <- ggplot(data = transition) + 
-  geom_hline(yintercept = c_old, color="#00BA38", linetype="dashed", size=0.5) + 
+  geom_hline(yintercept = c_old, color="#00BA38", linetype="dashed", linewidth=0.5) + 
   geom_ribbon(aes(x=year, ymin=0, ymax=c,    fill= "1c", color="1c") , alpha=0.4) +
   geom_ribbon(aes(x=year, ymin=c, ymax=y, fill= "2ir", color="2ir")  , alpha=0.4) +
-  geom_line(aes(x=year, y=y), color="darkblue", size=1) +
+  geom_line(aes(x=year, y=y), color="darkblue", linewidth=1) +
   coord_cartesian(xlim=c(T0, T1), ylim=c(0, 3)) + 
   scale_x_continuous(breaks=seq(T0, T1, 25), expand=c(0, 0)) +
   labs(x = "Year t",
@@ -527,9 +527,9 @@ As the capital tax is like an increase in the discount factor, the capital inten
 
 ```{r}
 myplot <- ggplot(data = transition) + 
-  geom_hline(yintercept=transition$k[ind(T0)], color=myred, linetype="dashed", size=1) + 
-  geom_hline(yintercept=transition$k[ind(T1)], color="#00BA38", linetype="dashed", size=1) + 
-  geom_line(aes(x=year, y=k), color="darkblue", size=1) +
+  geom_hline(yintercept=transition$k[ind(T0)], color=myred, linetype="dashed", linewidth=1) + 
+  geom_hline(yintercept=transition$k[ind(T1)], color="#00BA38", linetype="dashed", linewidth=1) + 
+  geom_line(aes(x=year, y=k), color="darkblue", linewidth=1) +
   coord_cartesian(xlim=c(T0, T1), ylim=c(6, 12)) + 
   scale_x_continuous(breaks=seq(T0, T1, 25), expand=c(0, 0)) +
   labs(x = "Year t",
@@ -545,10 +545,10 @@ The rise in capital needs to be accompanied by an increase in investment and, he
 
 ```{r}
 myplot <- ggplot(data = transition) + 
-  geom_hline(yintercept = c_old, color="#00BA38", linetype="dashed", size=0.5) + 
+  geom_hline(yintercept = c_old, color="#00BA38", linetype="dashed", linewidth=0.5) + 
   geom_ribbon(aes(x=year, ymin=0, ymax=c,    fill= "1c", color="1c") , alpha=0.4) +
   geom_ribbon(aes(x=year, ymin=c, ymax=y, fill= "2ir", color="2ir")  , alpha=0.4) +
-  geom_line(aes(x=year, y=y), color="darkblue", size=1) +
+  geom_line(aes(x=year, y=y), color="darkblue", linewidth=1) +
   coord_cartesian(xlim=c(T0, T1), ylim=c(0, 3)) + 
   scale_x_continuous(breaks=seq(T0, T1, 25), expand=c(0, 0)) +
   labs(x = "Year t",

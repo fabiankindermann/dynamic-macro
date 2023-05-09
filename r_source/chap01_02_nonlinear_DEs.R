@@ -48,8 +48,8 @@ plot_phase <- function(y_0, alpha, T) {
   )
   
   myplot <- ggplot(data=dat) + 
-    geom_line(aes(x=x, y=f), color="darkblue", size=1) +
-    geom_line(aes(x=x, y=x), color="darkblue", size=0.5) +
+    geom_line(aes(x=x, y=f), color="darkblue", linewidth=1) +
+    geom_line(aes(x=x, y=x), color="darkblue", linewidth=0.5) +
     coord_cartesian(xlim=c(0, 2), ylim=c(0, 2)) + 
     scale_x_continuous(breaks=seq(0, 2, 0.2)) +
     labs(x = expression('y'['t']),
@@ -64,12 +64,12 @@ plot_phase <- function(y_0, alpha, T) {
       # add the vertical line
       dat <- data.frame(d1 = c(y[t], y[t]),
                         d2 = c(y[t], y[t+1]))
-      myplot <- myplot + geom_path(data=dat, aes(x=d1, y=d2), color = "red", size=0.5, arrow = arrow(length = unit(0.02, "npc")))
+      myplot <- myplot + geom_path(data=dat, aes(x=d1, y=d2), color = "red", linewidth=0.5, arrow = arrow(length = unit(0.02, "npc")))
       
       # add the horizontal line
       dat <- data.frame(d1 = c(y[t], y[t+1]),
                         d2 = c(y[t+1], y[t+1]))
-      myplot <- myplot + geom_path(data=dat, aes(x=d1, y=d2), color = "red", size=0.5, arrow = arrow(length = unit(0.02, "npc")))
+      myplot <- myplot + geom_path(data=dat, aes(x=d1, y=d2), color = "red", linewidth=0.5, arrow = arrow(length = unit(0.02, "npc")))
     }
   }
   
@@ -101,8 +101,8 @@ plot_diff <- function(y_0, alpha, T) {
   
   # now generate the plot
   myplot <- ggplot(data=dat) + 
-    geom_line(aes(x=time, y=stst), color="red", size=1) +
-    geom_line(aes(x=time, y=DE), color="darkblue", size=1) +
+    geom_line(aes(x=time, y=stst), color="red", linewidth=1) +
+    geom_line(aes(x=time, y=DE), color="darkblue", linewidth=1) +
     geom_point(aes(x=time, y=DE), color="darkblue", size=3, show.legend = FALSE) +
     coord_cartesian(xlim=c(0, T), ylim=c(0,2)) + 
     scale_x_continuous(breaks=seq(0, T, 2)) +

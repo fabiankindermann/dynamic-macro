@@ -1,8 +1,8 @@
 #######################################
-### Model Linearization
+### Log-linearization of the model
 #######################################
 
-# Clear the workspace and load libraries
+### Loading packages, defining colors and using data
 rm(list = ls())
 library(reshape2)
 library(base)

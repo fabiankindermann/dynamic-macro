@@ -41,13 +41,13 @@ for(rho in c(-0.9, -0.5, 0, 0.5, 0.9)) {
 
 # create plot for positive rhos
 myplot <- ggplot(data = dat) + 
-  geom_line(aes(x=quarter, y=rho3, color="l1"), size=1) +
-  geom_line(aes(x=quarter, y=rho4, color="l2"), size=1) +
-  geom_line(aes(x=quarter, y=rho5, color="l3"), size=1) +
+  geom_line(aes(x=quarter, y=rho3, color="l1"), linewidth=1) +
+  geom_line(aes(x=quarter, y=rho4, color="l2"), linewidth=1) +
+  geom_line(aes(x=quarter, y=rho5, color="l3"), linewidth=1) +
   scale_x_continuous(breaks=seq(0, 20, 4), expand=c(0, 0)) +  
   scale_y_continuous(breaks=seq(0, 0.1, 0.025)) +  
   labs(x = "Quarter t",
-       y = expression(tilde(x)[t])) +
+       y = expression(hat(x)[t])) +
   scale_color_manual(breaks = c("l1", "l2", "l3"),
                      labels = c(expression(paste(rho," = 0.0")), expression(paste(rho," = 0.5")), expression(paste(rho," = 0.9"))),
                      values = c(mygreen, myblue, myred), name='') +
@@ -67,12 +67,12 @@ if(export_pdf) {
 
 # create plot for negative rhos
 myplot <- ggplot(data = dat) + 
-  geom_line(aes(x=quarter, y=rho1, color="l1"), size=1) +
-  geom_line(aes(x=quarter, y=rho2, color="l2"), size=1) +
+  geom_line(aes(x=quarter, y=rho2, color="l1"), linewidth=1) +
+  geom_line(aes(x=quarter, y=rho1, color="l2"), linewidth=1) +
   scale_x_continuous(breaks=seq(0, 20, 4), expand=c(0, 0)) +  
   scale_y_continuous(breaks=seq(-0.1, 0.1, 0.025)) +  
   labs(x = "Quarter t",
-       y = expression(tilde(x)[t])) +
+       y = expression(hat(x)[t])) +
   scale_color_manual(breaks = c("l1", "l2"),
                      labels = c(expression(paste(rho," = -0.5")), expression(paste(rho," = -0.9"))),
                      values = c(mygreen, myblue), name='') +
@@ -106,9 +106,9 @@ for(rho in c(0, 0.5, 0.9)) {
 
 # create plot for different values of rho
 myplot <- ggplot(data = dat) + 
-  geom_line(aes(x=x, y=rho1, color="l1"), size=1) +
-  geom_line(aes(x=x, y=rho2, color="l2"), size=1) +
-  geom_line(aes(x=x, y=rho3, color="l3"), size=1) +
+  geom_line(aes(x=x, y=rho1, color="l1"), linewidth=1) +
+  geom_line(aes(x=x, y=rho2, color="l2"), linewidth=1) +
+  geom_line(aes(x=x, y=rho3, color="l3"), linewidth=1) +
   scale_x_continuous(breaks=seq(-1, 1, 0.25), expand=c(0, 0)) +  
   labs(x = expression(log(x[t])),
        y = "Density") +
@@ -135,9 +135,9 @@ if(export_pdf) {
 
 # create plot for different values of rho
 myplot <- ggplot(data = dat) + 
-  geom_line(aes(x=exp(x), y=rho1, color="l1"), size=1) +
-  geom_line(aes(x=exp(x), y=rho2, color="l2"), size=1) +
-  geom_line(aes(x=exp(x), y=rho3, color="l3"), size=1) +
+  geom_line(aes(x=exp(x), y=rho1, color="l1"), linewidth=1) +
+  geom_line(aes(x=exp(x), y=rho2, color="l2"), linewidth=1) +
+  geom_line(aes(x=exp(x), y=rho3, color="l3"), linewidth=1) +
   scale_x_continuous(breaks=seq(0, 3, 0.5), expand=c(0, 0)) +  
   labs(x = expression(x[t]),
        y = "Density") +
@@ -175,9 +175,9 @@ for(X_bar in c(0, 0.25, 0.5)) {
 
 # create plot for different values of rho
 myplot <- ggplot(data = dat) + 
-  geom_line(aes(x=x, y=rho1, color="l1"), size=1) +
-  geom_line(aes(x=x, y=rho2, color="l2"), size=1) +
-  geom_line(aes(x=x, y=rho3, color="l3"), size=1) +
+  geom_line(aes(x=x, y=rho1, color="l1"), linewidth=1) +
+  geom_line(aes(x=x, y=rho2, color="l2"), linewidth=1) +
+  geom_line(aes(x=x, y=rho3, color="l3"), linewidth=1) +
   scale_x_continuous(breaks=seq(-1, 1.5, 0.25), expand=c(0, 0)) +  
   labs(x = expression(log(x[t])),
        y = "Density") +
@@ -204,9 +204,9 @@ if(export_pdf) {
 
 # create plot for different values of rho
 myplot <- ggplot(data = dat) + 
-  geom_line(aes(x=exp(x), y=rho1, color="l1"), size=1) +
-  geom_line(aes(x=exp(x), y=rho2, color="l2"), size=1) +
-  geom_line(aes(x=exp(x), y=rho3, color="l3"), size=1) +
+  geom_line(aes(x=exp(x), y=rho1, color="l1"), linewidth=1) +
+  geom_line(aes(x=exp(x), y=rho2, color="l2"), linewidth=1) +
+  geom_line(aes(x=exp(x), y=rho3, color="l3"), linewidth=1) +
   scale_x_continuous(breaks=seq(0, 4.5, 0.5), expand=c(0, 0)) +  
   
   labs(x = expression(x[t]),

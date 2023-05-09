@@ -6,7 +6,7 @@ output:
 ---
 
 ### Loading packages etc.
-We first clear the workspace using `rm(list = ls())`and then include all packages we need. All packages used here are for plotting. If a package is missing in your R distribution (which is quite likely initially), just use `install.packages("package_name")` with the respective package name to install it on your system. If you execute the code in the file `install_packages.R`, then all necessary packages will be installed into your R distribution.
+We first clear the workspace using `rm(list = ls())`and then include all packages we need. If a package is missing in your R distribution (which is quite likely initially), just use `install.packages("package_name")` with the respective package name to install it on your system. If you execute the code in the file `install_packages.R`, then all necessary packages will be installed into your R distribution.
 
 ```{r message = FALSE}
 rm(list = ls())
@@ -57,7 +57,7 @@ plot_diff <- function(y_0, a, b, T) {
   
   # now generate the plot
   myplot <- ggplot(data=dat) + 
-    geom_line(aes(x=time, y=DE), color="darkblue", size=1) +
+    geom_line(aes(x=time, y=DE), color="darkblue", linewidth=1) +
     geom_point(aes(x=time, y=DE), color="darkblue", size=3, show.legend = FALSE) +
     coord_cartesian(xlim=c(0, T)) + 
     scale_x_continuous(breaks=seq(0, T, 2)) +
@@ -126,8 +126,8 @@ plot_diff_steady <- function(y_0, a, b, T) {
   
   # now generate the plot
   myplot <- ggplot(data=dat) + 
-    geom_line(aes(x=time, y=stst, color="Steady State"), size=1) +
-    geom_line(aes(x=time, y=DE, color="Solution DE"), size=1) +
+    geom_line(aes(x=time, y=stst, color="Steady State"), linewidth=1) +
+    geom_line(aes(x=time, y=DE, color="Solution DE"), linewidth=1) +
     geom_point(aes(x=time, y=DE), color="darkblue", size=3, show.legend = FALSE) +
     scale_color_manual(name = "", values = c("Steady State"="red", "Solution DE"="darkblue")) +
     coord_cartesian(xlim=c(0, T)) + 

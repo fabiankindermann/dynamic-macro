@@ -75,7 +75,7 @@ consumption <- permanent_consumption(y)
 myplot <- ggplot(data = consumption) + 
   geom_ribbon(aes(x=year, ymin=0, ymax=c,    fill= "1c", color="1c") , alpha=0.4) +
   geom_ribbon(aes(x=year, ymin=c, ymax=c+s, fill= "2s", color="2s")  , alpha=0.4) +
-  geom_line(aes(x=year, y=y), color="darkblue", size=1) +
+  geom_line(aes(x=year, y=y), color="darkblue", linewidth=1) +
   coord_cartesian(xlim=c(1, T), ylim=c(0, 2)) + 
   scale_x_continuous(breaks=seq(0, T, 10), expand=c(0, 0)) +
   labs(x = "Year t",
@@ -102,7 +102,7 @@ if(export_pdf) {
 
 # Plot dynamics of individual wealth
 myplot <- ggplot(data = consumption) + 
-  geom_line(aes(x=year, y=a), color="darkblue", size=1) +
+  geom_line(aes(x=year, y=a), color="darkblue", linewidth=1) +
   coord_cartesian(xlim=c(1, T), ylim=c(0, 2)) + 
   scale_x_continuous(breaks=seq(0, T, 10), expand=c(0, 0)) +
   labs(x = "Year t",
@@ -135,7 +135,7 @@ consumption <- permanent_consumption(y)
 myplot <- ggplot(data = consumption) + 
   geom_ribbon(aes(x=year, ymin=0, ymax=c,    fill= "1c", color="1c") , alpha=0.4) +
   geom_ribbon(aes(x=year, ymin=c, ymax=c+s, fill= "2s", color="2s")  , alpha=0.4) +
-  geom_line(aes(x=year, y=y), color="darkblue", size=1) +
+  geom_line(aes(x=year, y=y), color="darkblue", linewidth=1) +
   coord_cartesian(xlim=c(1, T), ylim=c(0, 80)) + 
   scale_x_continuous(breaks=seq(0, T, 10), expand=c(0, 0)) +
   labs(x = "Year t",
@@ -162,7 +162,7 @@ if(export_pdf) {
 
 # Plot dynamics of individual wealth
 myplot <- ggplot(data = consumption) + 
-  geom_line(aes(x=year, y=a), color="darkblue", size=1) +
+  geom_line(aes(x=year, y=a), color="darkblue", linewidth=1) +
   coord_cartesian(xlim=c(1, T), ylim=c(0, 80)) + 
   scale_x_continuous(breaks=seq(0, T, 10), expand=c(0, 0)) +
   labs(x = "Year t",
@@ -195,7 +195,7 @@ consumption <- permanent_consumption(y)
 myplot <- ggplot(data = consumption) + 
   geom_ribbon(aes(x=year, ymin=0, ymax=c,   fill= "1c", color="1c") , alpha=0.4) +
   geom_ribbon(aes(x=year, ymin=c, ymax=c+s, fill= "2s", color="2s")  , alpha=0.4) +
-  geom_line(aes(x=year, y=y), color="darkblue", size=1) +
+  geom_line(aes(x=year, y=y), color="darkblue", linewidth=1) +
   coord_cartesian(xlim=c(1, T), ylim=c(0, 2)) + 
   scale_x_continuous(breaks=seq(0, T, 10), expand=c(0, 0)) +
   labs(x = "Year t",
@@ -222,7 +222,7 @@ if(export_pdf) {
 
 # Plot dynamics of individual wealth
 myplot <- ggplot(data = consumption) + 
-  geom_line(aes(x=year, y=a), color="darkblue", size=1) +
+  geom_line(aes(x=year, y=a), color="darkblue", linewidth=1) +
   coord_cartesian(xlim=c(1, T), ylim=c(0, 40)) + 
   scale_x_continuous(breaks=seq(0, T, 10), expand=c(0, 0)) +
   labs(x = "Year t",
@@ -293,9 +293,9 @@ cons_reg <- data.frame(y, c_agg, c_cross)
 
 # plot consumption functions
 myplot <- ggplot(data = cons_reg) + 
-  geom_line(aes(x=y, y=y), color="black", size=0.3) +
-  geom_line(aes(x=y, y=c_agg, color="1"), size=1) +
-  geom_line(aes(x=y, y=c_cross, color="2"), size=1) +
+  geom_line(aes(x=y, y=y), color="black", linewidth=0.3) +
+  geom_line(aes(x=y, y=c_agg, color="1"), linewidth=1) +
+  geom_line(aes(x=y, y=c_cross, color="2"), linewidth=1) +
   coord_cartesian(xlim=c(0, 50000), ylim=c(0, 50000)) + 
   scale_color_manual(breaks = c("1", "2"), name = "", 
                     labels = c("Macro Data", "Micro Data"),
@@ -338,9 +338,9 @@ cons_race <- data.frame(y, c_White, c_Black)
 
 # plot consumption functions
 myplot <- ggplot(data = cons_race) + 
-  geom_line(aes(x=y, y=y), color="black", size=0.3) +
-  geom_line(aes(x=y, y=c_White, color="1"), size=1) +
-  geom_line(aes(x=y, y=c_Black, color="2"), size=1) +
+  geom_line(aes(x=y, y=y), color="black", linewidth=0.3) +
+  geom_line(aes(x=y, y=c_White, color="1"), linewidth=1) +
+  geom_line(aes(x=y, y=c_Black, color="2"), linewidth=1) +
   coord_cartesian(xlim=c(0, 50000), ylim=c(0, 50000)) + 
   scale_color_manual(breaks = c("1", "2"), name = "", 
                      labels = c("Whites", "Blacks"),

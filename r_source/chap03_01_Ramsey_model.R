@@ -183,9 +183,9 @@ transition <- ramsey(T0, T1, res[1], k_old, g, alpha, delta, gamma, beta)
 
 # Plot dynamics of the capital stock
 myplot <- ggplot(data = transition) + 
-  geom_hline(yintercept=transition$k[ind(T0)], color=myred, linetype="dashed", size=1) + 
-  geom_hline(yintercept=transition$k[ind(T1)], color="#00BA38", linetype="dashed", size=1) + 
-  geom_line(aes(x=year, y=k), color="darkblue", size=1) +
+  geom_hline(yintercept=transition$k[ind(T0)], color=myred, linetype="dashed", linewidth=1) + 
+  geom_hline(yintercept=transition$k[ind(T1)], color="#00BA38", linetype="dashed", linewidth=1) + 
+  geom_line(aes(x=year, y=k), color="darkblue", linewidth=1) +
   coord_cartesian(xlim=c(T0, T1), ylim=c(6, 14)) + 
   scale_x_continuous(breaks=seq(T0, T1, 25), expand=c(0, 0)) +
   labs(x = "Year t",
@@ -205,9 +205,9 @@ if(export_pdf) {
 
 # Plot dynamics of the savings rate
 myplot <- ggplot(data = transition) + 
-  geom_hline(yintercept=(g+delta)/transition$k[ind(T0)]^(alpha-1), color=myred, linetype="dashed", size=1) + 
-  geom_hline(yintercept=(g+delta)/transition$k[ind(T1)]^(alpha-1), color="#00BA38", linetype="dashed", size=1) +
-  geom_line(aes(x=year, y=s), color="darkblue", size=1) +
+  geom_hline(yintercept=(g+delta)/transition$k[ind(T0)]^(alpha-1), color=myred, linetype="dashed", linewidth=1) + 
+  geom_hline(yintercept=(g+delta)/transition$k[ind(T1)]^(alpha-1), color="#00BA38", linetype="dashed", linewidth=1) +
+  geom_line(aes(x=year, y=s), color="darkblue", linewidth=1) +
   coord_cartesian(xlim=c(T0, T1), ylim=c(0, 0.5)) + 
   scale_x_continuous(breaks=seq(T0, T1, 25), expand=c(0, 0)) +
   labs(x = "Year t",
@@ -227,11 +227,11 @@ if(export_pdf) {
 
 # Plot GDP and its components
 myplot <- ggplot(data = transition) + 
-  geom_hline(yintercept = c_old, color="#00BA38", linetype="dashed", size=0.5) + 
+  geom_hline(yintercept = c_old, color="#00BA38", linetype="dashed", linewidth=0.5) + 
   geom_ribbon(aes(x=year, ymin=0, ymax=c,    fill= "1c", color="1c") , alpha=0.4) +
   geom_ribbon(aes(x=year, ymin=c, ymax=c+i-ir, fill= "3di", color="3di"), alpha=0.4) +
   geom_ribbon(aes(x=year, ymin=c+i-ir, ymax=y, fill= "2ir", color="2ir")  , alpha=0.4) +
-  geom_line(aes(x=year, y=y), color="darkblue", size=1) +
+  geom_line(aes(x=year, y=y), color="darkblue", linewidth=1) +
   coord_cartesian(xlim=c(T0, T1), ylim=c(0, 3)) + 
   scale_x_continuous(breaks=seq(T0, T1, 25), expand=c(0, 0)) +
   labs(x = "Year t",
@@ -284,9 +284,9 @@ transition <- ramsey(T0, T1, res[1], k_old, g, alpha, delta, gamma, beta)
 
 # Plot dynamics of the capital stock
 myplot <- ggplot(data = transition) + 
-  geom_hline(yintercept=transition$k[ind(T0)], color=myred, linetype="dashed", size=1) + 
-  geom_hline(yintercept=transition$k[ind(T1)], color="#00BA38", linetype="dashed", size=1) + 
-  geom_line(aes(x=year, y=k), color="darkblue", size=1) +
+  geom_hline(yintercept=transition$k[ind(T0)], color=myred, linetype="dashed", linewidth=1) + 
+  geom_hline(yintercept=transition$k[ind(T1)], color="#00BA38", linetype="dashed", linewidth=1) + 
+  geom_line(aes(x=year, y=k), color="darkblue", linewidth=1) +
   coord_cartesian(xlim=c(T0, T1), ylim=c(6, 14)) + 
   scale_x_continuous(breaks=seq(T0, T1, 25), expand=c(0, 0)) +
   labs(x = "Year t",
@@ -306,9 +306,9 @@ if(export_pdf) {
 
 # Plot dynamics of the savings rate
 myplot <- ggplot(data = transition) + 
-  geom_hline(yintercept=(g+delta)/transition$k[ind(T0)]^(alpha-1), color=myred, linetype="dashed", size=1) + 
-  geom_hline(yintercept=(g+delta)/transition$k[ind(T1)]^(alpha-1), color="#00BA38", linetype="dashed", size=1) +
-  geom_line(aes(x=year, y=s), color="darkblue", size=1) +
+  geom_hline(yintercept=(g+delta)/transition$k[ind(T0)]^(alpha-1), color=myred, linetype="dashed", linewidth=1) + 
+  geom_hline(yintercept=(g+delta)/transition$k[ind(T1)]^(alpha-1), color="#00BA38", linetype="dashed", linewidth=1) +
+  geom_line(aes(x=year, y=s), color="darkblue", linewidth=1) +
   coord_cartesian(xlim=c(T0, T1), ylim=c(0, 0.5)) + 
   scale_x_continuous(breaks=seq(T0, T1, 25), expand=c(0, 0)) +
   labs(x = "Year t",
@@ -328,11 +328,11 @@ if(export_pdf) {
 
 # Plot GDP and its components
 myplot <- ggplot(data = transition) + 
-  geom_hline(yintercept = c_old, color="#00BA38", linetype="dashed", size=0.5) + 
+  geom_hline(yintercept = c_old, color="#00BA38", linetype="dashed", linewidth=0.5) + 
   geom_ribbon(aes(x=year, ymin=0, ymax=c,    fill= "1c", color="1c") , alpha=0.4) +
   geom_ribbon(aes(x=year, ymin=c, ymax=c+i-ir, fill= "3di", color="3di"), alpha=0.4) +
   geom_ribbon(aes(x=year, ymin=c+i-ir, ymax=y, fill= "2ir", color="2ir")  , alpha=0.4) +
-  geom_line(aes(x=year, y=y), color="darkblue", size=1) +
+  geom_line(aes(x=year, y=y), color="darkblue", linewidth=1) +
   coord_cartesian(xlim=c(T0, T1), ylim=c(0, 3)) + 
   scale_x_continuous(breaks=seq(T0, T1, 25), expand=c(0, 0)) +
   labs(x = "Year t",

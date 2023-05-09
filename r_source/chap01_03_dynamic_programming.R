@@ -45,7 +45,7 @@ dat <- data.frame(
 
 # now generate time path plot
 myplot <- ggplot(data=dat) + 
-  geom_line(aes(x=t, y=c), color="darkblue", size=1) +
+  geom_line(aes(x=t, y=c), color="darkblue", linewidth=1) +
   scale_x_continuous(breaks=seq(0, 200, 20)) +
   labs(x = expression(paste("Time ", t)),
        y = expression(paste("Consumption path ", c[t]))) +
@@ -78,7 +78,7 @@ dat <- data.frame(
 
 # plot for the policy function
 myplot <- ggplot(data=dat) + 
-  geom_line(aes(x=a, y=c), color="darkblue", size=1) +
+  geom_line(aes(x=a, y=c), color="darkblue", linewidth=1) +
   scale_x_continuous(breaks=seq(0, a0, 20)) +
   labs(x = expression(paste("Resource ", a[t])),
        y = expression(paste("Policy function ", c(a[t])))) +
@@ -97,7 +97,7 @@ if(export_pdf) {
 
 # plot for the value function
 myplot <- ggplot(data=dat) + 
-  geom_line(aes(x=a, y=V), color="darkred", size=1) +
+  geom_line(aes(x=a, y=V), color="darkred", linewidth=1) +
   coord_cartesian(ylim=c(-1600, 0)) + 
   scale_x_continuous(breaks=seq(0, a0, 20)) +
   labs(x = expression(paste("Resource ", a[t])),
@@ -163,7 +163,7 @@ dat <- data.frame(
 
 # now generate time path plot of consumption
 myplot <- ggplot(data=dat) + 
-  geom_line(aes(x=t, y=c), color="darkblue", size=1) +
+  geom_line(aes(x=t, y=c), color="darkblue", linewidth=1) +
   scale_x_continuous(breaks=seq(0, 200, 20)) +
   labs(x = expression(paste("Time ", t)),
        y = expression(paste("Consumption path ", c[t]))) +
@@ -181,7 +181,7 @@ if(export_pdf) {
 
 # now generate time path plot of the resource
 myplot <- ggplot(data=dat) + 
-  geom_line(aes(x=t, y=a), color="darkred", size=1) +
+  geom_line(aes(x=t, y=a), color="darkred", linewidth=1) +
   scale_x_continuous(breaks=seq(0, 200, 20)) +
   labs(x = expression(paste("Time ", t)),
        y = expression(paste("Resource level ", a[t]))) +

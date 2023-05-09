@@ -53,7 +53,7 @@ lab  <- paste("growth rate = ", format(round(reg$coefficients[2]*100, 2), nsmall
 
 # generate plot
 myplot <- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=total_hours), color="darkblue", size=1) +
+  geom_line(aes(x=year, y=total_hours), color="darkblue", linewidth=1) +
   geom_smooth(aes(x=year, y=total_hours), method="lm", formula="y ~ x", se=FALSE, color=myred) +
   geom_label(aes(x = xrng[1], y = ymax, label = lab), 
             hjust = 0, vjust = 1, label.r = unit(0, "lines"), label.padding = unit(0.35, "lines")) +
@@ -86,7 +86,7 @@ ymax <- 0.30
 lab  <- paste("Long-run Level = ", format(round(mean(pwt_sub$csh_i), 3), nsmall=3))
 
 myplot <- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=csh_i), color="darkblue", size=1) +
+  geom_line(aes(x=year, y=csh_i), color="darkblue", linewidth=1) +
   geom_smooth(aes(x=year, y=csh_i), method="lm", formula="y ~ 1", se=FALSE, color=myred) +
   geom_label(aes(x = xrng[2], y = ymax, label = lab),
              hjust = 1, vjust = 1, label.r = unit(0, "lines"), label.padding = unit(0.35, "lines")) +
@@ -153,8 +153,8 @@ pwt_sub$solow_L <- L_1950*(1+n)^(pwt_sub$year-1950)
 
 # generate plot
 myplot <- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=rgdpe), color="darkblue", size=1) +
-  geom_line(aes(x=year, y=solow_Y), color="#00BA38", size=1) +
+  geom_line(aes(x=year, y=rgdpe), color="darkblue", linewidth=1) +
+  geom_line(aes(x=year, y=solow_Y), color="#00BA38", linewidth=1) +
   coord_cartesian(xlim=c(1950, 2020)) + 
   scale_x_continuous(breaks=seq(1950, 2020, 10)) +
   scale_y_continuous(labels = unit_format(unit = "T", scale = 1e-6)) +
@@ -181,8 +181,8 @@ pwt_sub$total_hours <- pwt_sub$emp*pwt_sub$avh
 
 # generate plot
 myplot <- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=total_hours), color="darkblue", size=1) +
-  geom_line(aes(x=year, y=solow_L), color="#00BA38", size=1) +
+  geom_line(aes(x=year, y=total_hours), color="darkblue", linewidth=1) +
+  geom_line(aes(x=year, y=solow_L), color="#00BA38", linewidth=1) +
   coord_cartesian(xlim=c(1950, 2020)) + 
   scale_x_continuous(breaks=seq(1950, 2020, 10)) +
   scale_y_continuous(labels = unit_format(unit = "B", scale = 1e-3)) +
@@ -207,8 +207,8 @@ if(export_pdf) {
 
 # generate plot
 myplot <- ggplot(data = pwt_sub) + 
-  geom_line(aes(x=year, y=rnna), color="darkblue", size=1) +
-  geom_line(aes(x=year, y=solow_K), color="#00BA38", size=1) +
+  geom_line(aes(x=year, y=rnna), color="darkblue", linewidth=1) +
+  geom_line(aes(x=year, y=solow_K), color="#00BA38", linewidth=1) +
   coord_cartesian(xlim=c(1950, 2020)) + 
   scale_x_continuous(breaks=seq(1950, 2020, 10)) +
   scale_y_continuous(labels = unit_format(unit = "T", scale = 1e-6)) +
@@ -279,9 +279,9 @@ transition <- data.frame(year=c(T0:T1), k, y, c, i, ir)
 ###########
 
 myplot <- ggplot(data = transition) + 
-  geom_hline(yintercept = transition$k[ind(T0)], color=myred, linetype="dashed", size=1) + 
-  geom_hline(yintercept = transition$k[ind(T1)], color="#00BA38", linetype="dashed", size=1) + 
-  geom_line(aes(x=year, y=k), color="darkblue", size=1) +
+  geom_hline(yintercept = transition$k[ind(T0)], color=myred, linetype="dashed", linewidth=1) + 
+  geom_hline(yintercept = transition$k[ind(T1)], color="#00BA38", linetype="dashed", linewidth=1) + 
+  geom_line(aes(x=year, y=k), color="darkblue", linewidth=1) +
   coord_cartesian(xlim=c(T0, T1), ylim=c(6, 16)) + 
   scale_x_continuous(breaks=seq(T0, T1, 25), expand=c(0, 0)) +
   labs(x = "Year t",
@@ -303,11 +303,11 @@ if(export_pdf) {
 ###########
 
 myplot <- ggplot(data = transition) + 
-  geom_hline(yintercept = transition$c[1], color="#00BA38", linetype="dashed", size=0.5) + 
+  geom_hline(yintercept = transition$c[1], color="#00BA38", linetype="dashed", linewidth=0.5) + 
   geom_ribbon(aes(x=year, ymin=0, ymax=c,    fill= "1c", color="1c") , alpha=0.4) +
   geom_ribbon(aes(x=year, ymin=c, ymax=c+i-ir, fill= "3di", color="3di"), alpha=0.4) +
   geom_ribbon(aes(x=year, ymin=c+i-ir, ymax=y, fill= "2ir", color="2ir")  , alpha=0.4) +
-  geom_line(aes(x=year, y=y), color="darkblue", size=1) +
+  geom_line(aes(x=year, y=y), color="darkblue", linewidth=1) +
   coord_cartesian(xlim=c(T0, T1), ylim=c(0, 3)) + 
   scale_x_continuous(breaks=seq(T0, T1, 25), expand=c(0, 0)) +
   labs(x = "Year t",
@@ -373,9 +373,9 @@ transition <- data.frame(year=c(T0:T1), k, y, c, i, ir)
 ###########
 
 myplot <- ggplot(data = transition) + 
-  geom_hline(yintercept = transition$k[ind(T0)], color=myred, linetype="dashed", size=1) + 
-  geom_hline(yintercept = transition$k[ind(T1)], color="#00BA38", linetype="dashed", size=1) + 
-  geom_line(aes(x=year, y=k), color="darkblue", size=1) +
+  geom_hline(yintercept = transition$k[ind(T0)], color=myred, linetype="dashed", linewidth=1) + 
+  geom_hline(yintercept = transition$k[ind(T1)], color="#00BA38", linetype="dashed", linewidth=1) + 
+  geom_line(aes(x=year, y=k), color="darkblue", linewidth=1) +
   coord_cartesian(xlim=c(T0, T1), ylim=c(12, 24)) + 
   scale_y_continuous(breaks=seq(12, 24, 2)) +
   scale_x_continuous(breaks=seq(T0, T1, 25), expand=c(0, 0)) +
@@ -398,11 +398,11 @@ if(export_pdf) {
 ###########
 
 myplot <- ggplot(data = transition) + 
-  geom_hline(yintercept = transition$c[1], color="#00BA38", linetype="dashed", size=0.5) + 
+  geom_hline(yintercept = transition$c[1], color="#00BA38", linetype="dashed", linewidth=0.5) + 
   geom_ribbon(aes(x=year, ymin=0, ymax=c,    fill= "1c", color="1c") , alpha=0.4) +
   geom_ribbon(aes(x=year, ymin=c, ymax=c+ir, fill= "2ir", color="2ir")  , alpha=0.4) +
   geom_ribbon(aes(x=year, ymin=c+ir, ymax=y, fill= "3di", color="3di"), alpha=0.4) +
-  geom_line(aes(x=year, y=y), color="darkblue", size=1) +
+  geom_line(aes(x=year, y=y), color="darkblue", linewidth=1) +
   coord_cartesian(xlim=c(T0, T1), ylim=c(0, 4)) + 
   scale_x_continuous(breaks=seq(T0, T1, 25), expand=c(0, 0)) +
   labs(x = "Year t",

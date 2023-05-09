@@ -128,7 +128,7 @@ pwt_sub$rt <- pwt_sub$gy - pwt_sub$gk
 myplot <- ggplot(data = pwt_sub[!is.na(pwt_sub$gy), ]) + 
   geom_ribbon(aes(x=year, ymin=0, ymax=gk*100,    fill= "1gk", color="1gk") , alpha=0.4) +
   geom_ribbon(aes(x=year, ymin=gk*100, ymax=(gk+rt)*100, fill= "2rt", color="2rt")  , alpha=0.4) +
-  geom_line(aes(x=year, y=gy*100), color="darkblue", size=1) +
+  geom_line(aes(x=year, y=gy*100), color="darkblue", linewidth=1) +
   coord_cartesian(xlim=c(1950, 2020), ylim=c(-3, 5)) + 
   scale_x_continuous(breaks=seq(1950, 2020, 20), expand=c(0, 0)) +
   labs(x = "Year t",
@@ -186,7 +186,7 @@ lab  <- paste("b = ", format(round(reg$coefficients[2], 2), nsmall=2), " (", for
               " / R2 = ", format(round(summary(reg)$r.squared, 2), nsmall=2))
 
 myplot <- ggplot(data = data) + 
-  geom_hline(yintercept = 0, color="black", size=0.5) + 
+  geom_hline(yintercept = 0, color="black", linewidth=0.5) + 
   geom_point(aes(x=output_per_capita.1970, y=gy), color="darkblue", fill="darkblue", size=1) +
   geom_smooth(aes(x=output_per_capita.1970, y=gy), method="lm", formula="y ~ x", se=FALSE, color=myred) +
   geom_label(aes(x = 13, y = 3, label = lab), 
@@ -219,7 +219,7 @@ lab  <- paste("b = ", format(round(reg$coefficients[2], 2), nsmall=2), " (", for
               " / R2 = ", format(round(summary(reg)$r.squared, 2), nsmall=2))
 
 myplot <- ggplot(data = data) + 
-  geom_hline(yintercept = 0, color="black", size=0.5) + 
+  geom_hline(yintercept = 0, color="black", linewidth=0.5) + 
   geom_point(aes(x=output_per_capita.1970, y=gy), color="darkblue", fill="darkblue", size=1) +
   geom_smooth(aes(x=output_per_capita.1970, y=gy), method="lm", formula="y ~ x", se=FALSE, color=myred) +
   geom_label(aes(x = 11, y = 3, label = lab), 

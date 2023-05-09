@@ -11,9 +11,10 @@ library(grid)
 library(scales)
 library(stringr)
 library(tidyverse)
+library(formattable)
 
 # should graphs be exported to pdf
-export_pdf <- TRUE
+export_pdf <- FALSE
 
 # define some colors
 mygreen <- "#00BA38"
@@ -64,10 +65,10 @@ impulse <- data.frame(quarter=c(0:n_quarter), K=x[1, ], A=x[2, ], G=x[3, ], Y=y[
 
 # Plot impulse response of production sector
 myplot <- ggplot(data = impulse) + 
-  geom_hline(yintercept=0, color="gray", size=0.5) +
-  geom_line(aes(x=quarter, y=K, color="capital"), size=1) +
-  geom_line(aes(x=quarter, y=A, color="tech"), size=1) +
-  geom_line(aes(x=quarter, y=L, color="labor"), size=1) +
+  geom_hline(yintercept=0, color="gray", linewidth=0.5) +
+  geom_line(aes(x=quarter, y=K, color="capital"), linewidth=1) +
+  geom_line(aes(x=quarter, y=A, color="tech"), linewidth=1) +
+  geom_line(aes(x=quarter, y=L, color="labor"), linewidth=1) +
   labs(x = "Quarter t",
        y = "Deviation from Steady State (in %)") +
   scale_color_manual(breaks = c("capital", "tech", "labor"),
@@ -90,10 +91,10 @@ if(export_pdf) {
 
 # Plot impulse response of final goods
 myplot <- ggplot(data = impulse) + 
-  geom_hline(yintercept=0, color="gray", size=0.5) +
-  geom_line(aes(x=quarter, y=C, color="cons"), size=1) +
-  geom_line(aes(x=quarter, y=I, color="inv"), size=1) +
-  geom_line(aes(x=quarter, y=G, color="gov"), size=1) +
+  geom_hline(yintercept=0, color="gray", linewidth=0.5) +
+  geom_line(aes(x=quarter, y=C, color="cons"), linewidth=1) +
+  geom_line(aes(x=quarter, y=I, color="inv"), linewidth=1) +
+  geom_line(aes(x=quarter, y=G, color="gov"), linewidth=1) +
   labs(x = "Quarter t",
        y = "Deviation from Steady State (in %)") +
   scale_color_manual(breaks = c("cons", "inv", "gov"),
@@ -116,9 +117,9 @@ if(export_pdf) {
 
 # Plot impulse response of prices
 myplot <- ggplot(data = impulse) + 
-  geom_hline(yintercept=0, color="gray", size=0.5) +
-  geom_line(aes(x=quarter, y=r, color="r"), size=1) +
-  geom_line(aes(x=quarter, y=w, color="w"), size=1) +
+  geom_hline(yintercept=0, color="gray", linewidth=0.5) +
+  geom_line(aes(x=quarter, y=r, color="r"), linewidth=1) +
+  geom_line(aes(x=quarter, y=w, color="w"), linewidth=1) +
   labs(x = "Quarter t",
        y = "Deviation from Steady State (in %)") +
   scale_color_manual(breaks = c("r", "w"),
@@ -171,10 +172,10 @@ impulse <- data.frame(quarter=c(0:n_quarter), K=x[1, ], A=x[2, ], G=x[3, ], Y=y[
 
 # Plot impulse response of production sector
 myplot <- ggplot(data = impulse) + 
-  geom_hline(yintercept=0, color="gray", size=0.5) +
-  geom_line(aes(x=quarter, y=K, color="capital"), size=1) +
-  geom_line(aes(x=quarter, y=A, color="tech"), size=1) +
-  geom_line(aes(x=quarter, y=L, color="labor"), size=1) +
+  geom_hline(yintercept=0, color="gray", linewidth=0.5) +
+  geom_line(aes(x=quarter, y=K, color="capital"), linewidth=1) +
+  geom_line(aes(x=quarter, y=A, color="tech"), linewidth=1) +
+  geom_line(aes(x=quarter, y=L, color="labor"), linewidth=1) +
   labs(x = "Quarter t",
        y = "Deviation from Steady State (in %)") +
   scale_color_manual(breaks = c("capital", "tech", "labor"),
@@ -197,10 +198,10 @@ if(export_pdf) {
 
 # Plot impulse response of final goods
 myplot <- ggplot(data = impulse) + 
-  geom_hline(yintercept=0, color="gray", size=0.5) +
-  geom_line(aes(x=quarter, y=C, color="cons"), size=1) +
-  geom_line(aes(x=quarter, y=I, color="inv"), size=1) +
-  geom_line(aes(x=quarter, y=G, color="gov"), size=1) +
+  geom_hline(yintercept=0, color="gray", linewidth=0.5) +
+  geom_line(aes(x=quarter, y=C, color="cons"), linewidth=1) +
+  geom_line(aes(x=quarter, y=I, color="inv"), linewidth=1) +
+  geom_line(aes(x=quarter, y=G, color="gov"), linewidth=1) +
   labs(x = "Quarter t",
        y = "Deviation from Steady State (in %)") +
   scale_color_manual(breaks = c("cons", "inv", "gov"),
@@ -223,9 +224,9 @@ if(export_pdf) {
 
 # Plot impulse response of prices
 myplot <- ggplot(data = impulse) + 
-  geom_hline(yintercept=0, color="gray", size=0.5) +
-  geom_line(aes(x=quarter, y=r, color="r"), size=1) +
-  geom_line(aes(x=quarter, y=w, color="w"), size=1) +
+  geom_hline(yintercept=0, color="gray", linewidth=0.5) +
+  geom_line(aes(x=quarter, y=r, color="r"), linewidth=1) +
+  geom_line(aes(x=quarter, y=w, color="w"), linewidth=1) +
   labs(x = "Quarter t",
        y = "Deviation from Steady State (in %)") +
   scale_color_manual(breaks = c("r", "w"),
@@ -315,7 +316,7 @@ set.seed(351224332)
 n_quarter <- 100000
 
 # set standard deviation of a (calibration target is sd(Y) = 1.93%)
-sigma_A = 0.00564
+sigma_A = 0.00565
 
 # initializes relevant statistics elements
 sim_data <- array(0, dim=c(6, 2))

@@ -191,8 +191,8 @@ myplot <- ggplot(data = data) +
   geom_label(aes(x = 13, y = 3, label = lab), 
              hjust = 1, vjust = 1, label.r = unit(0, "lines"), label.padding = unit(0.35, "lines")) +
   coord_cartesian(xlim=c(6, 13), ylim=c(-1.5, 3)) + 
-  labs(x = "Level of output per worker 1970 (in logs)",
-       y = "Growth in output per worker 1970-2015") +
+  labs(x = "Level of output per capita 1970 (in logs)",
+       y = "Growth in output per capita 1970-2015") +
   theme_bw()
 
 # print the plot
@@ -221,8 +221,8 @@ myplot <- ggplot(data = data) +
   geom_label(aes(x = 11, y = 3, label = lab), 
              hjust = 1, vjust = 1, label.r = unit(0, "lines"), label.padding = unit(0.35, "lines")) +
   coord_cartesian(xlim=c(6, 11), ylim=c(-1.5, 3)) + 
-  labs(x = "Level of output per worker 1970 (in logs)",
-       y = "Growth in output per worker 1970-2015") +
+  labs(x = "Level of output per capita 1970 (in logs)",
+       y = "Growth in output per capita 1970-2015") +
   theme_bw()
 
 # print the plot

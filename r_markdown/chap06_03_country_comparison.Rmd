@@ -1,0 +1,270 @@
+---
+title: "Comparison with Germany"
+output:
+  html_document:
+    df_print: paged
+---
+
+### Loading packages, defining colors and using data
+
+We first clear the workspace using `rm(list = ls())`and then include all packages we need. If a package is missing in your R distribution (which is quite likely initially), just use `install.packages("package_name")` with the respective package name to install it on your system. If you execute the code in the file `install_packages.R`, then all necessary packages will be installed into your R distribution. If the variable `export_graphs` is set to `TRUE`, then the graphs will be exported as pdf-files. In addition, we define a set of colors here to make graphs look more beautiful. Furthermore, we define some axis breaks for graphs to look nicer.
+
+```{r message = FALSE}
+# Clear the workspace and load libraries
+rm(list = ls())
+library(zoo)
+library(xts)
+library(dynlm)
+library(reshape2)
+library(base)
+library(ggplot2)
+library(grid)
+library(scales)
+library(stringr)
+library(tidyverse)
+library(fredr)
+library(mFilter)
+library(formattable)
+
+# should graphs be exported to pdf
+export_pdf <- FALSE
+
+# define some colors
+mygreen <- "#00BA38"
+myblue  <- "#619CFF"
+myred   <- "#F8766D"
+
+# define plotting breaks
+xbreaks <- c(seq(from = as.Date("1970-01-01"), to = as.Date("2020-01-01"),by = "10 years"))
+```
+
+
+### Quarterly data from the FRED database
+
+Like in the previous document, we again load multiple series from the FRED database at once. This time, we want to compare data from the US with data from Germany.
+
+```{r}
+# Load function to get FRED data
+source("chap06_func_get_fred_data.R")
+
+# US recession dates
+selection <- data.frame(series = "DEURECDP", names = "RECESSION")
+
+# real time series
+selection <- rbind(selection, c("GDPC1", "GDP_US"))
+selection <- rbind(selection, c("NAEXKP01DEQ661S", "GDP_DE"))
+
+# additional series
+selection <- rbind(selection, c("CE16OV", "EMPL_US"))
+selection <- rbind(selection, c("LFEMTTTTDEQ647S", "EMPL_DE"))
+selection <- rbind(selection, c("UNRATE", "UNEMP_US"))
+selection <- rbind(selection, c("LRUNTTTTDEQ156S", "UNEMP_DE"))
+selection <- rbind(selection, c("CPALTT01DEQ659N", "INFL_DE"))
+selection <- rbind(selection, c("TB3MS", "NOMRATE_US"))
+selection <- rbind(selection, c("IRLTLT01DEQ156N", "NOMRATE_DE"))
+
+# pull all data series from FRED
+fred <- get_fred_data(selection$series, selection$names, "1970-01-01", "2021-12-31", "q")
+```
+<br />
+Note that the annualized inflation rate for the US (meaning price changes relative to the same quarter in the last year) need to be calculated by hand from the GDP quarterly deflator series. For Germany, this series exists.
+
+```{r}
+# calculate inflation for US
+deflator <- fredr(series_id = "GDPDEF",
+                  observation_start = as.Date("1969-01-01"),
+                  observation_end = as.Date("2021-12-31")
+)
+
+fred$INFL_US <- diff(deflator$value, lag = 4)/deflator$value[1:(length(deflator$value)-4)]*100
+```
+
+### Create different cyclical plots
+
+We first want to create different cyclical plots. Therefore, we calculate US recession dates. Furthermore, we convert real GDP per capita in the US and in Germany into log values and apply the HP filter to these series in order to decompose them into trend an cycle.
+
+```{r}
+# calculate regression beginnings and ends
+fred$REC_DATES <- 0
+fred$REC_DATES[2:length(fred$REC_DATES)] <- diff(fred$RECESSION)
+
+# date at beginning and end of recessions
+rstart <- fred$date[fred$REC_DATES == 1]
+rend   <- fred$date[fred$REC_DATES == -1]
+rec_df <- data.frame(rstart, rend)
+
+# calculate log gdp for US
+fred$log_gdp_US = log(fred$GDP_US)
+
+gdp_ts <- xts(x = fred$log_gdp_US, order.by = as.Date(fred$date))
+res_hpf <- hpfilter(gdp_ts, freq=1600, type="lambda")
+fred$c_hpf_US <- res_hpf$cycle
+
+# calculate log gdp for Germany
+fred$log_gdp_DE = log(fred$GDP_DE)
+
+gdp_ts <- xts(x = fred$log_gdp_DE, order.by = as.Date(fred$date))
+res_hpf <- hpfilter(gdp_ts, freq=1600, type="lambda")
+fred$c_hpf_DE <- res_hpf$cycle
+```
+
+
+### Cycle after HP-filtering
+
+This plot shows the cycle of GDP both in the US and in Germany. The gray shaded areas denote officially dates US recessions.
+
+```{r warning = FALSE}
+# set minimum and maximum
+ymin <- -0.1
+ymax <-  0.05
+dy   <- (abs(ymin)+abs(ymax))/2
+
+# plot cycle
+myplot <- ggplot(data = fred) + 
+  geom_rect(data=rec_df, aes(xmin=rstart, xmax=rend, ymin=ymin-0.05*dy, ymax=ymax+0.05*dy), fill='gray', alpha=0.5) + 
+  geom_hline(yintercept=0, color="gray", linewidth=0.5) +
+  geom_line(aes(x=date, y=c_hpf_US, color="US"), linewidth=0.5) +
+  geom_line(aes(x=date, y=c_hpf_DE, color="DE"), linewidth=0.5) +
+  scale_x_date(breaks = xbreaks, date_labels = "%Y", expand=c(0, 0)) +
+  scale_y_continuous(breaks=seq(ymin, ymax, 0.025), expand=c(0, 0)) +  
+  labs(x = "Year t",
+       y = "Log of real GDP (cyclical component)") +
+  scale_color_manual(breaks = c("US", "DE"),
+                     labels = c("US", "Germany"),
+                     values = c("darkblue", myred), name='') +
+  theme_bw() +
+  theme(legend.position="bottom")
+
+# print the plot
+print(myplot)
+```
+
+### Employment
+
+Here, we plot growth rates of employment both for the US and for Germany.
+
+```{r warning = FALSE}
+# calculate employment changes for US
+fred$D_EMPL_US <- NA
+fred$D_EMPL_US[1:(length(fred$EMPL_US)-1)] <- diff(fred$EMPL_US)/fred$EMPL_US[1:(length(fred$EMPL_US)-1)]*100
+
+# calculate employment changes for Germany
+fred$D_EMPL_DE <- NA
+fred$D_EMPL_DE[1:(length(fred$EMPL_DE)-1)] <- diff(fred$EMPL_DE)/fred$EMPL_DE[1:(length(fred$EMPL_DE)-1)]*100
+
+# set minimum and maximum
+ymin <- -14
+ymax <- 8
+dy   <- (abs(ymin)+abs(ymax))/2
+
+# plot cycle
+myplot <- ggplot(data = fred) + 
+  geom_rect(data=rec_df, aes(xmin=rstart, xmax=rend, ymin=ymin-0.05*dy, ymax=ymax+0.05*dy), fill='gray', alpha=0.5) + 
+  geom_hline(yintercept=0, color="gray", linewidth=0.5) +
+  geom_line(aes(x=date, y=D_EMPL_US, color="US"), linewidth=0.5) +
+  geom_line(aes(x=date, y=D_EMPL_DE, color="DE"), linewidth=0.5) +
+  scale_x_date(breaks = xbreaks, date_labels = "%Y", expand=c(0, 0)) +
+  scale_y_continuous(breaks=seq(ymin, ymax, 2), expand=c(0, 0)) +  
+  labs(x = "Year t",
+       y = "Employment Change (in %)") +
+  scale_color_manual(breaks = c("US", "DE"),
+                     labels = c("US", "Germany"),
+                     values = c("darkblue", myred), name='') +
+  theme_bw() +
+  theme(legend.position="bottom")
+
+# print the plot
+print(myplot)
+```
+
+### Unemployment
+
+This graph shows unemployment rates for both the US and Germany.
+
+```{r warning = FALSE}
+# set minimum and maximum
+ymin <- 0
+ymax <- 15
+dy   <- (abs(ymin)+abs(ymax))/2
+
+# plot cycle
+myplot <- ggplot(data = fred) + 
+  geom_rect(data=rec_df, aes(xmin=rstart, xmax=rend, ymin=ymin-0.05*dy, ymax=ymax+0.05*dy), fill='gray', alpha=0.5) + 
+  geom_hline(yintercept=0, color="gray", linewidth=0.5) +
+  geom_line(aes(x=date, y=UNEMP_US, color="US"), linewidth=0.5) +
+  geom_line(aes(x=date, y=UNEMP_DE, color="DE"), linewidth=0.5) +
+  scale_x_date(breaks = xbreaks, date_labels = "%Y", expand=c(0, 0)) +
+  scale_y_continuous(breaks=seq(ymin, ymax, 2.5), expand=c(0, 0)) +  
+  labs(x = "Year t",
+       y = "Unemployment Rate (quarterly, in %)") +
+  scale_color_manual(breaks = c("US", "DE"),
+                     labels = c("US", "Germany"),
+                     values = c("darkblue", myred), name='') +
+  theme_bw() +
+  theme(legend.position="bottom")
+
+# print the plot
+print(myplot)
+```
+
+
+### Inflation
+
+Here we see the inflation rates in the two countries.
+
+```{r warning = FALSE}
+# set minimum and maximum
+ymin <- -2
+ymax <- 12
+dy   <- (abs(ymin)+abs(ymax))/2
+
+# plot cycle
+myplot <- ggplot(data = fred) + 
+  geom_rect(data=rec_df, aes(xmin=rstart, xmax=rend, ymin=ymin-0.05*dy, ymax=ymax+0.05*dy), fill='gray', alpha=0.5) + 
+  geom_hline(yintercept=0, color="gray", linewidth=0.5) +
+  geom_line(aes(x=date, y=INFL_US, color="US"), linewidth=0.5) +
+  geom_line(aes(x=date, y=INFL_DE, color="DE"), linewidth=0.5) +
+  scale_x_date(breaks = xbreaks, date_labels = "%Y", expand=c(0, 0)) +
+  scale_y_continuous(breaks=seq(ymin, ymax, 2), expand=c(0, 0)) +  
+  labs(x = "Year t",
+       y = "Inflation Relative to Previous Year (in %)") +
+  scale_color_manual(breaks = c("US", "DE"),
+                     labels = c("US", "Germany"),
+                     values = c("darkblue", myred), name='') +
+  theme_bw() +
+  theme(legend.position="bottom")
+
+# print the plot
+print(myplot)
+```
+
+
+### Nominal interest rate on 3-month interbank market
+
+And finally nominal interest rates on the 3-month interbank market.
+
+```{r warning = FALSE}
+# set minimum and maximum
+ymin <- 0
+ymax <- 16
+dy   <- (abs(ymin)+abs(ymax))/2
+
+# plot cycle
+myplot <- ggplot(data = fred) + 
+  geom_rect(data=rec_df, aes(xmin=rstart, xmax=rend, ymin=ymin-0.05*dy, ymax=ymax+0.05*dy), fill='gray', alpha=0.5) + 
+  geom_hline(yintercept=0, color="gray", linewidth=0.5) +
+  geom_line(aes(x=date, y=NOMRATE_US, color="US"), linewidth=0.5) +
+  geom_line(aes(x=date, y=NOMRATE_DE, color="DE"), linewidth=0.5) +
+  scale_x_date(breaks = xbreaks, date_labels = "%Y", expand=c(0, 0)) +
+  scale_y_continuous(breaks=seq(ymin, ymax, 2), expand=c(0, 0)) +  
+  labs(x = "Year t",
+       y = "3-month nominal rate (in %)") +
+  scale_color_manual(breaks = c("US", "DE"),
+                     labels = c("US", "Germany"),
+                     values = c("darkblue", myred), name='') +
+  theme_bw() +
+  theme(legend.position="bottom")
+
+# print the plot
+print(myplot)
+```

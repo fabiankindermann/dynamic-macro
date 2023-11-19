@@ -26,3 +26,10 @@ This is a set of R-files we use for our Dynamic Macro lecture at Uni Regensburg.
 
 - [Consumption under Certainty](https://raw.githack.com/fabiankindermann/dynamic-macro/main/r_markdown/chap04_01_certain_cons.html)
 - [Consumption under Uncertainty](https://raw.githack.com/fabiankindermann/dynamic-macro/main/r_markdown/chap04_02_uncertain_cons.html)
+
+## Chapter 6
+
+- [Filtering GDP](https://raw.githack.com/fabiankindermann/dynamic-macro/main/r_markdown/chap06_01_filtering_GDP.html)
+- [Business Cycle Statistics](https://raw.githack.com/fabiankindermann/dynamic-macro/main/r_markdown/chap06_02_bc_statistics.html)
+- [Comparison with Germany](https://raw.githack.com/fabiankindermann/dynamic-macro/main/r_markdown/chap06_03_country_comparison.html)
+- [A function to pull multiple data series from FRED](https://raw.githack.com/fabiankindermann/dynamic-macro/main/r_markdown/chap06_func_get_fred_data.html)

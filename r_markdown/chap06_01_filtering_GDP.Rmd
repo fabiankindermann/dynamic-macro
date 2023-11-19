@@ -1,0 +1,244 @@
+---
+title: "Filtering GDP"
+output:
+  html_document:
+    df_print: paged
+---
+
+### Loading packages, defining colors and using data
+We first clear the workspace using `rm(list = ls())`and then include all packages we need. If a package is missing in your R distribution (which is quite likely initially), just use `install.packages("package_name")` with the respective package name to install it on your system. If you execute the code in the file `install_packages.R`, then all necessary packages will be installed into your R distribution. If the variable `export_graphs` is set to `TRUE`, then the graphs will be exported as pdf-files. In addition, we define a set of colors here to make graphs look more beautiful. Furthermore, we define some axis breaks for graphs to look nicer.
+
+```{r message = FALSE}
+rm(list = ls())
+library(zoo)
+library(xts)
+library(dynlm)
+library(reshape2)
+library(base)
+library(ggplot2)
+library(grid)
+library(scales)
+library(stringr)
+library(tidyverse)
+library(fredr)
+library(mFilter)
+library(formattable)
+
+# should graphs be exported to pdf
+export_pdf <- FALSE
+
+# define some colors
+mygreen <- "#00BA38"
+myblue  <- "#619CFF"
+myred   <- "#F8766D"
+  
+# define plotting breaks
+xbreaks <- c(seq(from = as.Date("1950-01-01"), to = as.Date("2020-01-01"),by = "10 years"))
+```
+
+### US quarterly GDP
+
+We first want to be able to download time series data from the [Frederal Reserve Economic Database (FRED)](https://fred.stlouisfed.org). This can be done using the `fredr` package that we already included in the above library-statements. In order to be able to download data from FRED, you have to go to https://fred.stlouisfed.org/docs/api/api_key.html. Create an account and request an API key for downloading data. Then insert your API key into the `fredr_set_key` code line.
+
+We can download data from the FRED using the `fredr` function. This function takes as input the ID of the series we want to download. You can find this ID on the respective [series website, in this case here.](https://fred.stlouisfed.org/series/GDPC1). The series we want to download here is real quarterly GDP. In addition to the series, we can specify the start and end dates we want to use. If you don't specify and of these dates, `fredr` is going to use the maximum available time span. The result of the call of `fredr` is a data frame `gdp_real` with 5 columns, `date`, `series_id`, `value`, `realtime_start`, and `realtime_end`. For us, the most important columns are `date` and `value`. Note that `R` measures time and dates as numeric variables in days. The baseline day is January 1st 1970, which has a numeric value of 0. Starting from this point, the day scale continues in both positive and negative direction. Finally, we take the value of real GDP, convert it into log-GDP, and store it in the column `log_gdp` in the data frame.
+
+```{r}
+#fredr_set_key("type-you-key")
+
+# extract real GDP for the US (quarterly)
+gdp_real <- fredr(series_id = "GDPC1",
+                  observation_start = as.Date("1948-01-01"),
+                  observation_end = as.Date("2021-12-31")
+)
+
+# calculate log gdp
+gdp_real$log_gdp = log(gdp_real$value)
+```
+
+### Plot log GDP
+
+The first thing we want to do is plot log real GDP. After doing this, we can clearly see that there is a growth trend as well as cyclical movements around the trend.
+
+```{r}
+# Plot GDP and estimated trends
+myplot <- ggplot(data = gdp_real) + 
+  geom_line(aes(x=date, y=log_gdp), color="darkblue", linewidth=1) +
+  labs(x = "Year t",
+       y = "Log of real GDP") +
+  scale_x_date(breaks = xbreaks, date_labels = "%Y", expand=c(0, 0)) +
+  theme_bw() +
+  theme(legend.position="bottom")
+
+# print the plot
+print(myplot)
+```
+
+
+### Decomposition into trend and cycle
+
+Now we want to decompose our time series of log real GDP into a trend and a cycle component $y_t = g_t + c_t$. To this end, we have to convert our data into a time series object first. This can be done using, for example, the `xts` function from the `xts` package. This function takes as `x` variable the respective `log_gdp` column from our data frame. In addition, we have to specify the time dimension of the variable which is stored in `gdp_real$date`. By wrapping the `as.Date` function around this, we make sure that `R` recognizes this as a date. 
+
+```{r}
+# create time series for log GDP
+gdp_ts <- xts(x = gdp_real$log_gdp, order.by = as.Date(gdp_real$date))
+```
+<br />
+The first trend component we use is a linear trend $g_t = a + b\cdot t$. To estimate this trend, we run a simple linear regression of `gdp_ts` on the time index, which we can access through `index(gdp_ts))`. For this to make sense to `R`, we convert the date stored in this index to numeric variables with `as.numeric`, see the discussion of the numeric representation of dates above. We can look at the regression result using the `summary` statement. Finally, we want to extract the linear trend from this regression. To do so, we can call the `predict` function. This function takes as input the regression result and gives us a vector of predicted linear trends $g_t = a + b\cdot t$. We store this in the column `g_lin` of our data frame. The cyclical component then just is the difference $c_t = y_t - g_t$.
+
+```{r}
+res_lin <- lm(gdp_ts ~ as.numeric(index(gdp_ts)))
+summary(res_lin)
+
+# calculate trend and cycle
+gdp_real$g_lin <- predict(res_lin)
+gdp_real$c_lin <- gdp_real$log_gdp - gdp_real$g_lin
+```
+<br />
+Next to the linear trend, we want to calculate the filter proposed by Hamilton (2018). To this end, we regress the 8 quarter ahead lead of `gdp_ts` on the current and the past three quarters of log real GDP. We can again summarize and predict the trend. Note that, because of the 8 quarter lead difference and the fact that we need four quarters for prediction, we lose the first 12 observations of the time series.
+
+```{r}
+# run regression with h = 8 and p = 4
+h <- 8
+res_ham <- lm(stats::lag(gdp_ts, k=-8) ~ stats::lag(gdp_ts, k=0) + stats::lag(gdp_ts, k=1) + stats::lag(gdp_ts, k=2) + stats::lag(gdp_ts, k=3))
+summary(res_ham)
+
+# calculate trend and cycle
+gdp_real$g_ham <- NA
+gdp_real$c_ham <- NA
+gdp_real$g_ham[12:length(gdp_real$log_gdp)] <- predict(res_ham)
+gdp_real$c_ham[12:length(gdp_real$log_gdp)] = gdp_real$log_gdp[12:length(gdp_real$log_gdp)] - gdp_real$g_ham[12:length(gdp_real$log_gdp)]
+```
+
+<br />
+Lastly, we apply the filter proposed by Hodrick and Prescott (1997). The package `mFilter` contains a function `hpfilter` that does the HP-filtering for us. We specify a value of $\lambda = 1600$ by setting the variables `freq` and `type` accordingly. The HP-filter function directly stores the trend and the cycle in two columns of the resulting data frame `res_hpf`.  
+
+```{r}
+res_hpf <- hpfilter(gdp_ts, freq=1600, type="lambda")
+summary(res_hpf)
+
+# calculate trend and cycle
+gdp_real$g_hpf <- res_hpf$trend
+gdp_real$c_hpf <- res_hpf$cycle
+```
+
+### Plot GDP and estimated trends
+
+Next we plot the time series of log real GDP as well as the three estimated trends. We can see clear differences between the three approaches. Because of the clear trend break in the GDP series, the linear trend performs the worse in filtering the GDP growth trend. But the Hamilton-filter has problems with quickly recognizing the trend break around 2010.
+
+```{r}
+myplot <- ggplot(data = gdp_real) + 
+  geom_line(aes(x=date, y=log_gdp), color="darkblue", linewidth=1) +
+  geom_line(aes(x=date, y=g_lin, color="linear"), linewidth=0.5) +
+  geom_line(aes(x=date, y=g_ham, color="hamilton"), linewidth=0.5) +
+  geom_line(aes(x=date, y=g_hpf, color="hpfilter"), linewidth=0.5) +
+  labs(x = "Year t",
+       y = "Log of real GDP") +
+  scale_color_manual(breaks = c("linear", "hamilton", "hpfilter"),
+                     labels = c("Linear", "Hamilton", "HP-Filter"),
+                     values = c(mygreen, myblue, myred), name='') +
+  scale_x_date(breaks = xbreaks, date_labels = "%Y", expand=c(0, 0)) +
+  theme_bw() + 
+  theme(legend.position="bottom")
+
+# print the plot
+print(myplot)
+```
+
+### Extract and date the official NBER recessions
+
+Now we want to take a look at the estimated cyclical component of GDP. To see how the cyclicality of GDP coincides with the official recessions of the United States, we also extract the official NBER recession dates in the series `USRECQP` in FRED. This series gives us a sequence of $0$s and $1$s. It takes a value of $1$ every time the economy is in recession. By calculating the difference between two successive values of the series, we are able to determine the start and end dates of the recessions in the US, which we store in `r_start` and `r_end`. We create a separate data frame from these two series.
+
+```{r}
+# extract NBER recession indicator (including peak quarter)
+recession <- fredr(series_id = "USRECQP",
+                   observation_start = as.Date("1948-01-01"),
+                   observation_end = as.Date("2021-12-31")
+)
+
+# add quarter numbers to recession dataset
+recession$quarter <- c(1:length(recession$date))
+
+# generate differences and trace out recession dates
+recession$diff <- 0
+recession$diff[2:length(recession$diff)] = diff(recession$value)
+
+# date at beginning and end of recessions
+rstart <- recession$date[recession$diff == 1]
+rend   <- recession$date[recession$diff == -1]
+rec_df <- data.frame(rstart,rend)
+```
+
+### Plot cycle of log GDP
+
+Now we can generate a plot of the estimated cyclical components of GDP together with the official recessions in the US. We indicate the recession dates as gray areas using the `geom_rect` function. This function creates a shaded are between a minimum and maximum value. We use the recession start and end dates stored in the data frame `rec_df` to draw these areas.
+
+```{r}
+# set minimum and maximum
+ymin <- -0.25
+ymax <-  0.15
+dy   <- (abs(ymin)+abs(ymax))/2
+
+# plot cycle
+myplot <- ggplot(data = gdp_real) + 
+  geom_rect(data=rec_df, aes(xmin=rstart, xmax=rend, ymin=ymin-0.05*dy, ymax=ymax+0.05*dy), fill='gray', alpha=0.5) + 
+  geom_hline(yintercept=0, color="gray", linewidth=0.5) +
+  geom_line(aes(x=date, y=c_lin, color="linear"), linewidth=0.5) +
+  geom_line(aes(x=date, y=c_ham, color="hamilton"), linewidth=0.5) +
+  geom_line(aes(x=date, y=c_hpf, color="hpfilter"), linewidth=0.5) +
+  scale_x_date(breaks = xbreaks, date_labels = "%Y", expand=c(0, 0)) +
+  scale_y_continuous(breaks=seq(ymin, ymax, 0.05), expand=c(0, 0)) +  
+  labs(x = "Year t",
+       y = "Log of real GDP (cyclical component)") +
+  scale_color_manual(breaks = c("linear", "hamilton", "hpfilter"),
+                     labels = c("Linear", "Hamilton", "HP-Filter"),
+                     values = c(mygreen, myblue, myred), name='') +
+  theme_bw() + 
+  theme(legend.position="bottom")
+
+# print the plot
+print(myplot)
+```
+
+### Cycle after HP-filtering
+
+The following graph only depicts the NBER recession dates as well as the cyclical component of GDP estimated from the HP filter.
+
+```{r}
+# set minimum and maximum
+ymin <- -0.1
+ymax <-  0.05
+dy   <- (abs(ymin)+abs(ymax))/2
+
+# plot cycle
+myplot <- ggplot(data = gdp_real) + 
+  geom_rect(data=rec_df, aes(xmin=rstart, xmax=rend, ymin=ymin-0.05*dy, ymax=ymax+0.05*dy), fill='gray', alpha=0.5) + 
+  geom_hline(yintercept=0, color="gray", linewidth=0.5) +
+  geom_line(aes(x=date, y=c_hpf), color=myred, linewidth=0.5) +
+  scale_x_date(breaks = xbreaks, date_labels = "%Y", expand=c(0, 0)) +
+  scale_y_continuous(breaks=seq(ymin, ymax, 0.025), expand=c(0, 0)) +  
+  labs(x = "Year t",
+       y = "Log of real GDP (cyclical component)") +
+  theme_bw()
+
+# print the plot
+print(myplot)
+```
+
+
+### Recession dates and cyclical component
+
+As a last piece of information, we summarize the recessions in the US in a table. We therefore determine the recession starting quarters as well as the recession duration from the `recession` data frame. In addition, we calculate the decline in the cyclical component of log real GDP in each of the recessions from the `gdp_real` data frame. We store all this data in a new data frame `rec_data`. The function `formattable` from the corresponding library with the same name can generate a nice table from this.
+
+```{r}
+# calculate NBER dates recession statistics
+rec_data <- data.frame("Starting Quarter"=recession$date[recession$diff == 1])
+names(rec_data)[1] <- "Starting Quarter" 
+rec_data <- cbind(rec_data, "Number of Quarters" = 
+                      (recession$quarter[recession$diff == -1]-recession$quarter[recession$diff == 1]))
+rec_data <- cbind(rec_data, "Log-point decline in cyclical component (in %)" = 
+                      percent(gdp_real$c_hpf[recession$diff == -1]-gdp_real$c_hpf[recession$diff == 1]))
+
+# output table
+formattable(rec_data,
+              align= c("c", "c", "c"))
+```

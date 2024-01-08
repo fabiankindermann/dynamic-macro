@@ -1,8 +1,14 @@
-#######################################
-### Model Analysis
-#######################################
+---
+title: "Model Analysis"
+output:
+  html_document:
+    df_print: paged
+---
 
-# Clear the workspace and load libraries
+### Loading packages, defining colors and using data
+We first clear the workspace using `rm(list = ls())`and then include all packages we need. If a package is missing in your R distribution (which is quite likely initially), just use `install.packages("package_name")` with the respective package name to install it on your system. If you execute the code in the file `install_packages.R`, then all necessary packages will be installed into your R distribution. If the variable `export_graphs` is set to `TRUE`, then the graphs will be exported as pdf-files. In addition, we define a set of colors here to make graphs look more beautiful.
+
+```{r message = FALSE}
 rm(list = ls())
 library(reshape2)
 library(base)
@@ -20,12 +26,13 @@ export_pdf <- FALSE
 mygreen <- "#00BA38"
 myblue  <- "#619CFF"
 myred   <- "#F8766D"
+```
 
+### Load parameters, log-linearization coefficients and empirical data
 
-########### 
-# Load parameters, log-linearization coefficients and empirical data
-###########
+We now want to work with all our previous results. We therefore have to load all the data we previously stored in different files. This includes the model parameters in `chap07_parameters.RData`, the linearized coefficients in `chap07_coefficients.RData` and the empirical business cycle moments in `chap07_empirics.RData`.
 
+```{r}
 # get parameters stored in the RData set
 load("chap07_parameters.RData")
 
@@ -34,17 +41,25 @@ load("chap07_coefficients.RData")
 
 # get empirical data moments
 load("chap07_empirics.RData")
+```
 
-########### 
-# Impulse responses of a 1 percent productivity shock
-###########
 
+### Impulse responses of a 1 percent productivity shock
+
+To calculate the impulse response functions of the (linearized) real business cycle model to a 1 percent productivity shock, we have to take a couple of steps. First, we specify for how many quarters we want to simulate the impulse response in a variable `n_quarter`. Next we set up a matrix of shocks. Note that we measure all shocks and variables in percentage deviations from their steady state value. The matrix `shock` can contain shocks to all three state variables of the model. Setting `shock` to `matrix(c(0, 1, 0))` means that the capital stock and government consumption should remain at their steady state value but the productivity level should receive a positive 1 percent shock.
+
+```{r}
 # number of quarters
 n_quarter <- 80
 
 # initial shock at date t = 0 (in percent)
 shock <- matrix(c(0, 1, 0))
+```
 
+<br />
+Next, we determine the impulse response functions. We store them in matrices `x` and `y`. These matrices will have 3 and 6 columns, respectively. In addition, we simulate `n_quarter+1` quarters. The entry at value `1` corresponds to the initial shocks the system receives. We can calculate the values in `y` (i.e. all other variables of the economy) using the matrix `B`. Finally, we successively simulate the system forward. To do so, we derive the next period's state variables from the value of the previous period as well as the matrix `A`. Note that we only assume that there is one shock in the initial period and no additional shocks in all other periods. Once we have the state variable available, we can calculate all other variables using the matrix `B`. We finally store our results in a data frame named `impulse`, which we can use for drawing graphs.
+
+```{r}
 # initialize vectors x_t and y_t
 x <- matrix(nrow=3, ncol=n_quarter+1)
 y <- matrix(nrow=6, ncol=n_quarter+1)
@@ -61,8 +76,12 @@ for(i in c(2:(n_quarter+1))) {
 
 # generate dataframe from results
 impulse <- data.frame(quarter=c(0:n_quarter), K=x[1, ], A=x[2, ], G=x[3, ], Y=y[1, ], C=y[2, ], I=y[3, ], r=y[4, ], w=y[5, ], L=y[6, ])
+```
 
+<br />
+Once our data is simulated, we can plot it. We start with showing the dynamics of the capital stock, technology and labor supply (in percentage deviations from their steady state value).
 
+```{r}
 # Plot impulse response of production sector
 myplot <- ggplot(data = impulse) + 
   geom_hline(yintercept=0, color="gray", linewidth=0.5) +
@@ -81,14 +100,11 @@ myplot <- ggplot(data = impulse) +
 
 # print the plot
 print(myplot)
+```
+<br />
+Next we plot consumption, investment and government expenditure, i.e. the components of GDP.
 
-if(export_pdf) {
-  aspect_ratio <- 4/3.5;
-  height <- 4.8;
-  ggsave("fig9.pdf", width = height*aspect_ratio, height = height)
-}
-
-
+```{r}
 # Plot impulse response of final goods
 myplot <- ggplot(data = impulse) + 
   geom_hline(yintercept=0, color="gray", linewidth=0.5) +
@@ -107,14 +123,12 @@ myplot <- ggplot(data = impulse) +
 
 # print the plot
 print(myplot)
+```
 
-if(export_pdf) {
-  aspect_ratio <- 4/3.5;
-  height <- 4.8;
-  ggsave("fig10.pdf", width = height*aspect_ratio, height = height)
-}
+<br />
+Finally, we show the factor prices for capital and labor.
 
-
+```{r}
 # Plot impulse response of prices
 myplot <- ggplot(data = impulse) + 
   geom_hline(yintercept=0, color="gray", linewidth=0.5) +
@@ -132,20 +146,14 @@ myplot <- ggplot(data = impulse) +
 
 # print the plot
 print(myplot)
-
-if(export_pdf) {
-  aspect_ratio <- 4/3.5;
-  height <- 4.8;
-  ggsave("fig11.pdf", width = height*aspect_ratio, height = height)
-}
+```
 
 
+### Impulse responses of a 1 percent government expenditure shock
 
+Next, we calculate the impulse response to a one percent government expenditure shock. Mechanically, this works exactly in the same way as we simulated the technology shock. We just have to set `shock <- matrix(c(0, 0, 1))` to shock government expenditure and not technology.
 
-########### 
-# Impulse responses of a 1 percent government expenditure shock
-###########
-
+```{r}
 # number of quarters
 n_quarter <- 80
 
@@ -168,8 +176,12 @@ for(i in c(2:(n_quarter+1))) {
 
 # generate dataframe from results
 impulse <- data.frame(quarter=c(0:n_quarter), K=x[1, ], A=x[2, ], G=x[3, ], Y=y[1, ], C=y[2, ], I=y[3, ], r=y[4, ], w=y[5, ], L=y[6, ])
+```
 
+<br />
+Again we can plot the dynamics of the capital stock, technology and labor.
 
+```{r}
 # Plot impulse response of production sector
 myplot <- ggplot(data = impulse) + 
   geom_hline(yintercept=0, color="gray", linewidth=0.5) +
@@ -188,14 +200,13 @@ myplot <- ggplot(data = impulse) +
 
 # print the plot
 print(myplot)
+```
 
-if(export_pdf) {
-  aspect_ratio <- 4/3.5;
-  height <- 4.8;
-  ggsave("fig12.pdf", width = height*aspect_ratio, height = height)
-}
+<br />
+Next we plot consumption, investment and government expenditure, i.e. the components of GDP.
 
 
+```{r}
 # Plot impulse response of final goods
 myplot <- ggplot(data = impulse) + 
   geom_hline(yintercept=0, color="gray", linewidth=0.5) +
@@ -214,14 +225,12 @@ myplot <- ggplot(data = impulse) +
 
 # print the plot
 print(myplot)
+```
 
-if(export_pdf) {
-  aspect_ratio <- 4/3.5;
-  height <- 4.8;
-  ggsave("fig13.pdf", width = height*aspect_ratio, height = height)
-}
+<br />
+And finally, we show factor prices.
 
-
+```{r}
 # Plot impulse response of prices
 myplot <- ggplot(data = impulse) + 
   geom_hline(yintercept=0, color="gray", linewidth=0.5) +
@@ -239,19 +248,14 @@ myplot <- ggplot(data = impulse) +
 
 # print the plot
 print(myplot)
-
-if(export_pdf) {
-  aspect_ratio <- 4/3.5;
-  height <- 4.8;
-  ggsave("fig14.pdf", width = height*aspect_ratio, height = height)
-}
+```
 
 
+### Hansen and Wright (1992) simulation methodology
 
-########### 
-# Hansen and Wright (1992) simulation methodology
-###########
+Now we want to simulate our model to compare its second moments to the data. We use two different simulation methodologies. The first one is based on Hansen and Wright (1992). We first set the seed of the random number generate to some arbitrary variable. This allows us to simulate the same sequence of random numbers over and over again to insure comparability. Now we simulate 100 different times series from our model. Each time series will have 296 different quarters. We set the standard deviation of the technology shock to `sigma_A <- 0.0062`. This ensures that the standard deviation of GDP is equal to $1.91$, which it was in the data.
 
+```{r}
 # set the random seed to generate the same sequence of random variables
 set.seed(351224332)
 
@@ -263,7 +267,14 @@ n_quarter <- 296
 
 # set standard deviation of a (calibration target is sd(Y) = 1.91%)
 sigma_A <- 0.0062
+``` 
 
+<br />
+To use the Hansen and Wright (1992) methodology, we iterate over our `n_sim` different model simulations (variable `k`). For each simulation, we draw a new series of shocks for technology `a_shocks` and government expenditure `g_shocks`. We then apply the same simulation methodology as above to determine the time series of macroeconomic variables. Note that the only difference is the structure of shocks. For our impulse response functions, we assumed that there is only one shock in the initial period. Now, there will be shocks to technology and government expenditure in all periods.
+
+Once the model data is simulated, we can calculate the standard deviations and correlations as we did in our empirical exercise. We then store the moments in an `array` named `hansen_data`. Note that we divide each moment by the value `n_sim`, because we take an average over the `n_sim` different model simulations.
+
+```{r}
 # initializes relevant statistics elements
 hansen_data <- array(0, dim=c(6, 2))
 
@@ -287,7 +298,7 @@ for(k in c(1:n_sim)) {
     x[, i] <- A %*% x[, i-1] + matrix(c(0, sigma_A*a_shocks[i], sigma_G*g_shocks[i]))
     y[, i] <- B %*% x[, i]
   }
-  
+
   # update data
   hansen_data[1, 1] <- hansen_data[1, 1] + sd(y[1, ])/n_sim
   hansen_data[2, 1] <- hansen_data[2, 1] + sd(y[2, ])/sd(y[1, ])/n_sim
@@ -303,12 +314,14 @@ for(k in c(1:n_sim)) {
   hansen_data[5, 2] <- hansen_data[5, 2] + cor(y[6, ], y[1, ])/n_sim
   hansen_data[6, 2] <- hansen_data[6, 2] + cor(y[6, ], y[5, ])/n_sim
 }
+```
 
 
-########### 
-# Simulation with (almost) irrelevant initial conditions
-###########
+### Simulation with (almost) irrelevant initial conditions
 
+One concern with the Hansen and Wright (1992) simulation methodology may be that it only uses $297$ quarters of the economy in each simulation step. At the same time, we assume that in the initial quarter, the capital stock is at its steady state level. This may be a pretty strong assumption that may influence our simulation results. To deal with this criticism, we repeat the above simulation steps but this time just simulate one sequence of the economy which instead of $297$ has a total of $100000$ quarters. In doing so, we make the initial condition $\Delta K_0 = 0$ almost irrelevant. From this very long time series, we can again derive the standard deviations and correlations of relevant model simulated variables.
+
+```{r}
 # set the random seed to generate the same sequence of random variables
 set.seed(351224332)
 
@@ -353,12 +366,14 @@ sim_data[3, 2] <- cor(y[3, ], y[1, ])
 sim_data[4, 2] <- cor(y[5, ], y[1, ])
 sim_data[5, 2] <- cor(y[6, ], y[1, ])
 sim_data[6, 2] <- cor(y[6, ], y[5, ])
-
-
-########### 
-# Comparison of model simulations with the data
-###########
+```
   
+  
+### Comparison of model simulations with the data
+
+Lastly, we compare the moments generated from our model simulations to the moments we calculated from FRED with real US data. We put these numbers into a table. We can see that the business cycle model is successful in matching some dimensions of the data, but it fails on others. In addition, the simulation methodology has some impact on the results. However, the results are at least qualitatively the same, regardless of the methodology used.
+  
+```{r}
 # generate data table
 table_data <- data.frame("Statistics" = 
                            c("sd(Y) in %", 
@@ -383,4 +398,4 @@ table_data <- cbind(table_data, "No Initial Conditions" =
 # output table
 formattable(table_data, digits = 2,
             align= c("l", "r", "r", "r"))
-
+```

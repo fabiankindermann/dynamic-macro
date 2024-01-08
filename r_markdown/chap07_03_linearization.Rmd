@@ -1,0 +1,149 @@
+---
+title: "Model Linearization"
+output:
+  html_document:
+    df_print: paged
+---
+
+### Loading packages, defining colors and using data
+
+We first clear the workspace using `rm(list = ls())`and then include all packages we need. If a package is missing in your R distribution (which is quite likely initially), just use `install.packages("package_name")` with the respective package name to install it on your system. If you execute the code in the file `install_packages.R`, then all necessary packages will be installed into your R distribution. If the variable `export_graphs` is set to `TRUE`, then the graphs will be exported as pdf-files. In addition, we define a set of colors here to make graphs look more beautiful.
+
+```{r message = FALSE}
+rm(list = ls())
+library(reshape2)
+library(base)
+library(ggplot2)
+library(grid)
+library(scales)
+library(stringr)
+library(tidyverse)
+library(pracma)
+
+# should graphs be exported to pdf
+export_pdf <- TRUE
+
+# define some colors
+mygreen <- "#00BA38"
+myblue  <- "#619CFF"
+myred   <- "#F8766D"
+```
+
+
+### Load model parameters and steady state values
+
+For calculating the linearized coefficients of the RBC model, we need our calibrated model parameters. We saved these parameters in a file `chap07_parameters.RData` in the previous file. We can reload these values into our workspace using the function `load`.
+
+```{r}
+# get parameters stored in the RData set
+load("chap07_parameters.RData")
+```
+
+
+### Log-linear coefficients based on guess of \(\kappa\)~*LK*~, \(\kappa\)~*LA*~ and \(\kappa\)~*LG*~
+
+In the lecture, we discussed that we can solve for all linearized model coefficients analytically once we have a guess of the coefficients $\kappa_{LK}$, $\kappa_{LA}$ and $\kappa_{LG}$ available. We therefore write a function `coefficients` that allows us to trace out all these linearized model coefficients based on such a guess. The guess for $\kappa_{LK}$, $\kappa_{LA}$ and $\kappa_{LG}$ is given to this function in an input variable `x`. The function then sets up a `list` of parameters that are directly derived from these three inputs as well as our calibrated model parameters (see the slides).
+
+```{r}
+coefficients <- function(x) {
+  
+  kappa <- list()
+  
+  # copy coefficients
+  kappa$LK <- x[1]
+  kappa$LA <- x[2]
+  kappa$LG <- x[3]
+  
+  # calculate output coefficients
+  kappa$YK <- alpha + (1-alpha)*kappa$LK
+  kappa$YA <- (1-alpha)*(1+kappa$LA)
+  kappa$YG <- (1-alpha)*kappa$LG
+  
+  # calculate consumption coefficients
+  kappa$CK <- kappa$YK - kappa$LK/(1-L)
+  kappa$CA <- kappa$YA - kappa$LA/(1-L)
+  kappa$CG <- kappa$YG - kappa$LG/(1-L)
+  
+  # calculate tomorrow's capital coefficients
+  kappa$KK <- 1/KY*kappa$YK - CY/KY*kappa$CK + 1 - delta
+  kappa$KA <- 1/KY*kappa$YA - CY/KY*kappa$CA
+  kappa$KG <- 1/KY*kappa$YG - CY/KY*kappa$CG - GY/KY
+  
+  # calculate investment coefficients
+  kappa$IK <- KY/IY*(kappa$KK - (1-delta))
+  kappa$IA <- KY/IY*kappa$KA
+  kappa$IG <- KY/IY*kappa$KG
+  
+  # calculate interest rate coefficients
+  kappa$rK <- (r+delta)/r*(kappa$YK-1)
+  kappa$rA <- (r+delta)/r*kappa$YA
+  kappa$rG <- (r+delta)/r*kappa$YG
+
+  # calculate wage rate coefficients
+  kappa$wK <- kappa$YK - kappa$LK
+  kappa$wA <- kappa$YA - kappa$LA
+  kappa$wG <- kappa$YG - kappa$LG
+  
+  # return list of kappas
+  return(kappa)
+    
+}
+```
+
+### Function to determine equation system to solve for \(\kappa\)~*LK*~, \(\kappa\)~*LA*~ and \(\kappa\)~*LG*~
+
+Next, we need to determine the linearized model coefficients $\kappa_{LK}$, $\kappa_{LA}$ and $\kappa_{LG}$. We have seen that there are three non-linear equations that allow us to pin down these coefficients. Since we can not solve for the coefficients analytically anymore, we need to use a rootfinding routine (see below). In the function `equation_system`, we hence specify the equation system that determines the three coefficients we are looking for. This function again receives as input some guess for the coefficients $\kappa_{LK}$, $\kappa_{LA}$ and $\kappa_{LG}$. It then uses the function `coefficients` we have written above to determine all the other linearized model coefficients. Finally, we calculate the residual of the equation system that determines $\kappa_{LK}$, $\kappa_{LA}$ and $\kappa_{LG}$. Our goal then is to numerically set this residual to zero, which will determine our coefficients.
+
+```{r}
+equation_system <- function(x) {
+
+  # determine coefficients
+  kappa <- coefficients(x)
+  
+  # determine residual equations
+  eqs <- array(dim = 3)
+  eqs[1] <- kappa$CK - (kappa$CK - (r+delta)/(1+r)*(kappa$YK-1))*kappa$KK
+  eqs[2] <- kappa$CA - (kappa$CK - (r+delta)/(1+r)*(kappa$YK-1))*kappa$KA - (kappa$CA - (r+delta)/(1+r)*kappa$YA)*rho_A
+  eqs[3] <- kappa$CG - (kappa$CK - (r+delta)/(1+r)*(kappa$YK-1))*kappa$KG - (kappa$CG - (r+delta)/(1+r)*kappa$YG)*rho_G
+  
+  return(eqs)
+}
+```
+
+
+### Determine the correct values of \(\kappa\)~*LK*~, \(\kappa\)~*LA*~ and \(\kappa\)~*LG*~
+
+In a last step, we determine the correct coefficients $\kappa_{LK}$, $\kappa_{LA}$ and $\kappa_{LG}$ for our calibrated set of parameters. Since the equation system that determines these coefficients is non-linear, we need a numerical rootfinding routine to do so. The routine `fsolve` from the `pracma` package fulfills this task. It takes as input a function (in our case `equation_system`) that contains the equations to determine our coefficients. In addition, we have to provide an initial guess at which the function should start searching for our coefficients. We just set this to zero (`c(0, 0, 0)`).  We could provide a function that specifies the Jacobian of the system, but we don't (i.e. we set `J = NULL`). We can also specify the level of accuracy with which the function should search for the coefficients. We set this to `tol = 1e-10`, meaning $10^{-10}$. Finally, the function `fsolve` stores the results of the rootfinding process in a list `fret`. 
+
+```{r}
+# use fsolve from the pracma package to calculate the solution
+fret <- fsolve(equation_system, c(0, 0, 0), J=NULL, tol=1e-10)
+```
+
+<br />
+Once the function `fsolve` has found our coefficients $\kappa_{LK}$, $\kappa_{LA}$ and $\kappa_{LG}$, we need to do some post-processing. We first calculate all the model coefficients using our correct version of $\kappa_{LK}$, $\kappa_{LA}$ and $\kappa_{LG}$ stored in `fret$x`. Next, we store all the coefficients that determine the dynamics of the state variables in a matrix $A$. All coefficients that determine the relationship between state variables and other model variables are stored in a matrix $B$. Finally, we save these matrices to a file `chap07_coefficients.RData` for later use.
+
+```{r}
+# calculate all the kappas
+kappa <- coefficients(fret$x)
+
+# generate A matrix
+A = matrix(nrow=3, ncol=3)
+A[1, ] <- c(kappa$KK, kappa$KA, kappa$KG)
+A[2, ] <- c(       0,    rho_A,        0)
+A[3, ] <- c(       0,        0,    rho_G)
+
+# generate B matrix
+B = matrix(nrow=6, ncol=3)
+B[1, ] <- c(kappa$YK, kappa$YA, kappa$YG)
+B[2, ] <- c(kappa$CK, kappa$CA, kappa$CG)
+B[3, ] <- c(kappa$IK, kappa$IA, kappa$IG)
+B[4, ] <- c(kappa$rK, kappa$rA, kappa$rG)
+B[5, ] <- c(kappa$wK, kappa$wA, kappa$wG)
+B[6, ] <- c(kappa$LK, kappa$LA, kappa$LG)
+
+
+# save linearized model coefficients
+save(file="chap07_coefficients.RData", 
+     list=c("A", "B"))
+```

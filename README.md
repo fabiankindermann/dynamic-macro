@@ -33,3 +33,11 @@ This is a set of R-files we use for our Dynamic Macro lecture at Uni Regensburg.
 - [Business Cycle Statistics](https://raw.githack.com/fabiankindermann/dynamic-macro/main/r_markdown/chap06_02_bc_statistics.html)
 - [Comparison with Germany](https://raw.githack.com/fabiankindermann/dynamic-macro/main/r_markdown/chap06_03_country_comparison.html)
 - [A function to pull multiple data series from FRED](https://raw.githack.com/fabiankindermann/dynamic-macro/main/r_markdown/chap06_func_get_fred_data.html)
+
+
+## Chapter 7
+
+- [AR(1) processes](https://raw.githack.com/fabiankindermann/dynamic-macro/main/r_markdown/chap07_01_ar1_processes.html)
+- [Model Calibration](https://raw.githack.com/fabiankindermann/dynamic-macro/main/r_markdown/chap07_02_calibration.html)
+- [Model Linearization](https://raw.githack.com/fabiankindermann/dynamic-macro/main/r_markdown/chap07_03_linearization.html)
+- [Model Analysis](https://raw.githack.com/fabiankindermann/dynamic-macro/main/r_markdown/chap07_04_model_analysis.html)

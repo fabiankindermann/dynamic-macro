@@ -1,8 +1,15 @@
-#######################################
-### Model Calibration
-#######################################
+---
+title: "Model Calibration"
+output:
+  html_document:
+    df_print: paged
+---
 
-# Clear the workspace and load libraries
+### Loading packages, defining colors and using data
+
+We first clear the workspace using `rm(list = ls())`and then include all packages we need. If a package is missing in your R distribution (which is quite likely initially), just use `install.packages("package_name")` with the respective package name to install it on your system. If you execute the code in the file `install_packages.R`, then all necessary packages will be installed into your R distribution. If the variable `export_graphs` is set to `TRUE`, then the graphs will be exported as pdf-files. In addition, we define a set of colors here to make graphs look more beautiful. Furthermore, we define some axis breaks for graphs to look nicer.
+
+```{r message = FALSE}
 rm(list = ls())
 library(zoo)
 library(xts)
@@ -29,14 +36,16 @@ myred   <- "#F8766D"
   
 # define plotting breaks
 xbreaks <- c(seq(from = as.Date("1950-01-01"), to = as.Date("2020-01-01"),by = "10 years"))
+```
 
 
-########### 
-# Pull data from FRED database
-###########
+### Pull data from FRED database
 
+In a first step, we need to pull relevant data from the FRED database. We again do this using the function `get_fred_data`, which we already discussed in Chapter 6. This function allows us to pull multiple data series at the same time as long as they have the same starting and end date and the same frequency. We first pull a series of quarterly data consisting of nominal GDP and its components, the deflators for different GDP components and some employment and labor compensation statistics.
+
+
+```{r}
 source("chap06_func_get_fred_data.R")
-
 
 ########### 
 # Quarterly time series
@@ -74,8 +83,12 @@ selection <- rbind(selection, c("A442RC1Q027SBEA", "EMPCOMP"))
 
 # pull all quarterly data series from FRED
 fred_q <- get_fred_data(selection$series, selection$names, "1948-01-01", "2021-12-31", "q")
+```
+<br />
 
+Since data on the capital stock is only available at the annual frequency, we pull some data on aggregate production also at the annual frequency level.
 
+```{r}
 ########### 
 # Annual time series
 ###########
@@ -87,12 +100,13 @@ selection <- rbind(selection, c("A442RC1A027NBEA", "COMPENSATION"))
 
 # pull all annual data series from FRED
 fred_a <- get_fred_data(selection$series, selection$names, "1950-01-01", "2019-12-31", "a")
+```
 
+### Deflating variables to real values
 
-########### 
-# Get calibration target data
-###########
+We first deflate all components of GDP to get to their real values. For them to sum up to total real GDP, we again need to make a slight adjustment. We already discussed this in Chapter 6.
 
+```{r}
 # calculate real variables by deflating nominal ones
 for(var in c("GDP", "CONS", "CONS_N", "CONS_S", "INV", "INV_F", "GOV", "EXP", "IMP")) {
   fred_q[paste("R_", var, sep="")] = fred_q[var]/fred_q[paste("P_", var, sep="")]*100
@@ -105,8 +119,14 @@ factor <- fred_q$R_GDP/(fred_q$R_CONS +fred_q$R_INV + fred_q$R_GOV + fred_q$R_EX
 for(var in c("GDP", "CONS", "INV", "GOV", "EXP", "IMP")) {
   fred_q[paste("R_", var, sep="")] = fred_q[paste("R_", var, sep="")]*factor
 }
+```
 
 
+### The cyclical properties of government consumption
+
+We now study the cyclical properties of (the log of) government consumption. To this end, we first extract the cycle from the time series of government spending using the HP filter. We then plot the cyclical component of government spending over time. Government spending appears to have some persistence. However, there seems to be some excess motion in government spending in the first 40 quarters or so (right after World War II). For the following analysis, we hence only use the time series for government spending starting at quarter 40.
+
+```{r}
 # filter government spending
 ts <- xts(x = log(fred_q$R_GOV), order.by = as.Date(fred_q$date))
 hpf <- hpfilter(ts, freq=1600, type="lambda")
@@ -126,14 +146,12 @@ myplot <- ggplot(data = fred_q) +
 
 # print the plot
 print(myplot)
+```
+<br />
 
-if(export_pdf) {
-  aspect_ratio <- 4/3;
-  height <- 3.5;
-  ggsave("fig7.pdf", width = height*aspect_ratio, height = height)
-}
+In order to trace out the persistence of the cyclical component of government spending, we calculate its partial autocorrelations (for the data starting at quarter 40). As we can see, the partial autocorrelation is large and significant at a lag of one period. All other autocorrelations are minor and (if at all) hardly significant. Hence, assuming an AR(1) process for government spending seems to be safe.
 
-
+```{r}
 # generate partial autocorrelation plot
 myplot <- ggpacf(gov_exp[40:length(gov_exp)]) +
   coord_cartesian(ylim=c(-0.5, 1)) +  
@@ -142,18 +160,14 @@ myplot <- ggpacf(gov_exp[40:length(gov_exp)]) +
        y = "Partial Auto-Correlation") +
   theme_bw()
 print(myplot)
-
-if(export_pdf) {
-  aspect_ratio <- 4/3;
-  height <- 3.5;
-  ggsave("fig8.pdf", width = height*aspect_ratio, height = height)
-}
+```
 
 
-########### 
-# Calculate calibration targets
-###########
+### Calculate calibration targets
 
+Now we want to use our FRED data to calculate calibration targets. For most of it, we just use the long-run averages (`mean`). In addition, we can calculate the persistence parameter of the cyclical components of the log of government consumption with a simple regression using the lagged value (`lag`) to explain the current value. We finally show all the calibration targets in a table.
+
+```{r}
 # calculate relevant statistics
 dat <- array(dim=c(8))
 
@@ -179,18 +193,19 @@ table_data <- data.frame("Data" =
                              "Government purchases G/Y", "Hours worked (share of endowment)",
                              "Labor share corporate sector wL/Y", "Capital K/Y (quarterly)",
                              "Government purchases: autocorrelation rho_G", "Government purchases: sd sigma_G"))
-
-table_data <- cbind(table_data, "Value" = digits(dat, 4, format="f"))
+table_data <- cbind(table_data, "Average (1948-2021, in %)" = digits(dat, 4, format="f"))
 
 
 # output table
 formattable(table_data, align= c("l", "r"))
+```
 
 
-########### 
-# Calculate calibrated parameters
-###########
+### Calculate calibrated parameters
 
+From the data calculated above, we need to derive the model parameters. All parameters are directly linked to one or more moments. We discuss these linkages in the lecture. Having calculated all parameters, we print them to a table.
+
+```{r}
 # share or labor compensation -> production share
 alpha <- 1 - dat[5]
 
@@ -228,19 +243,19 @@ table_data <- data.frame("Parameter" =
                              "Time discount factor (beta)", "Disutility of labor (chi)",
                              "Government share (g_y)", "Mean gov. expend. process (G_bar)",
                              "Autocorrelation gov. expend. rho_G", "Standard deviation gov. expend. sigma_G"))
-
 table_data <- cbind(table_data, "Value" = digits(c(alpha, delta, beta, chi, g_y, G_bar, rho_G, sigma_G), 4, format="f"))
 
 
 # output table
-formattable(table_data, digits=2,
-            align= c("l", "r"))
+formattable(table_data, align= c("l", "r"))
+```
 
 
-########### 
-# Calculate the steady state
-###########
+### Calculate the steady state
 
+Using the calibrated parameters, we can easily derive the non-stochastic steady state of the RBC model. This steady state has a closed form solution.
+
+```{r}
 # interest rate
 r  <- theta
 
@@ -275,26 +290,30 @@ table_data <- data.frame("Data" =
                              "Government purchases G/Y", "Hours worked (share of endowment)",
                              "Labor share corporate sector wL/Y", "Capital K/Y (quarterly)",
                              "Interest rate (quarterly)"))
-table_data <- cbind(table_data, "Model Value" = c(CY, IY, GY, L, wL, KY, r))
+
+table_data <- cbind(table_data, "Model Value" = digits(c(CY, IY, GY, L, wL, KY, r), 4, format="f"))
 
 # output table
-formattable(table_data,
-            align= c("l", "r"), digits = 3)
+formattable(table_data, align= c("l", "r"))
+```
 
 
-########### 
-# Save parameters and steady state values to file
-###########
+### Save parameters and steady state values to file
 
+To work with our parameter set as well as the calculated steady state values throughout this entire chapter, we save the variables to an `.RData` file. We can use the function `save` to do this. In this function, we can specify a filename as well as a list of variable values that should be saved in this file.
+
+```{r}
 save(file="chap07_parameters.RData", 
      list=c("alpha", "delta", "beta", "chi", "g_y", "G_bar", "rho_G", "sigma_G", "rho_A",
             "CY", "IY", "GY", "L", "r", "w", "KY", "Y"))
+```
 
 
-########### 
-# Filter time series using HP filter to replicate Hansen and Wright (1992, Tab. 2)
-###########
+### Filter time series using HP filter to replicate Hansen and Wright (1992, Tab. 2)
 
+Last but not least, we compute some additional business cycle statistics which later on will allow us to compare our real business cycle model with the data. To this end, we first use an HP filter to filter the time series of GDP, consumption, investment, employment, and productivity. 
+
+```{r}
 # filter GDP
 ts <- xts(x = log(fred_q$R_GDP), order.by = as.Date(fred_q$date))
 hpf <- hpfilter(ts, freq=1600, type="lambda")
@@ -319,8 +338,13 @@ fred_q$HOURS_cycle <- hpf$cycle
 ts <- xts(x = log(fred_q$VA_NF/fred_q$HOURS_NF), order.by = as.Date(fred_q$date))
 hpf <- hpfilter(ts, freq=1600, type="lambda")
 fred_q$PROD_cycle <- hpf$cycle 
+```
 
+<br />
 
+With the filtered components, we can calculate standard deviations of all variables relative to the standard deviation of GDP. This allows us to compare the volatility of different time series generated by the data and the model. In addition, we calculate the correlation of all variables with GDP. We finally print our results to a table.
+
+```{r}
 # calculate relevant statistics
 emp_data <- array(dim=c(6, 2))
 
@@ -356,8 +380,14 @@ table_data <- cbind(table_data, "US Data 1948-2021" = digits(c(emp_data[1, 1]*10
 
 # output table
 formattable(table_data, align= c("l", "r"))
+```
 
 
+<br />
+Finally, we save our results in a file named `chap07_empirics.RData` for later use.
+
+```{r}
 # save empirical data
 save(file="chap07_empirics.RData", 
      list=c("emp_data"))
+```

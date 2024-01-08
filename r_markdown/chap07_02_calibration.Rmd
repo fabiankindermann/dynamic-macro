@@ -174,7 +174,7 @@ dat <- array(dim=c(8))
 # consumption share in GDP
 dat[1] <- mean(fred_q$CONS/fred_q$GDP)
 dat[2] <- mean(fred_q$INV/fred_q$GDP)
-dat[3] <- mean(fred_q$GOV/fred_q$GDP)
+dat[3] <- mean(fred_q$GOV[40:length(fred_q$GOV)]/fred_q$GDP[40:length(fred_q$GDP)])
 dat[4] <- mean(fred_a$HOURS)/(365*(24-8))
 dat[5] <- mean(fred_q$EMPCOMP/fred_q$VA_NET)
 

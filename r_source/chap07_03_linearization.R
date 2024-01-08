@@ -14,7 +14,7 @@ library(tidyverse)
 library(pracma)
 
 # should graphs be exported to pdf
-export_pdf <- TRUE
+export_pdf <- FALSE
 
 # define some colors
 mygreen <- "#00BA38"

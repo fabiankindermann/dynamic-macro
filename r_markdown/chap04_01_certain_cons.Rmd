@@ -18,6 +18,7 @@ library(scales)
 library(stringr)
 library(tidyverse)
 library(pwt10)
+library(httr)
 
 # should graphs be exported to pdf
 export_pdf <- FALSE
@@ -254,7 +255,8 @@ When we regress individual consumption on individual net income, we find that th
 ```{r}
 # download 2020 CEX from BLS (ATTENTION: 51Mb)
 zipfile <- paste(getwd(), "/intrvw20.zip", sep="")
-download.file("https://www.bls.gov/cex/pumd/data/comma/intrvw20.zip", destfile=zipfile)
+headers = c(`user-agent` = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36')
+GET(url = 'https://www.bls.gov/cex/pumd/data/comma/intrvw20.zip', add_headers(.headers=headers), write_disk(zipfile, overwrite=TRUE))
 unzip(zipfile)
 unlink(zipfile)
 

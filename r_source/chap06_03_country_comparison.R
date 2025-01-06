@@ -19,7 +19,7 @@ library(mFilter)
 library(formattable)
 
 # should graphs be exported to pdf
-export_pdf <- FALSE
+export_pdf <- TRUE
 
 # define some colors
 mygreen <- "#00BA38"
@@ -54,12 +54,12 @@ selection <- rbind(selection, c("TB3MS", "NOMRATE_US"))
 selection <- rbind(selection, c("IRLTLT01DEQ156N", "NOMRATE_DE"))
 
 # pull all data series from FRED
-fred <- get_fred_data(selection$series, selection$names, "1970-01-01", "2021-12-31", "q")
+fred <- get_fred_data(selection$series, selection$names, "1970-01-01", "2022-09-30", "q")
 
 # calculate inflation for US
 deflator <- fredr(series_id = "GDPDEF",
                   observation_start = as.Date("1969-01-01"),
-                  observation_end = as.Date("2021-12-31")
+                  observation_end = as.Date("2022-09-30")
 )
 
 fred$INFL_US <- diff(deflator$value, lag = 4)/deflator$value[1:(length(deflator$value)-4)]*100

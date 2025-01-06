@@ -48,7 +48,7 @@ We can download data from the FRED using the `fredr` function. This function tak
 # extract real GDP for the US (quarterly)
 gdp_real <- fredr(series_id = "GDPC1",
                   observation_start = as.Date("1948-01-01"),
-                  observation_end = as.Date("2021-12-31")
+                  observation_end = as.Date("2023-12-31")
 )
 
 # calculate log gdp
@@ -152,7 +152,7 @@ Now we want to take a look at the estimated cyclical component of GDP. To see ho
 # extract NBER recession indicator (including peak quarter)
 recession <- fredr(series_id = "USRECQP",
                    observation_start = as.Date("1948-01-01"),
-                   observation_end = as.Date("2021-12-31")
+                   observation_end = as.Date("2023-12-31")
 )
 
 # add quarter numbers to recession dataset

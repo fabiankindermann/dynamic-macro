@@ -46,7 +46,7 @@ xbreaks <- c(seq(from = as.Date("1950-01-01"), to = as.Date("2020-01-01"),by = "
 # extract real GDP for the US (quarterly)
 gdp_real <- fredr(series_id = "GDPC1",
                   observation_start = as.Date("1948-01-01"),
-                  observation_end = as.Date("2021-12-31")
+                  observation_end = as.Date("2023-12-31")
 )
 
 # calculate log gdp
@@ -157,7 +157,7 @@ if(export_pdf) {
 # extract NBER recession indicator (including peak quarter)
 recession <- fredr(series_id = "USRECQP",
                    observation_start = as.Date("1948-01-01"),
-                   observation_end = as.Date("2021-12-31")
+                   observation_end = as.Date("2023-12-31")
 )
 
 # add quarter numbers to recession dataset

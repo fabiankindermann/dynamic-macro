@@ -85,7 +85,7 @@ selection <- rbind(selection, c("PRS85006151", "REALCOMP"))
 selection <- rbind(selection, c("TB3MS", "NOMRATE"))
 
 # pull all data series from FRED
-fred <- get_fred_data(selection$series, selection$names, "1948-01-01", "1995-12-31", "q")
+fred <- get_fred_data(selection$series, selection$names, "1948-01-01", "2023-12-31", "q")
 ```
 
 <br />

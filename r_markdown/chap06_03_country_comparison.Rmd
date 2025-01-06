@@ -64,7 +64,7 @@ selection <- rbind(selection, c("TB3MS", "NOMRATE_US"))
 selection <- rbind(selection, c("IRLTLT01DEQ156N", "NOMRATE_DE"))
 
 # pull all data series from FRED
-fred <- get_fred_data(selection$series, selection$names, "1970-01-01", "2021-12-31", "q")
+fred <- get_fred_data(selection$series, selection$names, "1970-01-01", "2022-09-30", "q")
 ```
 <br />
 Note that the annualized inflation rate for the US (meaning price changes relative to the same quarter in the last year) need to be calculated by hand from the GDP quarterly deflator series. For Germany, this series exists.
@@ -73,7 +73,7 @@ Note that the annualized inflation rate for the US (meaning price changes relati
 # calculate inflation for US
 deflator <- fredr(series_id = "GDPDEF",
                   observation_start = as.Date("1969-01-01"),
-                  observation_end = as.Date("2021-12-31")
+                  observation_end = as.Date("2022-09-30")
 )
 
 fred$INFL_US <- diff(deflator$value, lag = 4)/deflator$value[1:(length(deflator$value)-4)]*100

@@ -253,7 +253,7 @@ print(myplot)
 
 ### Hansen and Wright (1992) simulation methodology
 
-Now we want to simulate our model to compare its second moments to the data. We use two different simulation methodologies. The first one is based on Hansen and Wright (1992). We first set the seed of the random number generate to some arbitrary variable. This allows us to simulate the same sequence of random numbers over and over again to insure comparability. Now we simulate 100 different times series from our model. Each time series will have 296 different quarters. We set the standard deviation of the technology shock to `sigma_A <- 0.0062`. This ensures that the standard deviation of GDP is equal to $1.91$, which it was in the data.
+Now we want to simulate our model to compare its second moments to the data. We use two different simulation methodologies. The first one is based on Hansen and Wright (1992). We first set the seed of the random number generate to some arbitrary variable. This allows us to simulate the same sequence of random numbers over and over again to insure comparability. Now we simulate 100 different times series from our model. Each time series will have 296 different quarters. We set the standard deviation of the technology shock to `sigma_A <- 0.00615`. This ensures that the standard deviation of GDP is equal to $1.89$, which it was in the data.
 
 ```{r}
 # set the random seed to generate the same sequence of random variables
@@ -265,8 +265,8 @@ n_sim <- 100
 # number of quarters to simulate
 n_quarter <- 296
 
-# set standard deviation of a (calibration target is sd(Y) = 1.91%)
-sigma_A <- 0.0062
+# set standard deviation of a (calibration target is sd(Y))
+sigma_A <- 0.00615
 ``` 
 
 <br />
@@ -328,8 +328,8 @@ set.seed(351224332)
 # number of quarters to simulate
 n_quarter <- 100000
 
-# set standard deviation of a (calibration target is sd(Y) = 1.91%)
-sigma_A = 0.00558
+# set standard deviation of a (calibration target is sd(Y))
+sigma_A <- 0.00553
 
 # initializes relevant statistics elements
 sim_data <- array(0, dim=c(6, 2))

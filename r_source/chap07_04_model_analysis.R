@@ -261,8 +261,8 @@ n_sim <- 100
 # number of quarters to simulate
 n_quarter <- 296
 
-# set standard deviation of a (calibration target is sd(Y) = 1.91%)
-sigma_A <- 0.0062
+# set standard deviation of a (calibration target is sd(Y))
+sigma_A <- 0.00615
 
 # initializes relevant statistics elements
 hansen_data <- array(0, dim=c(6, 2))
@@ -315,8 +315,8 @@ set.seed(351224332)
 # number of quarters to simulate
 n_quarter <- 100000
 
-# set standard deviation of a (calibration target is sd(Y) = 1.91%)
-sigma_A = 0.00558
+# set standard deviation of a (calibration target is sd(Y))
+sigma_A <- 0.00553
 
 # initializes relevant statistics elements
 sim_data <- array(0, dim=c(6, 2))

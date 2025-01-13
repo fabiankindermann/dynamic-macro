@@ -73,7 +73,7 @@ selection <- rbind(selection, c("A439RC1Q027SBEA", "VA_NET"))
 selection <- rbind(selection, c("A442RC1Q027SBEA", "EMPCOMP"))
 
 # pull all quarterly data series from FRED
-fred_q <- get_fred_data(selection$series, selection$names, "1948-01-01", "2021-12-31", "q")
+fred_q <- get_fred_data(selection$series, selection$names, "1948-01-01", "2023-12-31", "q")
 
 
 ########### 
@@ -82,11 +82,16 @@ fred_q <- get_fred_data(selection$series, selection$names, "1948-01-01", "2021-1
 
 selection <- data.frame(series = "GDP", names = "GDP")
 selection <- rbind(selection, c("K1TTOTL1ES000", "CAPSTOCK"))
-selection <- rbind(selection, c("AVHWPEUSA065NRUG", "HOURS"))
+selection <- rbind(selection, c("B4701C0A222NBEA", "TOTALHOURS"))
+selection <- rbind(selection, c("PAYEMS", "TOTALEMPS"))
 selection <- rbind(selection, c("A442RC1A027NBEA", "COMPENSATION"))
 
+
 # pull all annual data series from FRED
-fred_a <- get_fred_data(selection$series, selection$names, "1950-01-01", "2019-12-31", "a")
+fred_a <- get_fred_data(selection$series, selection$names, "1950-01-01", "2022-12-31", "a")
+
+# calculate hours per employee
+fred_a$HOURS = fred_a$TOTALHOURS/fred_a$TOTALEMPS*1000
 
 
 ########### 
@@ -174,13 +179,13 @@ dat[8] <- sd(gov_exp[40:length(gov_exp)])*sqrt(1 - dat[7]^2)
 
 
 # generate data table
-table_data <- data.frame("Data" = 
+table_data <- data.frame("Statistics" = 
                            c("Consumption C/Y", "Investment I/Y", 
                              "Government purchases G/Y", "Hours worked (share of endowment)",
                              "Labor share corporate sector wL/Y", "Capital K/Y (quarterly)",
                              "Government purchases: autocorrelation rho_G", "Government purchases: sd sigma_G"))
 
-table_data <- cbind(table_data, "Value" = digits(dat, 4, format="f"))
+table_data <- cbind(table_data, "Average" = digits(dat, 4, format="f"))
 
 
 # output table
@@ -270,7 +275,7 @@ wL <- w*L/Y
 
 
 # generate data table
-table_data <- data.frame("Data" = 
+table_data <- data.frame("Statistics" = 
                            c("Consumption C/Y", "Investment I/Y", 
                              "Government purchases G/Y", "Hours worked (share of endowment)",
                              "Labor share corporate sector wL/Y", "Capital K/Y (quarterly)",
@@ -349,7 +354,7 @@ table_data <- data.frame("Statistics" =
                              "sd(L)/sd(Y)", "corr(L, Y)",
                              "sd(L)/sd(w)", "corr(L, w)"))
 
-table_data <- cbind(table_data, "US Data 1948-2021" = digits(c(emp_data[1, 1]*100, emp_data[2, 1],
+table_data <- cbind(table_data, "US Data" = digits(c(emp_data[1, 1]*100, emp_data[2, 1],
                                 emp_data[2, 2], emp_data[3, 1], emp_data[3, 2], emp_data[4, 1], emp_data[4, 2],
                                 emp_data[5, 1], emp_data[5, 2], emp_data[6, 1], emp_data[6, 2]), 2, format="f"))
 

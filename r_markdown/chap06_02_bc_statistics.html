@@ -1762,13 +1762,17 @@ before we can use them. Deflators, however, are usually calculated
 separately for each component of GDP. Therefore, the sum of the deflated
 GDP components usually doesn’t add up exactly to deflated GDP anymore.
 We therefore adjust each series proportionally in order to make them
-consistent with aggregate real GDP. This involves calculating the ration
+consistent with aggregate real GDP. This involves calculating the ratio
 between real GDP and the sum of its components in the variable
 <code>factor</code>. We then multiply each individual series with this
-factor to make our data consistent. Finally, we calculate calculate net
-exports in both nominal and real terms.</p>
+factor to make our data consistent. The argument that inflated series
+don’t usually add up well also holds for real total consumption and real
+total investment. We therefore construct these aggregates by adding up
+the different real components of consumption and investment,
+respectively. Finally, we calculate calculate net exports in both
+nominal and real terms.</p>
 <pre class="r"><code># calculate real variables by deflating nominal ones
-for(var in c(&quot;GDP&quot;, &quot;CONS&quot;, &quot;CONS_D&quot;, &quot;CONS_N&quot;, &quot;CONS_S&quot;, &quot;INV&quot;, &quot;INV_R&quot;, &quot;INV_N&quot;, &quot;INV_I&quot;, &quot;GOV&quot;, &quot;EXP&quot;, &quot;IMP&quot;)) {
+for(var in c(&quot;GDP&quot;, &quot;CONS_D&quot;, &quot;CONS_N&quot;, &quot;CONS_S&quot;, &quot;INV_R&quot;, &quot;INV_N&quot;, &quot;INV_I&quot;, &quot;GOV&quot;, &quot;EXP&quot;, &quot;IMP&quot;)) {
   fred[paste(&quot;R_&quot;, var, sep=&quot;&quot;)] = fred[var]/fred[paste(&quot;P_&quot;, var, sep=&quot;&quot;)]*100
 }
 
@@ -1776,9 +1780,13 @@ for(var in c(&quot;GDP&quot;, &quot;CONS&quot;, &quot;CONS_D&quot;, &quot;CONS_N
 factor &lt;- fred$R_GDP/(fred$R_CONS_D + fred$R_CONS_N + fred$R_CONS_S +fred$R_INV_R + fred$R_INV_N + fred$R_INV_I + fred$R_GOV + fred$R_EXP - fred$R_IMP)
 
 # scale series
-for(var in c(&quot;CONS&quot;, &quot;CONS_D&quot;, &quot;CONS_N&quot;, &quot;CONS_S&quot;, &quot;INV&quot;, &quot;INV_R&quot;, &quot;INV_N&quot;, &quot;INV_I&quot;, &quot;GOV&quot;, &quot;EXP&quot;, &quot;IMP&quot;)) {
+for(var in c(&quot;CONS_D&quot;, &quot;CONS_N&quot;, &quot;CONS_S&quot;, &quot;INV_R&quot;, &quot;INV_N&quot;, &quot;INV_I&quot;, &quot;GOV&quot;, &quot;EXP&quot;, &quot;IMP&quot;)) {
   fred[paste(&quot;R_&quot;, var, sep=&quot;&quot;)] = fred[paste(&quot;R_&quot;, var, sep=&quot;&quot;)]*factor
 }
+
+# calculate aggregate real consumption and investment
+fred[&quot;R_CONS&quot;] = fred[&quot;R_CONS_D&quot;] + fred[&quot;R_CONS_N&quot;] + fred[&quot;R_CONS_S&quot;]
+fred[&quot;R_INV&quot;] = fred[&quot;R_INV_R&quot;] + fred[&quot;R_INV_N&quot;] + fred[&quot;R_INV_I&quot;]
 
 # determine net exports
 fred$XM   &lt;- fred$EXP   - fred$IMP
@@ -1899,7 +1907,7 @@ Consumption
 63.57%
 </td>
 <td style="text-align:center;">
-50.82%
+45.54%
 </td>
 </tr>
 <tr>
@@ -1946,7 +1954,7 @@ Investment
 17.39%
 </td>
 <td style="text-align:center;">
-49.19%
+52.59%
 </td>
 </tr>
 <tr>

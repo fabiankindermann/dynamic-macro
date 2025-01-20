@@ -89,11 +89,11 @@ fred <- get_fred_data(selection$series, selection$names, "1948-01-01", "2023-12-
 ```
 
 <br />
-The series for GDP and its components we've downloaded are nominal series. Therefore we have to deflate them into real series before we can use them. Deflators, however, are usually calculated separately for each component of GDP. Therefore, the sum of the deflated GDP components usually doesn't add up exactly to deflated GDP anymore. We therefore adjust each series proportionally in order to make them consistent with aggregate real GDP. This involves calculating the ration between real GDP and the sum of its components in the variable `factor`. We then multiply each individual series with this factor to make our data consistent. Finally, we calculate calculate net exports in both nominal and real terms.
+The series for GDP and its components we've downloaded are nominal series. Therefore we have to deflate them into real series before we can use them. Deflators, however, are usually calculated separately for each component of GDP. Therefore, the sum of the deflated GDP components usually doesn't add up exactly to deflated GDP anymore. We therefore adjust each series proportionally in order to make them consistent with aggregate real GDP. This involves calculating the ratio between real GDP and the sum of its components in the variable `factor`. We then multiply each individual series with this factor to make our data consistent. The argument that inflated series don't usually add up well also holds for real total consumption and real total investment. We therefore construct these aggregates by adding up the different real components of consumption and investment, respectively. Finally, we calculate calculate net exports in both nominal and real terms.
 
 ```{r}
 # calculate real variables by deflating nominal ones
-for(var in c("GDP", "CONS", "CONS_D", "CONS_N", "CONS_S", "INV", "INV_R", "INV_N", "INV_I", "GOV", "EXP", "IMP")) {
+for(var in c("GDP", "CONS_D", "CONS_N", "CONS_S", "INV_R", "INV_N", "INV_I", "GOV", "EXP", "IMP")) {
   fred[paste("R_", var, sep="")] = fred[var]/fred[paste("P_", var, sep="")]*100
 }
 
@@ -101,9 +101,13 @@ for(var in c("GDP", "CONS", "CONS_D", "CONS_N", "CONS_S", "INV", "INV_R", "INV_N
 factor <- fred$R_GDP/(fred$R_CONS_D + fred$R_CONS_N + fred$R_CONS_S +fred$R_INV_R + fred$R_INV_N + fred$R_INV_I + fred$R_GOV + fred$R_EXP - fred$R_IMP)
 
 # scale series
-for(var in c("CONS", "CONS_D", "CONS_N", "CONS_S", "INV", "INV_R", "INV_N", "INV_I", "GOV", "EXP", "IMP")) {
+for(var in c("CONS_D", "CONS_N", "CONS_S", "INV_R", "INV_N", "INV_I", "GOV", "EXP", "IMP")) {
   fred[paste("R_", var, sep="")] = fred[paste("R_", var, sep="")]*factor
 }
+
+# calculate aggregate real consumption and investment
+fred["R_CONS"] = fred["R_CONS_D"] + fred["R_CONS_N"] + fred["R_CONS_S"]
+fred["R_INV"] = fred["R_INV_R"] + fred["R_INV_N"] + fred["R_INV_I"]
 
 # determine net exports
 fred$XM   <- fred$EXP   - fred$IMP

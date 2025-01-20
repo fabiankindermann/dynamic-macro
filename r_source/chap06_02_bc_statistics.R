@@ -80,7 +80,7 @@ fred <- get_fred_data(selection$series, selection$names, "1948-01-01", "2023-12-
 
 
 # calculate real variables by deflating nominal ones
-for(var in c("GDP", "CONS", "CONS_D", "CONS_N", "CONS_S", "INV", "INV_R", "INV_N", "INV_I", "GOV", "EXP", "IMP")) {
+for(var in c("GDP", "CONS_D", "CONS_N", "CONS_S", "INV_R", "INV_N", "INV_I", "GOV", "EXP", "IMP")) {
   fred[paste("R_", var, sep="")] = fred[var]/fred[paste("P_", var, sep="")]*100
 }
 
@@ -88,9 +88,13 @@ for(var in c("GDP", "CONS", "CONS_D", "CONS_N", "CONS_S", "INV", "INV_R", "INV_N
 factor <- fred$R_GDP/(fred$R_CONS_D + fred$R_CONS_N + fred$R_CONS_S +fred$R_INV_R + fred$R_INV_N + fred$R_INV_I + fred$R_GOV + fred$R_EXP - fred$R_IMP)
 
 # scale series
-for(var in c("CONS", "CONS_D", "CONS_N", "CONS_S", "INV", "INV_R", "INV_N", "INV_I", "GOV", "EXP", "IMP")) {
+for(var in c("CONS_D", "CONS_N", "CONS_S", "INV_R", "INV_N", "INV_I", "GOV", "EXP", "IMP")) {
   fred[paste("R_", var, sep="")] = fred[paste("R_", var, sep="")]*factor
 }
+
+# calculate aggregate real consumption and investment
+fred["R_CONS"] = fred["R_CONS_D"] + fred["R_CONS_N"] + fred["R_CONS_S"]
+fred["R_INV"] = fred["R_INV_R"] + fred["R_INV_N"] + fred["R_INV_I"]
 
 # determine net exports
 fred$XM   <- fred$EXP   - fred$IMP

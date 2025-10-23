@@ -100,8 +100,8 @@ We now do a growth accounting exercise for the US. We therefore have to load the
 
 ```{r}
 # load data and extract US data
-data("pwt10.0")
-pwt_sub <- subset(pwt10.0, isocode=="USA")
+data("pwt10.01")
+pwt_sub <- subset(pwt10.01, isocode=="USA")
 
 # calculate output, capital per worker and capital share
 pwt_sub$output_per_worker  <- pwt_sub$rgdpe/pwt_sub$emp
@@ -148,8 +148,8 @@ To test the convergence hypothesis, we use all available data from the PWT for t
 
 ```{r}
 # use 1970 and 2015 data for all available countries
-data("pwt10.0")
-pwt_sub <- subset(pwt10.0, year=="1970" | year=="2015")
+data("pwt10.01")
+pwt_sub <- subset(pwt10.01, year=="1970" | year=="2015")
 
 # make sure you are in the right order
 pwt_sub <- pwt_sub[order(pwt_sub$isocode, pwt_sub$year), ]

@@ -109,8 +109,8 @@ sprintf("Percentile ratios : Y/L = %5.3f, K/L = %5.3f", qo["90%"]/qo["10%"], qk[
 ###########
 
 # load data and extract US data
-data("pwt10.0")
-pwt_sub <- subset(pwt10.0, isocode=="USA")
+data("pwt10.01")
+pwt_sub <- subset(pwt10.01, isocode=="USA")
 
 
 # calculate output, capital per worker and capital share
@@ -158,8 +158,8 @@ if(export_pdf) {
 ###########
 
 # use 1970 and 2015 data for all available countries
-data("pwt10.0")
-pwt_sub <- subset(pwt10.0, year=="1970" | year=="2015")
+data("pwt10.01")
+pwt_sub <- subset(pwt10.01, year=="1970" | year=="2015")
 
 # make sure you are in the right order
 pwt_sub <- pwt_sub[order(pwt_sub$isocode, pwt_sub$year), ]

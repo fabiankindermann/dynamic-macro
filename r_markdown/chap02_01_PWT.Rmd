@@ -29,15 +29,15 @@ export_pdf <- FALSE
 The most important package used here is `pwt10`. It contains data from the Penn World Tables. The Penn World Tables (PWT) cover important cross country data on macroeconomic performance, like GDP, labor input, the capital stock as well as labor and capital compensation. You can find an overview of the [Penn World Tables here](https://www.rug.nl/ggdc/productivity/pwt/). Downloading the Excel sheet version is the easiest way to inspect the different variables in the PWT dataset. We will use these tables in the following to study some growth facts for the United States. To get a first impression of the Penn World Tables, we can load and inspect them with the following statement:
 
 ```{r}
-data("pwt10.0")
-View(pwt10.0)
+data("pwt10.01")
+View(pwt10.01)
 ```
 
 <br />
 As a next step, we want to study the macroeconomic performance of post-War United States. To this end, we extract a sub-dataset that only contains US data.
 
 ```{r}
-pwt_sub <- subset(pwt10.0, isocode=="USA")
+pwt_sub <- subset(pwt10.01, isocode=="USA")
 ```
 
 ### Increasing economic performance: growth in GDP

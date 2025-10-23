@@ -29,8 +29,8 @@ myred   <- "#F8766D"
 ########### 
 
 # load data and extract US data
-data("pwt10.0")
-pwt_sub <- subset(pwt10.0, isocode=="USA")
+data("pwt10.01")
+pwt_sub <- subset(pwt10.01, isocode=="USA")
 
 
 ########### 

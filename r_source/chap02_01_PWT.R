@@ -24,11 +24,11 @@ export_pdf <- FALSE
 ########### 
 
 # load data and take a look
-data("pwt10.0")
-View(pwt10.0)
+data("pwt10.01")
+View(pwt10.01)
 
 # now extract US data only
-pwt_sub <- subset(pwt10.0, isocode=="USA")
+pwt_sub <- subset(pwt10.01, isocode=="USA")
 
 
 ########### 

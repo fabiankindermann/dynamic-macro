@@ -29,8 +29,8 @@ myblue  <- "#619CFF"
 myred   <- "#F8766D"
 
 # load data and extract 2019 data
-data("pwt10.0")
-pwt_sub <- subset(pwt10.0, year=="2019")
+data("pwt10.01")
+pwt_sub <- subset(pwt10.01, year=="2019")
 ```
 
 ### Output per worker across countries

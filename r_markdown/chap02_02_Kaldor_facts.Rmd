@@ -34,8 +34,8 @@ myred   <- "#F8766D"
 We again use the Penn World Tables in `pwt10.0` and extract a sub-dataset that only contains US data.
 
 ```{r}
-data("pwt10.0")
-pwt_sub <- subset(pwt10.0, isocode=="USA")
+data("pwt10.01")
+pwt_sub <- subset(pwt10.01, isocode=="USA")
 ```
 
 <br />

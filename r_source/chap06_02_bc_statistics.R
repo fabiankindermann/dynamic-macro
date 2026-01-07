@@ -25,6 +25,10 @@ mygreen <- "#00BA38"
 myblue  <- "#619CFF"
 myred   <- "#F8766D"
 
+# define start and end date
+start_date <- as.Date("1948-01-01")
+end_date   <- as.Date("2024-12-31")
+
 # define plotting breaks
 xbreaks <- c(seq(from = as.Date("1950-01-01"), to = as.Date("2020-01-01"),by = "10 years"))
 
@@ -76,7 +80,7 @@ selection <- rbind(selection, c("PRS85006151", "REALCOMP"))
 selection <- rbind(selection, c("TB3MS", "NOMRATE"))
 
 # pull all data series from FRED
-fred <- get_fred_data(selection$series, selection$names, "1948-01-01", "2023-12-31", "q")
+fred <- get_fred_data(selection$series, selection$names, start_date, end_date, "q")
 
 
 # calculate real variables by deflating nominal ones
@@ -105,7 +109,7 @@ fred$R_XM <- fred$R_EXP - fred$R_IMP
 # Calculate Statistics Table
 ###########
 
-# calculate regression beginnings and ends
+# calculate recession beginnings and ends
 fred$REC_DATES <- 0
 fred$REC_DATES[2:length(fred$REC_DATES)] <- diff(fred$RECESSION)
 
@@ -139,7 +143,7 @@ for(var in c("CONS", "CONS_D", "CONS_N", "CONS_S", "INV", "INV_R", "INV_N", "INV
   
   # calculate normal share in GDP growth of variable
   v_normal <- mean(diff(unlist(fred[rvar]))/unlist(fred[1:length(fred$R_GDP)-1,]["R_GDP"]))
-  
+
   # variable share of GDP growth in recessions
   v_rec <- vector();
   for(t in 1:length(fred$R_GDP)) {

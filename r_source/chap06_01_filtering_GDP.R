@@ -25,6 +25,10 @@ export_pdf <- FALSE
 mygreen <- "#00BA38"
 myblue  <- "#619CFF"
 myred   <- "#F8766D"
+
+# define start and end date
+start_date <- as.Date("1948-01-01")
+end_date   <- as.Date("2024-12-31")
   
 # define plotting breaks
 xbreaks <- c(seq(from = as.Date("1950-01-01"), to = as.Date("2020-01-01"),by = "10 years"))
@@ -45,8 +49,8 @@ xbreaks <- c(seq(from = as.Date("1950-01-01"), to = as.Date("2020-01-01"),by = "
 
 # extract real GDP for the US (quarterly)
 gdp_real <- fredr(series_id = "GDPC1",
-                  observation_start = as.Date("1948-01-01"),
-                  observation_end = as.Date("2023-12-31")
+                  observation_start = start_date,
+                  observation_end = end_date
 )
 
 # calculate log gdp
@@ -156,8 +160,8 @@ if(export_pdf) {
 
 # extract NBER recession indicator (including peak quarter)
 recession <- fredr(series_id = "USRECQP",
-                   observation_start = as.Date("1948-01-01"),
-                   observation_end = as.Date("2023-12-31")
+                   observation_start = start_date,
+                   observation_end = end_date
 )
 
 # add quarter numbers to recession dataset

@@ -247,8 +247,8 @@ if(export_pdf) {
 ###########
 
 # load Penn World Tables and extract US data
-data("pwt10.0")
-pwt_sub <- subset(pwt10.0, isocode=="USA")
+data("pwt10.01")
+pwt_sub <- subset(pwt10.01, isocode=="USA")
 
 # calculate consumption and income per capita
 pwt_sub$cons <- pwt_sub$csh_c*pwt_sub$cgdpe/pwt_sub$pop

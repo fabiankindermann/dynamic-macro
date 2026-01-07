@@ -19,8 +19,8 @@ get_fred_data <- function(series, names, start_date, end_date, freq) {
   
   # extract first data series
   tdat   <- fredr(series_id = series[1],
-                  observation_start = as.Date(start_date),
-                  observation_end = as.Date(end_date),
+                  observation_start = start_date,
+                  observation_end = end_date,
                   frequency = freq
   )
   
@@ -32,8 +32,8 @@ get_fred_data <- function(series, names, start_date, end_date, freq) {
   for(i in 2:length(series)) {
     print(paste("Loading series", series[i]))
     tdat   <- fredr(series_id = series[i],
-                    observation_start = as.Date(start_date),
-                    observation_end = as.Date(end_date),
+                    observation_start = start_date,
+                    observation_end = end_date,
                     frequency = freq
     )
     data[names[i]] <- tdat$value

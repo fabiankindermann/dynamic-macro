@@ -32,6 +32,10 @@ mygreen <- "#00BA38"
 myblue  <- "#619CFF"
 myred   <- "#F8766D"
 
+# define start and end date
+start_date <- as.Date("1948-01-01")
+end_date   <- as.Date("2024-12-31")
+
 # define plotting breaks
 xbreaks <- c(seq(from = as.Date("1950-01-01"), to = as.Date("2020-01-01"),by = "10 years"))
 ```
@@ -85,7 +89,7 @@ selection <- rbind(selection, c("PRS85006151", "REALCOMP"))
 selection <- rbind(selection, c("TB3MS", "NOMRATE"))
 
 # pull all data series from FRED
-fred <- get_fred_data(selection$series, selection$names, "1948-01-01", "2023-12-31", "q")
+fred <- get_fred_data(selection$series, selection$names, start_date, end_date, "q")
 ```
 
 <br />
@@ -120,7 +124,7 @@ fred$R_XM <- fred$R_EXP - fred$R_IMP
 The next step is to determine how recessions are different compared to normal times. We start with calculating normal GDP growth in `y_normal`, which is just the average growth rate of GDP over the entire time horizon of our data. We can do this using the `diff` function, which just calculates the forward difference for a series, i.e. $Y_{t+1} - Y_t$. We then just have to take the mean of all the calculated GDP growth rates. Next, we only select data from recessions into the variable `y_rec` to calculate GDP growth rates again, but only in recession times. After this exercise, `y_normal` contains the normal GDP growth rate and `y_rec` the GDP growth rates in recessions only.
 
 ```{r}
-# calculate regression beginnings and ends
+# calculate recession beginnings and ends
 fred$REC_DATES <- 0
 fred$REC_DATES[2:length(fred$REC_DATES)] <- diff(fred$RECESSION)
 

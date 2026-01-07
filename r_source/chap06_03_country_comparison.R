@@ -19,12 +19,16 @@ library(mFilter)
 library(formattable)
 
 # should graphs be exported to pdf
-export_pdf <- TRUE
+export_pdf <- FALSE
 
 # define some colors
 mygreen <- "#00BA38"
 myblue  <- "#619CFF"
 myred   <- "#F8766D"
+
+# define start and end date
+start_date <- as.Date("1970-01-01")
+end_date   <- as.Date("2022-09-01")
 
 # define plotting breaks
 xbreaks <- c(seq(from = as.Date("1970-01-01"), to = as.Date("2020-01-01"),by = "10 years"))
@@ -54,12 +58,12 @@ selection <- rbind(selection, c("TB3MS", "NOMRATE_US"))
 selection <- rbind(selection, c("IRLTLT01DEQ156N", "NOMRATE_DE"))
 
 # pull all data series from FRED
-fred <- get_fred_data(selection$series, selection$names, "1970-01-01", "2022-09-30", "q")
+fred <- get_fred_data(selection$series, selection$names, start_date, end_date, "q")
 
 # calculate inflation for US
 deflator <- fredr(series_id = "GDPDEF",
                   observation_start = as.Date("1969-01-01"),
-                  observation_end = as.Date("2022-09-30")
+                  observation_end = end_date
 )
 
 fred$INFL_US <- diff(deflator$value, lag = 4)/deflator$value[1:(length(deflator$value)-4)]*100

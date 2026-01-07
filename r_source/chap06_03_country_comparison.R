@@ -62,7 +62,7 @@ fred <- get_fred_data(selection$series, selection$names, start_date, end_date, "
 
 # calculate inflation for US
 deflator <- fredr(series_id = "GDPDEF",
-                  observation_start = as.Date("1969-01-01"),
+                  observation_start = start_date-365,
                   observation_end = end_date
 )
 
